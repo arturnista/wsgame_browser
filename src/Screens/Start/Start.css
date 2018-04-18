@@ -1,0 +1,14 @@
+.start-container {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.start-input {
+    flex: 1;
+
+    margin: .3rem;
+}

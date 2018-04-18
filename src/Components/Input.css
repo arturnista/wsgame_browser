@@ -1,0 +1,15 @@
+.input-container {
+    display: flex;
+    height: 1.3rem;
+    align-items: center;
+}
+
+.input-label {
+    flex: 1;
+    display: flex;
+    margin-right: .3rem;
+}
+
+.input {
+    flex: 4;
+}

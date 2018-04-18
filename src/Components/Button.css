@@ -1,0 +1,14 @@
+.button-container {
+    display: flex;
+    height: 1.8rem;
+    justify-content: center;
+    align-items: center;
+    background-color: #FFCC00;
+
+    cursor: pointer;
+}
+
+.button-label {
+    display: flex;
+    text-align: center;
+}
