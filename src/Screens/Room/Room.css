@@ -1,4 +1,9 @@
 .room-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.room-content {
     flex: 1;
 
     display: flex;
@@ -8,15 +13,26 @@
 
 .room-users {
     flex: 1;
-    background-color: red;
+    border-bottom: 1px solid #ccc;
 }
 
 .room-user-container {
+    padding: 1rem;
+    height: 3rem;
 
+    display: flex;
+    align-items: center;
+}
+
+.room-user-color {
+    height: 2rem;
+    width: 2rem;
+    margin-right: .3rem;
 }
 
 .room-user-name {
-
+    font-size: 1.2rem;
+    font-weight: bold;
 }
 
 .room-spells {

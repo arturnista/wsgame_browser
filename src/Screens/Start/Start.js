@@ -1,14 +1,16 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Input, Button } from '../../Components'
+import _ from 'lodash'
 import moment from 'moment'
 import './Start.css'
 
 const mapStateToProps = (state) => ({
-    user: state.login
+    user: state.user,
+    room: state.room,
 })
 const mapDispatchToProps = (dispatch) => ({
-    
+
 })
 
 class Start extends Component {
@@ -17,16 +19,19 @@ class Start extends Component {
         super(props)
 
         this.state = {
-            userName: '',
-            roomName: ''
+            userName: 'a',
+            roomName: 'a'
         }
 
         this._handleCreateRoom = this._handleCreateRoom.bind(this)
         this._handleJoinRoom = this._handleJoinRoom.bind(this)
     }
 
-    componentDidMount() {
-
+    componentWillReceiveProps(nextProps) {
+        console.log(nextProps.room)
+        if(!_.isEmpty(nextProps.room)) {
+            this.props.history.replace('/room')
+        }
     }
 
     _handleJoinRoom() {

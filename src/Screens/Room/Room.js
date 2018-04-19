@@ -21,13 +21,7 @@ class Room extends Component {
         if(_.isEmpty(props.room)) props.history.replace('/')
 
         this.state = {
-            users: [
-                { name: 'User', isLeader: true, color: '#FFCC00' },
-                { name: 'User 2', isLeader: false, color: '#FFCC00' },
-                { name: 'User 3', isLeader: false, color: '#FFCC00' },
-                { name: 'User 4', isLeader: false, color: '#FFCC00' },
-                { name: 'User 5', isLeader: false, color: '#FFCC00' },
-            ]
+
         }
 
     }
@@ -35,6 +29,7 @@ class Room extends Component {
     _renderUser(user) {
         return (
             <div className='room-user-container'>
+                <div className='room-user-color' style={{ backgroundColor: user.color }}></div>
                 <p className='room-user-name'>{user.name}</p>
             </div>
         )
@@ -44,13 +39,16 @@ class Room extends Component {
 
         return (
             <div className="room-container">
-                <div className='room-users'>
-                    {
-                        this.props.room.users.map(this._renderUser)
-                    }
-                </div>
-                <div className='room-spells'>
+                <h2>{ this.props.room.roomJoined }</h2>
+                <div className="room-content">
+                    <div className='room-users'>
+                        {
+                            this.props.room.users.map(this._renderUser)
+                        }
+                    </div>
+                    <div className='room-spells'>
 
+                    </div>
                 </div>
             </div>
         )

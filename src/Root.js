@@ -60,7 +60,6 @@ class Root extends Component {
 
             window.socketio.on('myuser_joined_room', (body) => {
                 this.store.dispatch( setRoom({ roomJoined: body.room.name, user: body.user }) )
-                this.props.history.replace('/room')
             })
 
             window.socketio.on('disconnect', () => {
