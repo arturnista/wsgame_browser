@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { Input, Button } from '../../Components'
-import './Start.css'
+import './Room.css'
 
-class Start extends Component {
+class Room extends Component {
 
     constructor(props) {
         super(props)
@@ -18,12 +18,10 @@ class Start extends Component {
 
     createRoom() {
         console.log('createRoom')
-        this.props.history.replace('/room')
     }
 
     enterRoom() {
         console.log('enterRoom')
-        this.props.history.replace('/room')
     }
 
     render() {
@@ -46,4 +44,4 @@ class Start extends Component {
     }
 }
 
-export default Start
+export default Room
