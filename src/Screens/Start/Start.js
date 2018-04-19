@@ -1,6 +1,15 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import { Input, Button } from '../../Components'
+import moment from 'moment'
 import './Start.css'
+
+const mapStateToProps = (state) => ({
+    user: state.login
+})
+const mapDispatchToProps = (dispatch) => ({
+    
+})
 
 class Start extends Component {
 
@@ -8,22 +17,26 @@ class Start extends Component {
         super(props)
 
         this.state = {
-            name: '',
+            userName: '',
             roomName: ''
         }
 
-        this.createRoom = this.createRoom.bind(this)
-        this.enterRoom = this.enterRoom.bind(this)
+        this._handleCreateRoom = this._handleCreateRoom.bind(this)
+        this._handleJoinRoom = this._handleJoinRoom.bind(this)
     }
 
-    createRoom() {
-        console.log('createRoom')
-        this.props.history.replace('/room')
+    componentDidMount() {
+
     }
 
-    enterRoom() {
-        console.log('enterRoom')
-        this.props.history.replace('/room')
+    _handleJoinRoom() {
+        this.setState({ roomJoinedIsOwner: false })
+        window.socketio.emit('room_join', { name: this.state.roomName, userName: this.state.userName })
+    }
+
+    _handleCreateRoom() {
+        this.setState({ roomJoinedIsOwner: true })
+        window.socketio.emit('room_create', { name: this.state.roomName, userName: this.state.userName })
     }
 
     render() {
@@ -32,18 +45,18 @@ class Start extends Component {
             <div className="start-container">
                 <Input label='Name' className='start-input'
                     placeholder='Robson'
-                    onChange={x => this.setState({ name: x })} />
+                    onChange={x => this.setState({ userName: x })} />
                 <Input label='Room name' className='start-input'
                     placeholder="Robson's room"
                     onChange={x => this.setState({ roomName: x })} />
                 <Button label='Create' className='start-input'
-                    onClick={this.createRoom}/>
+                    onClick={this._handleCreateRoom}/>
                 <Button label='Enter' className='start-input'
-                    onClick={this.enterRoom}/>
+                    onClick={this._handleJoinRoom}/>
             </div>
         )
 
     }
 }
 
-export default Start
+export default connect(mapStateToProps, mapDispatchToProps)(Start)

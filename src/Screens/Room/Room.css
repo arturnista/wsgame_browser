@@ -1,14 +1,25 @@
-.start-container {
+.room-container {
     flex: 1;
 
     display: flex;
-    flex-direction: column;
     justify-content: center;
     padding: 2rem;
 }
 
-.start-input {
+.room-users {
     flex: 1;
+    background-color: red;
+}
 
-    margin: .3rem;
+.room-user-container {
+
+}
+
+.room-user-name {
+
+}
+
+.room-spells {
+    flex: 2;
+    background-color: blue;
 }
