@@ -7,7 +7,7 @@ import { Router, Route } from 'react-router'
 import { App, Start, Room, NotFound } from './Screens'
 import createBrowserHistory from 'history/createBrowserHistory'
 import createStore from './Redux/createStore'
-import { setRoom } from './Redux/room'
+import { setRoom, addUser, removeUser, readyUser, waitingUser } from './Redux/room'
 import { defineUser } from './Redux/user'
 import './Root.css'
 
@@ -27,32 +27,9 @@ class Root extends Component {
         window.socketio.on('connect', (socket) => {
             console.log('SocketIO :: Connected')
 
-            window.socketio.on('sync', (body) => {
-                const ping = moment().diff(body.sendTime)
-                this.setState({ players: body.players, spells: body.spells, ping })
-                this.currentPlayer = body.players.find(x => x.id === this.currentPlayerId)
-            })
-
             window.socketio.on('player_create', (body) => {
                 this.currentPlayerId = body.id
             })
-
-            window.socketio.on('game_will_start', ({map}) => this.setState({ mapName: map.name, gameIsRunning: true }))
-            window.socketio.on('game_start', () => {} )
-
-            window.socketio.on('game_will_end', (body) => {
-                const isWinner = body.winner.id === this.currentPlayerId
-                this.setState({ isWinner, isReady: false })
-                if(isWinner) {
-                    alert('GANHO BOA PORRA')
-                } else {
-                    alert('SE FUDEU EM')
-                }
-            })
-            window.socketio.on('game_end', (body) => this.setState({ map: {}, players: [], spells: [], gameIsRunning: false, isReady: false }))
-
-            window.socketio.on('map_create', (body) => this.setState({ map: body }))
-            window.socketio.on('map_update', (body) => this.setState({ map: body }))
 
             window.socketio.on('myuser_info', (body) => {
                 this.store.dispatch( defineUser(body) )
@@ -60,6 +37,29 @@ class Root extends Component {
 
             window.socketio.on('myuser_joined_room', (body) => {
                 this.store.dispatch( setRoom({ roomJoined: body.room.name, user: body.user }) )
+            })
+
+            window.socketio.on('user_joined_room', (body) => {
+                console.log('user_joined_room', body)
+                this.store.dispatch( addUser(body.user) )
+            })
+            window.socketio.on('user_ready', (body) => {
+                console.log('user_ready', body)
+                this.store.dispatch( readyUser(body.user) )
+            })
+            window.socketio.on('user_waiting', (body) => {
+                console.log('user_waiting', body)
+                this.store.dispatch( waitingUser(body.user) )
+            })
+            window.socketio.on('user_selected_spell', (body) => {
+                console.log('user_selected_spell', body)
+            })
+            window.socketio.on('user_deselected_spell', (body) => {
+                console.log('user_deselected_spell', body)
+            })
+            window.socketio.on('user_left_room', (body) => {
+                console.log('user_left_room', body)
+                this.store.dispatch( removeUser(body.user) )
             })
 
             window.socketio.on('disconnect', () => {

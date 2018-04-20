@@ -18,12 +18,15 @@ class Room extends Component {
         super(props)
 
         this._renderUser = this._renderUser.bind(this)
-        if(_.isEmpty(props.room)) props.history.replace('/')
 
         this.state = {
 
         }
 
+    }
+
+    componentDidMount() {
+        if(_.isEmpty(this.props.room)) this.props.history.replace('/')
     }
 
     _renderUser(user) {
@@ -36,6 +39,7 @@ class Room extends Component {
     }
 
     render() {
+        if(_.isEmpty(this.props.room)) return null
 
         return (
             <div className="room-container">

@@ -1,5 +1,8 @@
 const SET_ROOM = 'room/SET_ROOM'
-const ADD_PLAYER = 'room/ADD_PLAYER'
+const ADD_USER = 'room/ADD_USER'
+const REMOVE_USER = 'room/REMOVE_USER'
+const READY_USER = 'room/READY_USER'
+const WAITING_USER = 'room/WAITING_USER'
 
 const initialState = null
 
@@ -7,32 +10,78 @@ export default function reducer(state = initialState, action = {}) {
     switch (action.type) {
         case SET_ROOM:
             return { ...action.payload }
-        case ADD_PLAYER:
+        case ADD_USER:
             return {
                 ...state,
                 users: [
                     ...state.users,
-                    { ...action.payload }
+                    {
+                        ...action.payload,
+                        isReady: false
+                    }
                 ]
+            }
+        case REMOVE_USER:
+            return {
+                ...state,
+                users: state.users.filter(x => x.id !== action.payload.id)
+            }
+        case READY_USER:
+            return {
+                ...state,
+                users: state.users.map(x => {
+                    if(x.id !== action.payload.id) return x
+                    return { ...x, isReady: true }
+                })
+            }
+        case WAITING_USER:
+            return {
+                ...state,
+                users: state.users.map(x => {
+                    if(x.id !== action.payload.id) return x
+                    return { ...x, isReady: true }
+                })
             }
         default:
             return state
     }
 }
 
-export function setRoom({ roomJoined, user }) {
+export function setRoom({ roomJoined, users }) {
+    console.log(roomJoined, users)
     return {
         type: SET_ROOM,
         payload: {
             roomJoined,
-            users: [ user ]
+            users: users || []
         }
     }
 }
 
-export function addPlayer(user) {
+export function addUser(user) {
     return {
-        type: SET_ROOM,
+        type: ADD_USER,
+        payload: { ...user }
+    }
+}
+
+export function removeUser(user) {
+    return {
+        type: REMOVE_USER,
+        payload: { ...user }
+    }
+}
+
+export function readyUser(user) {
+    return {
+        type: READY_USER,
+        payload: { ...user }
+    }
+}
+
+export function waitingUser(user) {
+    return {
+        type: WAITING_USER,
         payload: { ...user }
     }
 }
