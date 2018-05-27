@@ -9,7 +9,7 @@ import { App, Start, Room, Game, NotFound } from './Screens'
 import createBrowserHistory from 'history/createBrowserHistory'
 import createStore from './Redux/createStore'
 import { setRoom, addUser, removeUser, readyUser, waitingUser } from './Redux/room'
-import { startGame, stopGame } from './Redux/game'
+import { startGame } from './Redux/game'
 import { defineUser, definePlayer } from './Redux/user'
 import './Root.css'
 
@@ -27,8 +27,11 @@ class Root extends Component {
     }
 
     componentDidMount() {
-        window.PIXI.loader.add('/img/tileset.json')
+        window.PIXI.loader
+        .add('/img/tileset.json')
+        .add('/img/BasicArena.png')
         .load(() => {
+            window.resources = PIXI.loader.resources
             window.textures = PIXI.loader.resources['/img/tileset.json'].textures
         })
 
@@ -76,17 +79,6 @@ class Root extends Component {
             window.socketio.on('game_will_start', (body) => {
                 console.log('game_will_start', body)
                 this.store.dispatch( startGame(body) )
-            })
-            window.socketio.on('game_start', (body) => {
-                console.log('game_start', body)
-            })
-
-            window.socketio.on('game_will_end', (body) => {
-                console.log('game_will_end', body)
-            })
-            window.socketio.on('game_end', (body) => {
-                console.log('game_end', body)
-                this.store.dispatch( stopGame(body) )
             })
 
             window.socketio.on('disconnect', () => {

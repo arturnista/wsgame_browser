@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import _ from 'lodash'
 import { Input, Button } from '../../Components'
 import vector from '../../Utils/vector'
+import { stopGame } from '../../Redux/game'
 import './Game.css'
 
 // bump = new window.Bump(PIXI)
@@ -17,38 +18,51 @@ const mapStateToProps = (state) => ({
     user: state.user,
 })
 const mapDispatchToProps = (dispatch) => ({
-
+    stopGame: () => dispatch(stopGame())
 })
 
 class Game extends Component {
 
     constructor(props) {
+
         super(props)
 
-        this.onLoad = this.onLoad.bind(this)
-        this.onMouseDown = this.onMouseDown.bind(this)
+        this.handleLoad = this.handleLoad.bind(this)
+        this.handleMouseDown = this.handleMouseDown.bind(this)
+        this.handleKeyDown = this.handleKeyDown.bind(this)
         this.gameLoop = this.gameLoop.bind(this)
 
         this.gameSync = this.gameSync.bind(this)
         this.gameMapCreate = this.gameMapCreate.bind(this)
         this.gameMapUpdate = this.gameMapUpdate.bind(this)
+        this.gameStart = this.gameStart.bind(this)
+        this.gameWillEnd = this.gameWillEnd.bind(this)
+        this.gameEnd = this.gameEnd.bind(this)
+
+        this.gameIsRunning = false
+        this.zoom = 1
 
         this.player = null
-
-        this.state = {
-            status: ''
-        }
+        this.status = ''
 
     }
 
     componentDidMount() {
+
         if(_.isEmpty(this.props.game)) {
             this.props.history.replace('/room')
+        }
+
+        if(this.gameDiv) {
+            this.gameDiv.focus()
         }
 
         window.socketio.on('sync', this.gameSync)
         window.socketio.on('map_create', this.gameMapCreate)
         window.socketio.on('map_update', this.gameMapUpdate)
+        window.socketio.on('game_start', this.gameStart)
+        window.socketio.on('game_will_end', this.gameWillEnd)
+        window.socketio.on('game_end', this.gameEnd)
 
         // Create a Pixi Application
         this.app = new window.PIXI.Application({
@@ -63,30 +77,32 @@ class Game extends Component {
 
         this.camera = new window.PIXI.Container()
 
-        this.firstSync = true
+        this.startText = new window.PIXI.Text('READY??', { fontFamily : 'Arial', fontSize: 35, fill : 0xFAFAFA, align : 'center' })
+        this.startText.x = 400
+        this.startText.y = 200
+        this.camera.addChild(this.startText)
+
         this.players = []
+        this.spells = []
+        this.map = {}
+        this.firstSync = true
+        this.tick = 0
 
         // Load a texture
-        this.onLoad()
+        this.handleLoad()
 
     }
 
     componentWillUnmount() {
         window.socketio.off('sync', this.gameSync)   
         window.socketio.off('map_create', this.gameMapCreate)
-        window.socketio.off('map_update', this.gameMapUpdate)     
-    }
-
-    onMouseDown(event) {
-        event.preventDefault()
-        const pos = {
-            x: event.clientX - this.camera.x,
-            y: event.clientY - this.camera.y - 177
-        }
-        this.emitAction('move', pos)
+        window.socketio.off('map_update', this.gameMapUpdate)    
+        window.socketio.off('game_will_end', this.gameWillEnd)
+        window.socketio.off('game_end', this.gameEnd) 
     }
 
     gameSync(body) {
+        this.tick++
         if(this.firstSync) {
 
             this.firstSync = false
@@ -97,8 +113,12 @@ class Game extends Component {
                 player.anchor.set(.5, .5)
 
                 player.id = playerData.id
-                player.position = playerData.position
-                player.velocity = playerData.velocity
+                player.metadata = {
+                    position: playerData.position,
+                    velocity: playerData.velocity
+                }
+                player.width = playerData.collider.size
+                player.height = playerData.collider.size
                 player.x = playerData.position.x
                 player.y = playerData.position.y
                 player.vx = playerData.velocity.x * 0.016666667
@@ -109,16 +129,57 @@ class Game extends Component {
             }
 
         } else {
+            for (let i = 0; i < body.spells.length; i++) {
+
+                const spellData = body.spells[i]
+                let spell = this.spells.find(x => x.id === spellData.id)
+
+                if(_.isNil(spell)) {
+
+                    spell = new window.PIXI.Sprite( window.textures['cube.png'] )
+                    spell.anchor.set(.5, .5)
+                    this.camera.addChild(spell)
+                    this.spells.push(spell)
+
+                }
+
+                spell.id = spellData.id
+                spell.metadata = {
+                    position: spellData.position,
+                    velocity: spellData.velocity
+                }
+                spell.width = spellData.collider.size
+                spell.height = spellData.collider.size
+                spell.x = spellData.position.x
+                spell.y = spellData.position.y
+                spell.vx = spellData.velocity.x * 0.016666667
+                spell.vy = spellData.velocity.y * 0.016666667
+
+                spell.lastTick = this.tick
+
+            }
+
+            let spellsToRemove = []
+            this.spells = this.spells.filter(x => {
+                if(x.lastTick !== this.tick) {
+                    this.camera.removeChild(x)
+                    return false
+                }
+                return true
+            })
+
             for (let i = 0; i < body.players.length; i++) {
 
                 const playerData = body.players[i]
-                const player = this.players.find(x => x.id === body.players[i].id)
+                const player = this.players.find(x => x.id === playerData.id)
 
                 player.id = playerData.id
                 player.metadata = {
                     position: playerData.position,
                     velocity: playerData.velocity
                 }
+                player.width = playerData.collider.size
+                player.height = playerData.collider.size
                 player.x = playerData.position.x
                 player.y = playerData.position.y
                 player.vx = playerData.velocity.x * 0.016666667
@@ -129,7 +190,17 @@ class Game extends Component {
     }
 
     gameMapCreate(body) {
-        this.map = body
+        console.log('gameMapCreate', body)
+        this.map.data = body
+
+        this.map.sprite = new window.PIXI.Sprite(window.resources['/img/BasicArena.png'].texture)
+        this.map.sprite.x = this.map.data.position.x
+        this.map.sprite.y = this.map.data.position.y
+        this.map.sprite.width = this.map.data.size
+        this.map.sprite.height = this.map.data.size
+        this.map.sprite.anchor.set(.5, .5)
+        this.camera.addChild(this.map.sprite)
+
         for (let i = 0; i < body.obstacles.length; i++) {
             const obstacleData = body.obstacles[i]
             
@@ -145,26 +216,67 @@ class Game extends Component {
     }
 
     gameMapUpdate(body) {
-
-        this.map = body
-
+        console.log('gameMapUpdate', body)
+        this.map.data = body
+        this.map.sprite.x = this.map.data.position.x
+        this.map.sprite.y = this.map.data.position.y
+        this.map.sprite.width = this.map.data.size
+        this.map.sprite.height = this.map.data.size
     }
 
-    gameMapUpdate(body) {
+    gameStart(body) {
+        this.camera.removeChild(this.startText)
+        this.gameIsRunning = true
+    }
 
-        console.log(body)        
+    gameWillEnd(body) {
+        const finishText = new window.PIXI.Text('CABO', { fontFamily : 'Arial', fontSize: 55, fill : 0xFAFAFA, align : 'center' })
+        finishText.x = 300
+        finishText.y = 200
+        this.camera.addChild(finishText)
 
+        if(this.player && body.winner.id === this.player.id) {
+            const winnerText = new window.PIXI.Text('YOU WIN MATE', { fontFamily : 'Arial', fontSize: 35, fill : 0xFFCC00, align : 'center' })
+            winnerText.x = 300
+            winnerText.y = 500
+            this.camera.addChild(winnerText)
+        } else {
+            const loserText = new window.PIXI.Text('YEP NOT TODAY', { fontFamily : 'Arial', fontSize: 35, fill : 0xB22222, align : 'center' })
+            loserText.x = 300
+            loserText.y = 500
+            this.camera.addChild(loserText)
+        }
+    }
+
+    gameEnd(body) {
+        console.log('gameEnd', body)        
+        this.props.stopGame()
+        this.props.history.replace('/room')
+    }
+
+    handleMouseDown(event) {
+        event.preventDefault()
+        const pos = {
+            x: (event.clientX / this.zoom) - this.camera.x,
+            y: (event.clientY / this.zoom) - this.camera.y - 177
+        }
+        console.log('camera', this.camera)
+        console.log('zoom', this.zoom)
+        console.log('event', event.clientX, event.clientY)
+        console.log('pos', pos)
+        this.emitAction(this.status, pos)
     }
 
     handleKeyDown(e) {
+
         const keyPressed = e.key.toLowerCase()
         switch (keyPressed) {
             case 'q':
-                return this.setState({ status: 'spell_fireball' })
+                return this.status = 'spell_fireball'
             case 'w':
-                return this.emitAction('spell_explosion')
+                return this.status = 'spell_explosion'
             case 'r':
-                return this.setState({ status: 'spell_blink' })
+                return this.status = 'spell_blink'
             case 'e':
                 return this.emitAction('spell_reflect_shield')
             case 't':
@@ -173,15 +285,23 @@ class Game extends Component {
     }
 
     emitAction(action, mousePosition) {
-        if(!this.player) this.player = this.players.find(x => x.id === this.props.user.player.id)
+        if(!this.gameIsRunning) return
+
+        if(!mousePosition) mousePosition = { x: 0, y: 0 }
+
+        if(!this.player) {
+            this.player = this.players.find(x => x.id === this.props.user.player.id)
+            this.forceUpdate()
+        }
         window.socketio.emit(`player_${action}`, {
             id: this.player.id,
             position: mousePosition,
             direction: vector.direction(this.player.position, mousePosition),
         })
+        this.status = 'move'
     }
 
-    onLoad() {
+    handleLoad() {
         this.entities = []
 
         this.app.stage.addChild(this.camera)
@@ -192,6 +312,21 @@ class Game extends Component {
     }
 
     gameLoop(deltatime) {
+        if(this.player) {
+            const dist = vector.distance(this.map.data.position, this.player.position)
+            let newZoom = 300 / dist
+            if(newZoom > 1) newZoom = 1
+            this.zoom = newZoom
+            this.camera.scale.set(this.zoom, this.zoom)
+        }
+
+        if(!_.isEmpty(this.map)) {
+            this.map.sprite.x = this.map.data.position.x
+            this.map.sprite.y = this.map.data.position.y
+            this.map.sprite.width -= this.map.data.decreasePerSecond * 0.016666667 * deltatime
+            this.map.sprite.height -= this.map.data.decreasePerSecond * 0.016666667 * deltatime
+        }
+
         for (let i = 0; i < this.players.length; i++) {
             const player = this.players[i]
             player.x += player.vx * deltatime
@@ -204,8 +339,10 @@ class Game extends Component {
 
         return (
             <div>
-                <h1>GAME</h1>
-                <div id="game-mount" onMouseDown={this.onMouseDown}>
+                <h1>GAME | {this.player ? this.player.id : '...'}</h1>
+                <div id="game-mount" ref={r => this.gameDiv = r} 
+                    onMouseDown={this.handleMouseDown}
+                    onKeyDown={this.handleKeyDown} tabindex="1">
                     
                 </div>
             </div>

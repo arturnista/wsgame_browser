@@ -27,7 +27,10 @@ class Room extends Component {
     }
 
     componentDidMount() {
-        window.socketio.emit('user_ready', {})        
+        window.socketio.emit('user_ready', {})       
+        window.socketio.emit('user_select_spell', { spellName: 'fireball' }) 
+        window.socketio.emit('user_select_spell', { spellName: 'follower' }) 
+        window.socketio.emit('user_select_spell', { spellName: 'blink' }) 
         if(_.isEmpty(this.props.room)) {
             this.props.history.replace('/')
         }
