@@ -28,7 +28,6 @@ class Start extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        console.log(nextProps.room)
         if(!_.isEmpty(nextProps.room)) {
             this.props.history.replace('/room')
         }
@@ -50,9 +49,11 @@ class Start extends Component {
             <div className="start-container">
                 <Input label='Name' className='start-input'
                     placeholder='Robson'
+                    value={this.state.userName}
                     onChange={x => this.setState({ userName: x })} />
                 <Input label='Room name' className='start-input'
                     placeholder="Robson's room"
+                    value={this.state.roomName}
                     onChange={x => this.setState({ roomName: x })} />
                 <Button label='Create' className='start-input'
                     onClick={this._handleCreateRoom}/>

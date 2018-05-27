@@ -7,7 +7,8 @@ class Input extends Component {
             <div className={'input-container ' + this.props.className}>
                 <p className='input-label'>{this.props.label}</p>
                 <input className='input' placeholder={this.props.placeholder}
-                    onChange={e => this.props.onChange(e.target.value)}/>
+                    value={this.props.value} 
+                    onChange={e => this.props.onChange(e.target.value)} />
             </div>
         )
     }

@@ -24,6 +24,10 @@
     align-items: center;
 }
 
+.room-user-container.ready {
+    background-color: rgba(0, 255, 0, .3);
+}
+
 .room-user-color {
     height: 2rem;
     width: 2rem;
@@ -37,5 +41,5 @@
 
 .room-spells {
     flex: 2;
-    background-color: blue;
+    border: 1px solid #eee;
 }

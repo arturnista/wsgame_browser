@@ -31,7 +31,7 @@ export default function reducer(state = initialState, action = {}) {
                 ...state,
                 users: state.users.map(x => {
                     if(x.id !== action.payload.id) return x
-                    return { ...x, isReady: true }
+                    return { ...x, status: 'ready', isReady: true }
                 })
             }
         case WAITING_USER:
@@ -39,7 +39,7 @@ export default function reducer(state = initialState, action = {}) {
                 ...state,
                 users: state.users.map(x => {
                     if(x.id !== action.payload.id) return x
-                    return { ...x, isReady: true }
+                    return { ...x, status: 'waiting', isReady: true }
                 })
             }
         default:
@@ -48,7 +48,6 @@ export default function reducer(state = initialState, action = {}) {
 }
 
 export function setRoom({ roomJoined, users }) {
-    console.log(roomJoined, users)
     return {
         type: SET_ROOM,
         payload: {
@@ -75,7 +74,7 @@ export function removeUser(user) {
 export function readyUser(user) {
     return {
         type: READY_USER,
-        payload: { ...user }
+        payload: { ...user, id: user.user }
     }
 }
 
