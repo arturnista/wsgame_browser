@@ -8,6 +8,7 @@ const mapStateToProps = (state) => ({
     game: state.game,
     room: state.room,
     user: state.user,
+    isOwner: state.room ? state.room.owner === state.user.id : false,
 })
 const mapDispatchToProps = (dispatch) => ({
 
@@ -73,6 +74,8 @@ class Room extends Component {
     render() {
         if(_.isEmpty(this.props.room)) return null
 
+        const toggleText = this.state.status === 'ready' ? 'WAIT GUYS!' : "OK I'M READY!"
+
         return (
             <div className="room-container">
                 <h2>{ this.props.room.roomJoined }</h2>
@@ -87,10 +90,13 @@ class Room extends Component {
                     </div>
                 </div>
                 <div>
-                    <Button label='Start' className='start-input'
+                    <Button label={toggleText} className='start-input'
                         onClick={this.handleToggleStatus}/>
-                    <Button label='Start' className='start-input'
-                        onClick={this.handleStartGame}/>
+                    {
+                        this.props.isOwner && 
+                        <Button label='Start' className='start-input'
+                            onClick={this.handleStartGame}/>
+                    }
                 </div>
             </div>
         )

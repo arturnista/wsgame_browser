@@ -2,6 +2,7 @@ const SET_ROOM = 'room/SET_ROOM'
 const ADD_USER = 'room/ADD_USER'
 const REMOVE_USER = 'room/REMOVE_USER'
 const READY_USER = 'room/READY_USER'
+const RESET_ROOM = 'room/RESET_ROOM'
 const WAITING_USER = 'room/WAITING_USER'
 
 const initialState = null
@@ -35,6 +36,11 @@ export default function reducer(state = initialState, action = {}) {
                     if(x.id !== action.payload.id) return x
                     return { ...x, status: 'ready', isReady: true }
                 })
+            }
+        case RESET_ROOM:
+            return {
+                ...state,
+                users: state.users.map(x => ({ ...x, status: 'waiting', isReady: false }))
             }
         case WAITING_USER:
             return {
@@ -85,5 +91,12 @@ export function waitingUser(user) {
     return {
         type: WAITING_USER,
         payload: { ...user, id: user.user  }
+    }
+}
+
+
+export function resetRoom() {
+    return {
+        type: RESET_ROOM,
     }
 }

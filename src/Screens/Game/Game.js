@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import _ from 'lodash'
 import { Input, Button } from '../../Components'
 import vector from '../../Utils/vector'
+import { resetRoom } from '../../Redux/room'
 import { stopGame } from '../../Redux/game'
 import './Game.css'
 
@@ -18,7 +19,8 @@ const mapStateToProps = (state) => ({
     user: state.user,
 })
 const mapDispatchToProps = (dispatch) => ({
-    stopGame: () => dispatch(stopGame())
+    stopGame: () => dispatch(stopGame()),
+    resetRoom: () => dispatch(resetRoom())
 })
 
 class Game extends Component {
@@ -67,21 +69,14 @@ class Game extends Component {
         // Create a Pixi Application
         this.app = new window.PIXI.Application({
             width: 800,
-            height: 600,
+            height: 800,
             antialias: true,
             transparent: false,
             resolution: 1,
             backgroundColor: 0x061639
         })
         document.getElementById("game-mount").appendChild(this.app.view)
-
-        this.camera = new window.PIXI.Container()
-
-        this.startText = new window.PIXI.Text('READY??', { fontFamily : 'Arial', fontSize: 35, fill : 0xFAFAFA, align : 'center' })
-        this.startText.x = 400
-        this.startText.y = 200
-        this.camera.addChild(this.startText)
-
+        
         this.players = []
         this.spells = []
         this.map = {}
@@ -101,6 +96,60 @@ class Game extends Component {
         window.socketio.off('game_end', this.gameEnd) 
     }
 
+    handleLoad() {
+        this.entities = []
+
+        this.camera = new window.PIXI.Container()
+        this.hud = new window.PIXI.Container()
+
+        this.lifeText = new window.PIXI.Text(100, { fontFamily : 'Arial', fontSize: 35, fill : 0xB22222, align : 'center' })
+        this.hud.addChild(this.lifeText)
+        this.knockbackText = new window.PIXI.Text(100, { fontFamily : 'Arial', fontSize: 35, fill : 0x22B222, align : 'center' })
+        this.knockbackText.y = 40
+        this.hud.addChild(this.knockbackText)
+
+        this.startText = new window.PIXI.Text('READY??', { fontFamily : 'Arial', fontSize: 35, fill : 0xFAFAFA, align : 'center' })
+        this.startText.x = 400
+        this.hud.addChild(this.startText)
+
+        this.app.stage.addChild(this.camera)
+        this.app.stage.addChild(this.hud)
+
+        //Render the stage
+        this.app.renderer.render(this.app.stage)
+        this.app.ticker.add(this.gameLoop.bind(this))
+    }
+
+    gameLoop(deltatime) {
+        if(this.player) {
+            const dist = vector.distance(this.map.data.position, this.player.position)
+            let newZoom = 300 / dist
+            if(newZoom > 1) newZoom = 1
+            this.zoom = newZoom
+            this.camera.scale.set(this.zoom, this.zoom)
+
+            const yPiv = (this.map.data.position.y / 2) - ((this.app.renderer.screen.height - this.map.data.position.y) / 2) / this.zoom
+            const xPiv = (this.map.data.position.x / 2) - ((this.app.renderer.screen.width - this.map.data.position.x) / 2) / this.zoom
+            this.camera.pivot.set(xPiv, yPiv)
+
+            this.lifeText.text = this.player.metadata.life.toFixed(0)
+            this.knockbackText.text = this.player.metadata.knockbackValue.toFixed(0)
+        }
+
+        if(!_.isEmpty(this.map)) {
+            this.map.sprite.x = this.map.data.position.x
+            this.map.sprite.y = this.map.data.position.y
+            this.map.sprite.width -= this.map.data.decreasePerSecond * 0.016666667 * deltatime
+            this.map.sprite.height -= this.map.data.decreasePerSecond * 0.016666667 * deltatime
+        }
+
+        for (let i = 0; i < this.players.length; i++) {
+            const player = this.players[i]
+            player.x += player.vx * deltatime
+            player.y += player.vy * deltatime
+        }
+    }
+
     gameSync(body) {
         this.tick++
         if(this.firstSync) {
@@ -113,10 +162,7 @@ class Game extends Component {
                 player.anchor.set(.5, .5)
 
                 player.id = playerData.id
-                player.metadata = {
-                    position: playerData.position,
-                    velocity: playerData.velocity
-                }
+                player.metadata = { ...playerData }
                 player.width = playerData.collider.size
                 player.height = playerData.collider.size
                 player.x = playerData.position.x
@@ -144,10 +190,7 @@ class Game extends Component {
                 }
 
                 spell.id = spellData.id
-                spell.metadata = {
-                    position: spellData.position,
-                    velocity: spellData.velocity
-                }
+                spell.metadata = { ...spellData }
                 spell.width = spellData.collider.size
                 spell.height = spellData.collider.size
                 spell.x = spellData.position.x
@@ -174,10 +217,7 @@ class Game extends Component {
                 const player = this.players.find(x => x.id === playerData.id)
 
                 player.id = playerData.id
-                player.metadata = {
-                    position: playerData.position,
-                    velocity: playerData.velocity
-                }
+                player.metadata = { ...playerData }
                 player.width = playerData.collider.size
                 player.height = playerData.collider.size
                 player.x = playerData.position.x
@@ -192,6 +232,10 @@ class Game extends Component {
     gameMapCreate(body) {
         console.log('gameMapCreate', body)
         this.map.data = body
+
+        const yPiv = (this.map.data.position.y / 2) - ((this.app.renderer.screen.height - this.map.data.position.y) / 2) / this.zoom
+        const xPiv = (this.map.data.position.x / 2) - ((this.app.renderer.screen.width - this.map.data.position.x) / 2) / this.zoom
+        this.camera.pivot.set(xPiv, yPiv)
 
         this.map.sprite = new window.PIXI.Sprite(window.resources['/img/BasicArena.png'].texture)
         this.map.sprite.x = this.map.data.position.x
@@ -225,7 +269,7 @@ class Game extends Component {
     }
 
     gameStart(body) {
-        this.camera.removeChild(this.startText)
+        this.hud.removeChild(this.startText)
         this.gameIsRunning = true
     }
 
@@ -233,44 +277,56 @@ class Game extends Component {
         const finishText = new window.PIXI.Text('CABO', { fontFamily : 'Arial', fontSize: 55, fill : 0xFAFAFA, align : 'center' })
         finishText.x = 300
         finishText.y = 200
-        this.camera.addChild(finishText)
+        this.hud.addChild(finishText)
 
         if(this.player && body.winner.id === this.player.id) {
             const winnerText = new window.PIXI.Text('YOU WIN MATE', { fontFamily : 'Arial', fontSize: 35, fill : 0xFFCC00, align : 'center' })
             winnerText.x = 300
             winnerText.y = 500
-            this.camera.addChild(winnerText)
+            this.hud.addChild(winnerText)
         } else {
             const loserText = new window.PIXI.Text('YEP NOT TODAY', { fontFamily : 'Arial', fontSize: 35, fill : 0xB22222, align : 'center' })
             loserText.x = 300
             loserText.y = 500
-            this.camera.addChild(loserText)
+            this.hud.addChild(loserText)
         }
     }
 
     gameEnd(body) {
         console.log('gameEnd', body)        
         this.props.stopGame()
+        this.props.resetRoom()
+
         this.props.history.replace('/room')
     }
 
     handleMouseDown(event) {
+
         event.preventDefault()
         const pos = {
-            x: (event.clientX / this.zoom) - this.camera.x,
-            y: (event.clientY / this.zoom) - this.camera.y - 177
+            x: (event.clientX / this.zoom) + this.camera.pivot.x,
+            y: ((event.clientY - 177) / this.zoom) + this.camera.pivot.y
         }
-        console.log('camera', this.camera)
+        console.log('camera', this.camera.pivot.x, this.camera.pivot.x)
         console.log('zoom', this.zoom)
         console.log('event', event.clientX, event.clientY)
         console.log('pos', pos)
         this.emitAction(this.status, pos)
+
     }
 
     handleKeyDown(e) {
 
         const keyPressed = e.key.toLowerCase()
         switch (keyPressed) {
+            case 'l':
+                this.camera.x = this.camera.x + 1
+                console.log(this.camera.x, this.camera.y)
+                break
+            case 'o':
+                this.camera.y = this.camera.y + 1
+                console.log(this.camera.x, this.camera.y)
+                break
             case 'q':
                 return this.status = 'spell_fireball'
             case 'w':
@@ -300,40 +356,6 @@ class Game extends Component {
         })
         this.status = 'move'
     }
-
-    handleLoad() {
-        this.entities = []
-
-        this.app.stage.addChild(this.camera)
-
-        //Render the stage
-        this.app.renderer.render(this.app.stage)
-        this.app.ticker.add(this.gameLoop.bind(this))
-    }
-
-    gameLoop(deltatime) {
-        if(this.player) {
-            const dist = vector.distance(this.map.data.position, this.player.position)
-            let newZoom = 300 / dist
-            if(newZoom > 1) newZoom = 1
-            this.zoom = newZoom
-            this.camera.scale.set(this.zoom, this.zoom)
-        }
-
-        if(!_.isEmpty(this.map)) {
-            this.map.sprite.x = this.map.data.position.x
-            this.map.sprite.y = this.map.data.position.y
-            this.map.sprite.width -= this.map.data.decreasePerSecond * 0.016666667 * deltatime
-            this.map.sprite.height -= this.map.data.decreasePerSecond * 0.016666667 * deltatime
-        }
-
-        for (let i = 0; i < this.players.length; i++) {
-            const player = this.players[i]
-            player.x += player.vx * deltatime
-            player.y += player.vy * deltatime
-        }
-    }
-    
 
     render() {
 
