@@ -1,64 +1,111 @@
 .room-container {
+    flex: 1;
     display: flex;
     flex-direction: column;
+    background-color: #061639;
 }
 
-.room-content {
-    flex: 1;
-
+.room-info-container {
     display: flex;
     justify-content: center;
-    padding: 2rem;
+    align-items: center;
+    height: 50px;
 }
 
-.room-users {
+.room-name {
+    color: #fafafa;
+    margin: 0;
+    padding: 0;
+}
+
+.room-content-container {
+    display: flex;
     flex: 1;
-    border-bottom: 1px solid #ccc;
+}
+
+.room-users-container {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding-left: .3rem;
+    padding-right: .3rem;
 }
 
 .room-user-container {
-    padding: 1rem;
-    height: 3rem;
-
     display: flex;
     align-items: center;
+    background-color: #424242;
+    height: 4rem;
+    padding-left: 1em;
+    padding-right: 1em;
+    border-bottom: 1px solid #555;
 }
-
 .room-user-container.ready {
-    background-color: rgba(0, 255, 0, .3);
+    background-color: #2E7D32;
 }
 
 .room-user-color {
-    height: 2rem;
-    width: 2rem;
-    margin-right: .3rem;
+    height: 1.5em;
+    width: 1.5em;
+    border: 1px solid #212121;
 }
 
 .room-user-name {
+    margin: 0;
+    margin-left: .5em;
+    padding: 0;
+    color: #fafafa;
     flex: 1;
-    font-size: 1.2rem;
-    color: #323232;
+    font-weight: bold;
 }
 .room-user-name.owner {
-    font-weight: bold;
-    color: #212121;
+    color: #4FC3F7;
 }
 .room-user-name.you {
-    text-decoration: underline;
+    font-size: 1.2em;
 }
 
 .room-user-status {
-    font-size: 1.2rem;
-    font-weight: bold;
-}
-.room-user-status.waiting {
-    color: rgb(83, 33, 33);
+    color: #EF5350;
 }
 .room-user-status.ready {
-    color: rgb(37, 58, 37);
+    font-weight: bold;
+    color: #FAFAFA;
 }
 
-.room-spells {
-    flex: 2;
-    border: 1px solid #eee;
+.room-side-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
+
+.room-spells-container {
+    display: flex;
+    flex: 1;
+}
+
+.room-buttons-container {
+    display: flex;
+    height: 4em;
+}
+
+.room-button {
+    flex: 1;
+    height: inherit;
+}
+.room-button.right {
+    margin-left: .5em;
+}
+.room-button.left {
+    margin-right: .5em;
+}
+.room-button.ready {
+    background-color: #C62828;
+    color: #fafafa;
+    font-weight: bold;
+}
+.room-button.waiting {
+    background-color: #2E7D32;
+    color: #fafafa;
+}
+

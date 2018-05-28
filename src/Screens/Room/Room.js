@@ -78,25 +78,30 @@ class Room extends Component {
 
         return (
             <div className="room-container">
-                <h2>{ this.props.room.roomJoined }</h2>
-                <div className="room-content">
-                    <div className='room-users'>
+                <div className="room-info-container">
+                    <h2 className="room-name">{ this.props.room.roomJoined }</h2>
+                </div>
+                <div className="room-content-container">
+                    <div className='room-users-container'>
                         {
                             this.props.room.users.map(this.renderUser)
                         }
                     </div>
-                    <div className='room-spells'>
-                        
+                    <div className='room-side-container'>
+                        <div className='room-buttons-container'>
+                            <Button label={toggleText} className={'room-button left ' + this.state.status}
+                                onClick={this.handleToggleStatus}/>
+                            {
+                                this.props.isOwner ?
+                                <Button label='Start' className='room-button right'
+                                    onClick={this.handleStartGame}/>
+                                : <div className='room-button'></div>
+                            }
+                        </div>
+                        <div className='room-spells-container'>
+
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <Button label={toggleText} className='start-input'
-                        onClick={this.handleToggleStatus}/>
-                    {
-                        this.props.isOwner && 
-                        <Button label='Start' className='start-input'
-                            onClick={this.handleStartGame}/>
-                    }
                 </div>
             </div>
         )

@@ -19,8 +19,8 @@ class Start extends Component {
         super(props)
 
         this.state = {
-            userName: 'a',
-            roomName: 'a'
+            userName: 'Good user name',
+            roomName: 'A very good room name'
         }
 
         this._handleCreateRoom = this._handleCreateRoom.bind(this)

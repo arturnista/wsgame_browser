@@ -92,7 +92,7 @@ class Root extends Component {
         return (
             <Provider store={this.store}>
                 <Router history={history}>
-                    <div style={{ flex: 1 }}>
+                    <div className="root-container">
                         <Route path="/" component={Header} />
                         <Route exact path="/" component={Start} />
                         <Route exact path="/room" component={Room} />

@@ -17,6 +17,7 @@ if(!window.PIXI.utils.isWebGLSupported()){
 const mapStateToProps = (state) => ({
     game: state.game,
     user: state.user,
+    room: state.room,
 })
 const mapDispatchToProps = (dispatch) => ({
     stopGame: () => dispatch(stopGame()),
@@ -43,6 +44,7 @@ class Game extends Component {
 
         this.gameIsRunning = false
         this.zoom = 1
+        this.zoomOption = 1
 
         this.player = null
         this.status = ''
@@ -51,9 +53,9 @@ class Game extends Component {
 
     componentDidMount() {
 
-        if(_.isEmpty(this.props.game)) {
-            this.props.history.replace('/room')
-        }
+        // if(_.isEmpty(this.props.game)) {
+        //     this.props.history.replace('/room')
+        // }
 
         if(this.gameDiv) {
             this.gameDiv.focus()
@@ -66,10 +68,16 @@ class Game extends Component {
         window.socketio.on('game_will_end', this.gameWillEnd)
         window.socketio.on('game_end', this.gameEnd)
 
+        const gameMountStyle = window.getComputedStyle(document.getElementById("game-mount-container"))
+        
+        const screenHeight = parseInt(gameMountStyle.height) // * .8
+        const screenWidth = parseInt(gameMountStyle.width) // * .8
+        const screenRatio = 1.333333
+
         // Create a Pixi Application
         this.app = new window.PIXI.Application({
-            width: 800,
-            height: 800,
+            width: screenWidth,
+            height: screenHeight,
             antialias: true,
             transparent: false,
             resolution: 1,
@@ -100,16 +108,31 @@ class Game extends Component {
         this.entities = []
 
         this.camera = new window.PIXI.Container()
+        this.camera.hitArea = new window.PIXI.Rectangle(0, 0, 1000, 1000)
         this.hud = new window.PIXI.Container()
 
-        this.lifeText = new window.PIXI.Text(100, { fontFamily : 'Arial', fontSize: 35, fill : 0xB22222, align : 'center' })
-        this.hud.addChild(this.lifeText)
-        this.knockbackText = new window.PIXI.Text(100, { fontFamily : 'Arial', fontSize: 35, fill : 0x22B222, align : 'center' })
-        this.knockbackText.y = 40
+        let lifeOutRectangle = new window.PIXI.Graphics()
+        lifeOutRectangle.beginFill(0xEEEEEE)
+        lifeOutRectangle.drawRect(0, 0, this.app.renderer.screen.width, 15)
+        lifeOutRectangle.endFill()
+        this.hud.addChild(lifeOutRectangle)
+        
+        this.lifeRectangle = new window.PIXI.Graphics()
+        this.lifeRectangle.beginFill(0xFF3300)
+        this.lifeRectangle.drawRect(0, 0, this.app.renderer.screen.width, 15)
+        this.lifeRectangle.endFill()
+        this.hud.addChild(this.lifeRectangle)
+
+        this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 35, fill: 0x22B222, align: 'center' })
+        this.knockbackText.x = this.app.renderer.screen.width / 2
+        this.knockbackText.y = 35
+        this.knockbackText.anchor.set(.5, .5)
         this.hud.addChild(this.knockbackText)
 
-        this.startText = new window.PIXI.Text('READY??', { fontFamily : 'Arial', fontSize: 35, fill : 0xFAFAFA, align : 'center' })
-        this.startText.x = 400
+        this.startText = new window.PIXI.Text('READY?', { fontFamily: 'Arial', fontSize: 35, fill: 0xFAFAFA, align: 'center' })
+        this.startText.x = this.app.renderer.screen.width / 2
+        this.startText.y = this.app.renderer.screen.height / 2
+        this.startText.anchor.set(.5, .5)
         this.hud.addChild(this.startText)
 
         this.app.stage.addChild(this.camera)
@@ -117,7 +140,10 @@ class Game extends Component {
 
         //Render the stage
         this.app.renderer.render(this.app.stage)
-        this.app.ticker.add(this.gameLoop.bind(this))
+        this.app.ticker.add(t => this.gameLoop(t * 0.016666667, t))
+
+        this.app.renderer.plugins.interaction.on( 'mousedown', function(event) { console.log('renderer', event) } );
+
     }
 
     gameLoop(deltatime) {
@@ -128,19 +154,20 @@ class Game extends Component {
             this.zoom = newZoom
             this.camera.scale.set(this.zoom, this.zoom)
 
-            const yPiv = (this.map.data.position.y / 2) - ((this.app.renderer.screen.height - this.map.data.position.y) / 2) / this.zoom
-            const xPiv = (this.map.data.position.x / 2) - ((this.app.renderer.screen.width - this.map.data.position.x) / 2) / this.zoom
+            const xPiv = (this.map.data.position.x / 2) - this.camera.originalPivot.x / this.zoom
+            const yPiv = (this.map.data.position.y / 2) - this.camera.originalPivot.y / this.zoom
             this.camera.pivot.set(xPiv, yPiv)
 
-            this.lifeText.text = this.player.metadata.life.toFixed(0)
+            this.lifeRectangle.width = this.app.renderer.screen.width * (this.player.metadata.life / 100)
+            console.log(this.lifeRectangle.width)
             this.knockbackText.text = this.player.metadata.knockbackValue.toFixed(0)
         }
 
         if(!_.isEmpty(this.map)) {
             this.map.sprite.x = this.map.data.position.x
             this.map.sprite.y = this.map.data.position.y
-            this.map.sprite.width -= this.map.data.decreasePerSecond * 0.016666667 * deltatime
-            this.map.sprite.height -= this.map.data.decreasePerSecond * 0.016666667 * deltatime
+            this.map.sprite.width -= this.map.data.decreasePerSecond * deltatime
+            this.map.sprite.height -= this.map.data.decreasePerSecond * deltatime
         }
 
         for (let i = 0; i < this.players.length; i++) {
@@ -167,8 +194,8 @@ class Game extends Component {
                 player.height = playerData.collider.size
                 player.x = playerData.position.x
                 player.y = playerData.position.y
-                player.vx = playerData.velocity.x * 0.016666667
-                player.vy = playerData.velocity.y * 0.016666667
+                player.vx = playerData.velocity.x
+                player.vy = playerData.velocity.y
 
                 this.camera.addChild(player)
                 this.players.push(player)
@@ -195,8 +222,8 @@ class Game extends Component {
                 spell.height = spellData.collider.size
                 spell.x = spellData.position.x
                 spell.y = spellData.position.y
-                spell.vx = spellData.velocity.x * 0.016666667
-                spell.vy = spellData.velocity.y * 0.016666667
+                spell.vx = spellData.velocity.x
+                spell.vy = spellData.velocity.y
 
                 spell.lastTick = this.tick
 
@@ -222,8 +249,8 @@ class Game extends Component {
                 player.height = playerData.collider.size
                 player.x = playerData.position.x
                 player.y = playerData.position.y
-                player.vx = playerData.velocity.x * 0.016666667
-                player.vy = playerData.velocity.y * 0.016666667
+                player.vx = playerData.velocity.x
+                player.vy = playerData.velocity.y
                 
             }
         }
@@ -233,10 +260,11 @@ class Game extends Component {
         console.log('gameMapCreate', body)
         this.map.data = body
 
-        const yPiv = (this.map.data.position.y / 2) - ((this.app.renderer.screen.height - this.map.data.position.y) / 2) / this.zoom
-        const xPiv = (this.map.data.position.x / 2) - ((this.app.renderer.screen.width - this.map.data.position.x) / 2) / this.zoom
-        this.camera.pivot.set(xPiv, yPiv)
-
+        const xPiv = ((this.app.renderer.screen.width - this.map.data.position.x) / 2)
+        const yPiv = ((this.app.renderer.screen.height - this.map.data.position.y) / 2)
+        this.camera.originalPivot = { x: xPiv, y: yPiv }
+        this.camera.pivot.set((this.map.data.position.x / 2) - xPiv, (this.map.data.position.y / 2) - yPiv)
+        
         this.map.sprite = new window.PIXI.Sprite(window.resources['/img/BasicArena.png'].texture)
         this.map.sprite.x = this.map.data.position.x
         this.map.sprite.y = this.map.data.position.y
@@ -274,26 +302,39 @@ class Game extends Component {
     }
 
     gameWillEnd(body) {
-        const finishText = new window.PIXI.Text('CABO', { fontFamily : 'Arial', fontSize: 55, fill : 0xFAFAFA, align : 'center' })
-        finishText.x = 300
-        finishText.y = 200
-        this.hud.addChild(finishText)
+        console.log('gameWillEnd', body)
+
+        let finalScreenBackgroundRect = new window.PIXI.Graphics()
+        finalScreenBackgroundRect.beginFill(0x212121, .6)
+        finalScreenBackgroundRect.drawRect(0, 0, this.app.renderer.screen.width, this.app.renderer.screen.height)
+        finalScreenBackgroundRect.endFill()
+        this.hud.addChild(finalScreenBackgroundRect)
+
+        const nameText = new window.PIXI.Text(this.props.user.name, { fontFamily: 'Arial', fontSize: 30, fill: 0xFAFAFA, align: 'center' })
+        nameText.x = this.app.renderer.screen.width / 2 - 100
+        nameText.y = 100
+        this.hud.addChild(nameText)
 
         if(this.player && body.winner.id === this.player.id) {
-            const winnerText = new window.PIXI.Text('YOU WIN MATE', { fontFamily : 'Arial', fontSize: 35, fill : 0xFFCC00, align : 'center' })
-            winnerText.x = 300
-            winnerText.y = 500
+
+            const winnerText = new window.PIXI.Text('CONGRATZ BRO', { fontFamily: 'Arial', fontSize: 35, fill: 0xFFCC00, align: 'center' })
+            winnerText.x = this.app.renderer.screen.width / 2 - 100
+            winnerText.y = 150
+            winnerText.anchor.set(0, 0)
             this.hud.addChild(winnerText)
+
         } else {
-            const loserText = new window.PIXI.Text('YEP NOT TODAY', { fontFamily : 'Arial', fontSize: 35, fill : 0xB22222, align : 'center' })
-            loserText.x = 300
-            loserText.y = 500
+
+            const loserText = new window.PIXI.Text('NOT TODAY', { fontFamily: 'Arial', fontSize: 35, fill: 0xEECCCC, align: 'center' })
+            loserText.x = this.app.renderer.screen.width / 2 - 100
+            loserText.y = 150
+            loserText.anchor.set(0, 0)
             this.hud.addChild(loserText)
+
         }
     }
 
     gameEnd(body) {
-        console.log('gameEnd', body)        
         this.props.stopGame()
         this.props.resetRoom()
 
@@ -303,14 +344,13 @@ class Game extends Component {
     handleMouseDown(event) {
 
         event.preventDefault()
+        const xClick = event.clientX
+        const yClick = event.clientY - 96
         const pos = {
-            x: (event.clientX / this.zoom) + this.camera.pivot.x,
-            y: ((event.clientY - 177) / this.zoom) + this.camera.pivot.y
+            x: (xClick / this.zoom) + this.camera.pivot.x,
+            y: (yClick / this.zoom) + this.camera.pivot.y
         }
-        console.log('camera', this.camera.pivot.x, this.camera.pivot.x)
-        console.log('zoom', this.zoom)
-        console.log('event', event.clientX, event.clientY)
-        console.log('pos', pos)
+        
         this.emitAction(this.status, pos)
 
     }
@@ -319,14 +359,6 @@ class Game extends Component {
 
         const keyPressed = e.key.toLowerCase()
         switch (keyPressed) {
-            case 'l':
-                this.camera.x = this.camera.x + 1
-                console.log(this.camera.x, this.camera.y)
-                break
-            case 'o':
-                this.camera.y = this.camera.y + 1
-                console.log(this.camera.x, this.camera.y)
-                break
             case 'q':
                 return this.status = 'spell_fireball'
             case 'w':
@@ -360,11 +392,10 @@ class Game extends Component {
     render() {
 
         return (
-            <div>
-                <h1>GAME | {this.player ? this.player.id : '...'}</h1>
-                <div id="game-mount" ref={r => this.gameDiv = r} 
+            <div id="game-mount-container" className="game-container">
+                <div id="game-mount" className="game" ref={r => this.gameDiv = r} 
                     onMouseDown={this.handleMouseDown}
-                    onKeyDown={this.handleKeyDown} tabindex="1">
+                    onKeyDown={this.handleKeyDown} tabIndex="1">
                     
                 </div>
             </div>
