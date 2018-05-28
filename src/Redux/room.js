@@ -11,6 +11,8 @@ export default function reducer(state = initialState, action = {}) {
         case SET_ROOM:
             return { ...action.payload }
         case ADD_USER:
+            if(state.users.find(x => x.id === action.payload.id) != null) return state
+
             return {
                 ...state,
                 users: [
@@ -47,12 +49,13 @@ export default function reducer(state = initialState, action = {}) {
     }
 }
 
-export function setRoom({ roomJoined, users }) {
+export function setRoom({ room }) {
     return {
         type: SET_ROOM,
         payload: {
-            roomJoined,
-            users: users || []
+            roomJoined: room.name,
+            users: room.users,
+            owner: room.owner.id,
         }
     }
 }
@@ -81,6 +84,6 @@ export function readyUser(user) {
 export function waitingUser(user) {
     return {
         type: WAITING_USER,
-        payload: { ...user }
+        payload: { ...user, id: user.user  }
     }
 }

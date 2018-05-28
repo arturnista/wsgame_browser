@@ -50,7 +50,7 @@ class Root extends Component {
 
             window.socketio.on('myuser_joined_room', (body) => {
                 console.log('myuser_joined_room', body)
-                this.store.dispatch( setRoom({ roomJoined: body.room.name, user: body.user }) )
+                this.store.dispatch( setRoom({ room: body.room, user: body.user }) )
             })
 
             window.socketio.on('user_joined_room', (body) => {
@@ -73,7 +73,7 @@ class Root extends Component {
             })
             window.socketio.on('user_left_room', (body) => {
                 console.log('user_left_room', body)
-                this.store.dispatch( removeUser(body.user) )
+                this.store.dispatch( removeUser(body) )
             })
 
             window.socketio.on('game_will_start', (body) => {

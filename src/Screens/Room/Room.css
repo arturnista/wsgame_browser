@@ -35,8 +35,27 @@
 }
 
 .room-user-name {
+    flex: 1;
+    font-size: 1.2rem;
+    color: #323232;
+}
+.room-user-name.owner {
+    font-weight: bold;
+    color: #212121;
+}
+.room-user-name.you {
+    text-decoration: underline;
+}
+
+.room-user-status {
     font-size: 1.2rem;
     font-weight: bold;
+}
+.room-user-status.waiting {
+    color: rgb(83, 33, 33);
+}
+.room-user-status.ready {
+    color: rgb(37, 58, 37);
 }
 
 .room-spells {
