@@ -47,18 +47,26 @@ class Start extends Component {
 
         return (
             <div className="start-container">
-                <Input label='Name' className='start-input'
-                    placeholder='Robson'
-                    value={this.state.userName}
-                    onChange={x => this.setState({ userName: x })} />
-                <Input label='Room name' className='start-input'
-                    placeholder="Robson's room"
-                    value={this.state.roomName}
-                    onChange={x => this.setState({ roomName: x })} />
-                <Button label='Create' className='start-input'
-                    onClick={this._handleCreateRoom}/>
-                <Button label='Enter' className='start-input'
-                    onClick={this._handleJoinRoom}/>
+                <div className="start-user-container">
+                    <h2 className="start-room-title">User configuration</h2>
+                    <Input label='Name' className='start-input-username'
+                        placeholder='Robson'
+                        value={this.state.userName}
+                        onChange={x => this.setState({ userName: x })} />
+                </div>
+                <div className="start-room-container">
+                    <h2 className="start-room-title">Room configuration</h2>
+                    <Input label='Room name' className='start-input-roomname'
+                        placeholder="Robson's room"
+                        value={this.state.roomName}
+                        onChange={x => this.setState({ roomName: x })} />
+                    <div className="start-room-buttons">
+                        <Button label='Create' className='start-button left'
+                            onClick={this._handleCreateRoom}/>
+                        <Button label='Enter' className='start-button right'
+                            onClick={this._handleJoinRoom}/>
+                    </div>
+                </div>
             </div>
         )
 

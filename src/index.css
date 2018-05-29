@@ -10,7 +10,18 @@ body {
     flex: 1;
 }
 
+h1 {
+    font-family: 'Arial';
+    margin: 0;
+    padding: 0;
+}
+h2 {
+    font-family: 'Arial';
+    margin: 0;
+    padding: 0;
+}
 p {
+    font-family: 'Arial';
     display: flex;
     margin: 0;
     padding: 0;

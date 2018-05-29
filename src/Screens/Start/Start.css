@@ -3,12 +3,57 @@
 
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-around;
     padding: 2rem;
+
+    background-color: #061639;
 }
 
-.start-input {
-    flex: 1;
+.start-user-container {
+    display: flex;
+    flex-direction: column;
+    background-color: #fafafa;
+    padding: 1em;
+}
 
+.start-input-username {
     margin: .3rem;
+    margin-top: 1em;
+}
+
+.start-room-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    background-color: #fafafa;
+    padding: 1em;
+}
+
+.start-room-title {
+    text-align: center;
+    color: #212121;
+    border-bottom: 1px #999 solid;
+}
+
+.start-input-roomname {
+    margin: .3rem;
+    margin-top: 1em;
+}
+
+.start-room-buttons {
+    flex: 1;
+    display: flex;
+    justify-content: space-around;
+    margin-top: 1em;
+}
+
+.start-button {
+    flex: 1;
+    height: 5em;
+}
+.start-button.left {
+    margin-right: 1em;
+}
+.start-button.right {
+    margin-left: 1em;
 }

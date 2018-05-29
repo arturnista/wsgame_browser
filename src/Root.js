@@ -65,12 +65,6 @@ class Root extends Component {
                 console.log('user_waiting', body)
                 this.store.dispatch( waitingUser(body) )
             })
-            window.socketio.on('user_selected_spell', (body) => {
-                console.log('user_selected_spell', body)
-            })
-            window.socketio.on('user_deselected_spell', (body) => {
-                console.log('user_deselected_spell', body)
-            })
             window.socketio.on('user_left_room', (body) => {
                 console.log('user_left_room', body)
                 this.store.dispatch( removeUser(body) )

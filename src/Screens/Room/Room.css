@@ -3,6 +3,7 @@
     display: flex;
     flex-direction: column;
     background-color: #061639;
+    padding: .3em;
 }
 
 .room-info-container {
@@ -27,15 +28,14 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    padding-left: .3rem;
-    padding-right: .3rem;
+    margin-right: 1em;
+    background-color: #FAFAFA;
 }
 
 .room-user-container {
     display: flex;
     align-items: center;
-    background-color: #424242;
-    height: 4rem;
+    height: calc(4rem - 1px);
     padding-left: 1em;
     padding-right: 1em;
     border-bottom: 1px solid #555;
@@ -51,10 +51,8 @@
 }
 
 .room-user-name {
-    margin: 0;
     margin-left: .5em;
-    padding: 0;
-    color: #fafafa;
+    color: #212121;
     flex: 1;
     font-weight: bold;
 }
@@ -82,11 +80,80 @@
 .room-spells-container {
     display: flex;
     flex: 1;
+    flex-direction: column;
+}
+
+.room-spells-list-container {
+    margin-top: 1em;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: .3em;
+    background-color: #FAFAFA;
+}
+
+.room-spells-list-title {
+    color: #212121;
+    border-bottom: 1px #333 solid;
+    margin-bottom: .3em;
+}
+
+.room-spells-list {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.room-spell-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+
+    height: 6em;
+    width: 5em;
+    padding: .3em;
+    cursor: pointer;
+
+    background-color: #eee;
+    border: 1px solid #212121;
+}
+.room-spell-container.selected {
+    background-color: #EF5350;
+}
+
+.room-spell-name {
+    text-align: center;
+}
+
+.room-spell-icon {
+    height: 5em;
+    width: 5em;
+}
+
+.room-spell-hotkey-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;  
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+}
+
+.room-spell-hotkey {
+    font-size: 3em;
+    color: #FAFAFA;
 }
 
 .room-buttons-container {
     display: flex;
     height: 4em;
+    padding: 1em;
+    background-color: #FAFAFA;
 }
 
 .room-button {

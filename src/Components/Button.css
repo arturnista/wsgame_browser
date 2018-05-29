@@ -6,6 +6,8 @@
     background-color: #FFCC00;
 
     cursor: pointer;
+
+    border: 1px solid #212121;
 }
 
 .button-label {

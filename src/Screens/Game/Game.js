@@ -5,6 +5,7 @@ import { Input, Button } from '../../Components'
 import vector from '../../Utils/vector'
 import { resetRoom } from '../../Redux/room'
 import { stopGame } from '../../Redux/game'
+import { resetSpells } from '../../Redux/user'
 import './Game.css'
 
 // bump = new window.Bump(PIXI)
@@ -21,7 +22,8 @@ const mapStateToProps = (state) => ({
 })
 const mapDispatchToProps = (dispatch) => ({
     stopGame: () => dispatch(stopGame()),
-    resetRoom: () => dispatch(resetRoom())
+    resetRoom: () => dispatch(resetRoom()),
+    resetSpells: () => dispatch(resetSpells())
 })
 
 class Game extends Component {
@@ -53,9 +55,9 @@ class Game extends Component {
 
     componentDidMount() {
 
-        // if(_.isEmpty(this.props.game)) {
-        //     this.props.history.replace('/room')
-        // }
+        if(_.isEmpty(this.props.game)) {
+            this.props.history.replace('/room')
+        }
 
         if(this.gameDiv) {
             this.gameDiv.focus()
@@ -159,7 +161,6 @@ class Game extends Component {
             this.camera.pivot.set(xPiv, yPiv)
 
             this.lifeRectangle.width = this.app.renderer.screen.width * (this.player.metadata.life / 100)
-            console.log(this.lifeRectangle.width)
             this.knockbackText.text = this.player.metadata.knockbackValue.toFixed(0)
         }
 
@@ -337,6 +338,7 @@ class Game extends Component {
     gameEnd(body) {
         this.props.stopGame()
         this.props.resetRoom()
+        this.props.resetSpells()
 
         this.props.history.replace('/room')
     }
@@ -356,19 +358,32 @@ class Game extends Component {
     }
 
     handleKeyDown(e) {
-
         const keyPressed = e.key.toLowerCase()
         switch (keyPressed) {
             case 'q':
-                return this.status = 'spell_fireball'
+                if(this.props.user.spells.length <= 0) return
+                this.useSpell(this.props.user.spells[0].id)
+                break
             case 'w':
-                return this.status = 'spell_explosion'
-            case 'r':
-                return this.status = 'spell_blink'
+                if(this.props.user.spells.length <= 1) return
+                this.useSpell(this.props.user.spells[1].id)
+                break
             case 'e':
-                return this.emitAction('spell_reflect_shield')
-            case 't':
-                return this.emitAction('spell_follower')
+                if(this.props.user.spells.length <= 2) return
+                this.useSpell(this.props.user.spells[2].id)
+                break
+        }
+    }
+
+    useSpell(name) {
+        const spellName = 'spell_' + name
+        switch (name) {
+            case 'reflect_shield':
+            case 'follower':
+                this.emitAction(spellName)
+                return 
+            default:
+                this.status = spellName
         }
     }
 
