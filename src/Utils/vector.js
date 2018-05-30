@@ -1,5 +1,40 @@
 const vector = {
 
+    isEqual: (pos1, pos2) => {
+        return pos1.x === pos2.x && pos1.y === pos2.y
+    },
+
+    multiply: (vec1, vec2) => {
+        if(vec1 == null) throw new Error('Vector 1 is undefined')
+        if(vec2 == null) throw new Error('Vector 2 is undefined')
+        if(typeof vec2 === 'number') vec2 = { x: vec2, y: vec2 }
+
+        return {
+            x: vec2.x * vec1.x,
+            y: vec2.y * vec1.y
+        }
+    },
+
+    add: (pos1, pos2) => {
+        if(pos1 == null) throw new Error('Position 1 is undefined')
+        if(pos2 == null) throw new Error('Position 2 is undefined')
+
+        return {
+            x: pos2.x + pos1.x,
+            y: pos2.y + pos1.y
+        }
+    },
+
+    sub: (pos1, pos2) => {
+        if(pos1 == null) throw new Error('Position 1 is undefined')
+        if(pos2 == null) throw new Error('Position 2 is undefined')
+
+        return {
+            x: pos2.x - pos1.x,
+            y: pos2.y - pos1.y
+        }
+    },
+
     length: (vector) => {
         if(vector == null) throw new Error('Vector is undefined')
 
@@ -13,17 +48,6 @@ const vector = {
 
         const dist = Math.pow(pos2.x - pos1.x, 2) + Math.pow(pos2.y - pos1.y, 2)
         return Math.sqrt(dist)
-    },
-
-    multiply: (vec1, vec2) => {
-        if(vec1 == null) throw new Error('Vector 1 is undefined')
-        if(vec2 == null) throw new Error('Vector 2 is undefined')
-        if(typeof vec2 === 'number') vec2 = { x: vec2, y: vec2 }
-
-        return {
-            x: vec2.x * vec1.x,
-            y: vec2.y * vec1.y
-        }
     },
 
     direction: (pos1, pos2) => {
@@ -45,26 +69,6 @@ const vector = {
         return {
             x: vector.x / tot,
             y: vector.y / tot,
-        }
-    },
-
-    add: (pos1, pos2) => {
-        if(pos1 == null) throw new Error('Position 1 is undefined')
-        if(pos2 == null) throw new Error('Position 2 is undefined')
-
-        return {
-            x: pos2.x + pos1.x,
-            y: pos2.y + pos1.y
-        }
-    },
-
-    sub: (pos1, pos2) => {
-        if(pos1 == null) throw new Error('Position 1 is undefined')
-        if(pos2 == null) throw new Error('Position 2 is undefined')
-
-        return {
-            x: pos2.x - pos1.x,
-            y: pos2.y - pos1.y
         }
     },
 

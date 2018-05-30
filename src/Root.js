@@ -29,10 +29,14 @@ class Root extends Component {
     componentDidMount() {
         window.PIXI.loader
         .add('/img/tileset.json')
+        .add('/img/WSSprites.json')
         .add('/img/BasicArena.png')
         .load(() => {
             window.resources = PIXI.loader.resources
-            window.textures = PIXI.loader.resources['/img/tileset.json'].textures
+            window.textures = {
+                ...PIXI.loader.resources['/img/tileset.json'].textures,
+                ...PIXI.loader.resources['/img/WSSprites.json'].textures,
+            }
         })
 
         window.socketio.on('connect', (socket) => {

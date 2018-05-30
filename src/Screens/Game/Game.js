@@ -6,6 +6,13 @@ import vector from '../../Utils/vector'
 import { resetRoom } from '../../Redux/room'
 import { stopGame } from '../../Redux/game'
 import { resetSpells } from '../../Redux/user'
+
+import { createFireball } from './Fireball'
+import { createBoomerang } from './Boomerang'
+import { createFollower } from './Follower'
+import { createExplosion } from './Explosion'
+import { createReflectShield } from './ReflectShield'
+
 import './Game.css'
 
 // bump = new window.Bump(PIXI)
@@ -40,6 +47,7 @@ class Game extends Component {
         this.gameSync = this.gameSync.bind(this)
         this.gameMapCreate = this.gameMapCreate.bind(this)
         this.gameMapUpdate = this.gameMapUpdate.bind(this)
+        this.playerUseSpell = this.playerUseSpell.bind(this)
         this.gameStart = this.gameStart.bind(this)
         this.gameWillEnd = this.gameWillEnd.bind(this)
         this.gameEnd = this.gameEnd.bind(this)
@@ -66,6 +74,7 @@ class Game extends Component {
         window.socketio.on('sync', this.gameSync)
         window.socketio.on('map_create', this.gameMapCreate)
         window.socketio.on('map_update', this.gameMapUpdate)
+        window.socketio.on('player_use_spell', this.playerUseSpell)
         window.socketio.on('game_start', this.gameStart)
         window.socketio.on('game_will_end', this.gameWillEnd)
         window.socketio.on('game_end', this.gameEnd)
@@ -89,6 +98,8 @@ class Game extends Component {
         
         this.players = []
         this.spells = []
+        this.entities = []
+        this.entitiesToRemove = []
         this.map = {}
         this.firstSync = true
         this.tick = 0
@@ -99,15 +110,16 @@ class Game extends Component {
     }
 
     componentWillUnmount() {
+        this.app.ticker.remove(this.gameLoop)
         window.socketio.off('sync', this.gameSync)   
         window.socketio.off('map_create', this.gameMapCreate)
         window.socketio.off('map_update', this.gameMapUpdate)    
         window.socketio.off('game_will_end', this.gameWillEnd)
         window.socketio.off('game_end', this.gameEnd) 
+        window.socketio.off('player_use_spell', this.playerUseSpell)
     }
 
     handleLoad() {
-        this.entities = []
 
         this.camera = new window.PIXI.Container()
         this.camera.hitArea = new window.PIXI.Rectangle(0, 0, 1000, 1000)
@@ -142,26 +154,32 @@ class Game extends Component {
 
         //Render the stage
         this.app.renderer.render(this.app.stage)
-        this.app.ticker.add(t => this.gameLoop(t * 0.016666667, t))
-
-        this.app.renderer.plugins.interaction.on( 'mousedown', function(event) { console.log('renderer', event) } );
+        this.app.ticker.add(this.gameLoop)
 
     }
 
-    gameLoop(deltatime) {
+    gameLoop(delta) {
+        const deltatime = delta * 0.016666667
+        
         if(this.player) {
-            const dist = vector.distance(this.map.data.position, this.player.position)
-            let newZoom = 300 / dist
-            if(newZoom > 1) newZoom = 1
-            this.zoom = newZoom
-            this.camera.scale.set(this.zoom, this.zoom)
 
-            const xPiv = (this.map.data.position.x / 2) - this.camera.originalPivot.x / this.zoom
-            const yPiv = (this.map.data.position.y / 2) - this.camera.originalPivot.y / this.zoom
-            this.camera.pivot.set(xPiv, yPiv)
+            if(!vector.isEqual(this.lastPosition, this.player.position)) {
+                const dist = vector.distance(this.map.data.position, this.player.position)
+                let newZoom = 300 / dist
+                if(newZoom > 1) newZoom = 1
+                this.zoom = newZoom
+                this.camera.scale.set(this.zoom, this.zoom)
+    
+                const xPiv = (this.map.data.position.x / 2) - this.camera.originalPivot.x / this.zoom
+                const yPiv = (this.map.data.position.y / 2) - this.camera.originalPivot.y / this.zoom
+                this.camera.pivot.set(xPiv, yPiv)
+
+                this.lastPosition = _.clone(this.player.position)
+            }
 
             this.lifeRectangle.width = this.app.renderer.screen.width * (this.player.metadata.life / 100)
             this.knockbackText.text = this.player.metadata.knockbackValue.toFixed(0)
+
         }
 
         if(!_.isEmpty(this.map)) {
@@ -171,89 +189,115 @@ class Game extends Component {
             this.map.sprite.height -= this.map.data.decreasePerSecond * deltatime
         }
 
-        for (let i = 0; i < this.players.length; i++) {
-            const player = this.players[i]
-            player.x += player.vx * deltatime
-            player.y += player.vy * deltatime
+        for (let i = 0; i < this.entities.length; i++) {
+            this.entities[i].update && this.entities[i].update(deltatime)
+
+            if(this.entities[i].vx) this.entities[i].x += this.entities[i].vx * deltatime
+            if(this.entities[i].vy) this.entities[i].y += this.entities[i].vy * deltatime
+        }
+
+        for (let i = 0; i < this.entitiesToRemove.length; i++) {
+            const entity = this.entitiesToRemove[i]
+            this.camera.removeChild(entity)
+            this.entities = this.entities.filter(c => c.id !== entity.id)
+        }
+        this.entitiesToRemove = []
+    }
+
+    playerUseSpell(body) {
+        console.log('playerUseSpell', body)
+
+        let spell = null
+        switch (body.spellName) {
+            case 'explosion':
+                spell = createExplosion(body, this)
+                break
+            case 'reflect_shield':
+                const player = this.players.find(x => x.id === body.player.id)
+                spell = createReflectShield(body, this, player)
+                break
+        }
+
+        if(spell) {
+            this.camera.addChild(spell)
+            this.entities.push(spell)
         }
     }
 
     gameSync(body) {
         this.tick++
-        if(this.firstSync) {
+        for (let i = 0; i < body.spells.length; i++) {
 
-            this.firstSync = false
-            for (let index = 0; index < body.players.length; index++) {
-                const playerData = body.players[index]
+            const spellData = body.spells[i]
+            let spell = this.spells.find(x => x.id === spellData.id)
 
-                const player = new window.PIXI.Sprite( window.textures['monster.png'] )
+            if(_.isNil(spell)) {
+                switch (spellData.type) {
+                    case 'fireball':
+                        spell = createFireball(spellData)
+                        break
+                    case 'boomerang':
+                        spell = createBoomerang(spellData)
+                        break
+                    case 'follower':
+                        spell = createFollower(spellData)
+                        break
+                    default:
+                        spell = new window.PIXI.Sprite( window.textures['cube.png'] )
+                        spell.anchor.set(.5, .5)
+                        break
+                }
+                this.camera.addChild(spell)
+                this.spells.push(spell)
+                this.entities.push(spell)
+            }
+
+            spell.id = spellData.id
+            spell.metadata = { ...spellData }
+            spell.width = spellData.collider.size
+            spell.height = spellData.collider.size
+            spell.x = spellData.position.x
+            spell.y = spellData.position.y
+            spell.vx = spellData.velocity.x
+            spell.vy = spellData.velocity.y
+
+            spell.lastTick = this.tick
+
+        }
+
+        let spellsToRemove = []
+        this.spells = this.spells.filter(x => {
+            if(x.lastTick !== this.tick) {
+                this.removeEntity(x)
+                return false
+            }
+            return true
+        })
+
+        for (let i = 0; i < body.players.length; i++) {
+
+            const playerData = body.players[i]
+            let player = this.players.find(x => x.id === playerData.id)
+
+            if(_.isNil(player)) {
+
+                player = new window.PIXI.Sprite( window.textures['monster.png'] )
                 player.anchor.set(.5, .5)
-
-                player.id = playerData.id
-                player.metadata = { ...playerData }
-                player.width = playerData.collider.size
-                player.height = playerData.collider.size
-                player.x = playerData.position.x
-                player.y = playerData.position.y
-                player.vx = playerData.velocity.x
-                player.vy = playerData.velocity.y
-
                 this.camera.addChild(player)
                 this.players.push(player)
-            }
-
-        } else {
-            for (let i = 0; i < body.spells.length; i++) {
-
-                const spellData = body.spells[i]
-                let spell = this.spells.find(x => x.id === spellData.id)
-
-                if(_.isNil(spell)) {
-
-                    spell = new window.PIXI.Sprite( window.textures['cube.png'] )
-                    spell.anchor.set(.5, .5)
-                    this.camera.addChild(spell)
-                    this.spells.push(spell)
-
-                }
-
-                spell.id = spellData.id
-                spell.metadata = { ...spellData }
-                spell.width = spellData.collider.size
-                spell.height = spellData.collider.size
-                spell.x = spellData.position.x
-                spell.y = spellData.position.y
-                spell.vx = spellData.velocity.x
-                spell.vy = spellData.velocity.y
-
-                spell.lastTick = this.tick
+                this.entities.push(player)
 
             }
 
-            let spellsToRemove = []
-            this.spells = this.spells.filter(x => {
-                if(x.lastTick !== this.tick) {
-                    this.camera.removeChild(x)
-                    return false
-                }
-                return true
-            })
-
-            for (let i = 0; i < body.players.length; i++) {
-
-                const playerData = body.players[i]
-                const player = this.players.find(x => x.id === playerData.id)
-
-                player.id = playerData.id
-                player.metadata = { ...playerData }
-                player.width = playerData.collider.size
-                player.height = playerData.collider.size
-                player.x = playerData.position.x
-                player.y = playerData.position.y
-                player.vx = playerData.velocity.x
-                player.vy = playerData.velocity.y
-                
-            }
+            player.id = playerData.id
+            player.metadata = { ...playerData }
+            player.width = playerData.collider.size
+            player.height = playerData.collider.size
+            player.x = playerData.position.x
+            player.y = playerData.position.y
+            player.vx = playerData.velocity.x
+            player.vy = playerData.velocity.y
+            
         }
     }
 
@@ -276,7 +320,6 @@ class Game extends Component {
 
         for (let i = 0; i < body.obstacles.length; i++) {
             const obstacleData = body.obstacles[i]
-            
             const obstacle = new window.PIXI.Sprite( window.textures['wall.png'] )
             obstacle.anchor.set(.5, .5)
             obstacle.x = obstacleData.position.x
@@ -303,7 +346,7 @@ class Game extends Component {
     }
 
     gameWillEnd(body) {
-        console.log('gameWillEnd', body)
+        console.log('gameWillEnd', body, this.props.user)
 
         let finalScreenBackgroundRect = new window.PIXI.Graphics()
         finalScreenBackgroundRect.beginFill(0x212121, .6)
@@ -341,6 +384,10 @@ class Game extends Component {
         this.props.resetSpells()
 
         this.props.history.replace('/room')
+    }
+
+    removeEntity(entity) {
+        this.entitiesToRemove.push(entity)
     }
 
     handleMouseDown(event) {
@@ -394,6 +441,7 @@ class Game extends Component {
 
         if(!this.player) {
             this.player = this.players.find(x => x.id === this.props.user.player.id)
+            this.lastPosition = _.clone(this.player.position)            
             this.forceUpdate()
         }
         window.socketio.emit(`player_${action}`, {
