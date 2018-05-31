@@ -2,7 +2,7 @@ import _ from 'lodash'
 import vector from '../../Utils/vector'
 
 export function createFollower(spellData) {
-    const spell = new window.PIXI.Sprite( window.textures['follower.png'] )
+    const spell = new window.PIXI.Sprite( window.textures['follower_01.png'] )
     spell.anchor.set(.5, .5)
 
     spell.update = (deltatime) => {

@@ -196,12 +196,12 @@ class Game extends Component {
             if(this.entities[i].vy) this.entities[i].y += this.entities[i].vy * deltatime
         }
 
-        for (let i = 0; i < this.entitiesToRemove.length; i++) {
-            const entity = this.entitiesToRemove[i]
+        while (this.entitiesToRemove.length > 0) {
+            const entity = this.entitiesToRemove.pop()
             this.camera.removeChild(entity)
-            this.entities = this.entities.filter(c => c.id !== entity.id)
+            let index = _.findIndex(this.entities, c => c.id !== entity.id)
+            this.entities.splice(index, 1)
         }
-        this.entitiesToRemove = []
     }
 
     playerUseSpell(body) {
@@ -281,7 +281,7 @@ class Game extends Component {
 
             if(_.isNil(player)) {
 
-                player = new window.PIXI.Sprite( window.textures['monster.png'] )
+                player = new window.PIXI.Sprite( window.textures['player.png'] )
                 player.anchor.set(.5, .5)
                 this.camera.addChild(player)
                 this.players.push(player)

@@ -2,7 +2,7 @@ import _ from 'lodash'
 import vector from '../../Utils/vector'
 
 export function createReflectShield(spellData, game, player) {
-    const spell = new window.PIXI.Sprite( window.textures['shield_00.png'] )
+    const spell = new window.PIXI.Sprite( window.textures['shield.png'] )
     spell.anchor.set(.5, .5)
     
     let dur = spellData.duration / 1000
