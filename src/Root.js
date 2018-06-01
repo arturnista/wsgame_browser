@@ -24,6 +24,10 @@ class Root extends Component {
 
         const { store } = createStore()
         this.store = store
+
+        this.state = {
+            isLoading: true
+        }
     }
 
     componentDidMount() {
@@ -37,6 +41,7 @@ class Root extends Component {
                 ...PIXI.loader.resources['/img/tileset.json'].textures,
                 ...PIXI.loader.resources['/img/WSSprites.json'].textures,
             }
+            this.setState({ isLoading: false })
         })
 
         window.socketio.on('connect', (socket) => {
@@ -86,6 +91,7 @@ class Root extends Component {
     }
 
     render() {
+        if(this.state.isLoading) return <div><p>caregano</p></div>
 
         return (
             <Provider store={this.store}>

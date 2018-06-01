@@ -6,6 +6,8 @@ import vector from '../../Utils/vector'
 import { resetRoom } from '../../Redux/room'
 import { stopGame } from '../../Redux/game'
 import { resetSpells } from '../../Redux/user'
+import SpellIcon from './HUD/SpellIcon'
+import textureMap from './textureMap'
 
 import { createFireball } from './Fireball'
 import { createBoomerang } from './Boomerang'
@@ -80,7 +82,7 @@ class Game extends Component {
         window.socketio.on('game_end', this.gameEnd)
 
         const gameMountStyle = window.getComputedStyle(document.getElementById("game-mount-container"))
-        
+
         const screenHeight = parseInt(gameMountStyle.height) // * .8
         const screenWidth = parseInt(gameMountStyle.width) // * .8
         const screenRatio = 1.333333
@@ -95,10 +97,11 @@ class Game extends Component {
             backgroundColor: 0x061639
         })
         document.getElementById("game-mount").appendChild(this.app.view)
-        
+
         this.players = []
         this.spells = []
         this.entities = []
+        this.hudEntities = []
         this.entitiesToRemove = []
         this.map = {}
         this.firstSync = true
@@ -111,11 +114,11 @@ class Game extends Component {
 
     componentWillUnmount() {
         this.app.ticker.remove(this.gameLoop)
-        window.socketio.off('sync', this.gameSync)   
+        window.socketio.off('sync', this.gameSync)
         window.socketio.off('map_create', this.gameMapCreate)
-        window.socketio.off('map_update', this.gameMapUpdate)    
+        window.socketio.off('map_update', this.gameMapUpdate)
         window.socketio.off('game_will_end', this.gameWillEnd)
-        window.socketio.off('game_end', this.gameEnd) 
+        window.socketio.off('game_end', this.gameEnd)
         window.socketio.off('player_use_spell', this.playerUseSpell)
     }
 
@@ -130,7 +133,7 @@ class Game extends Component {
         lifeOutRectangle.drawRect(0, 0, this.app.renderer.screen.width, 15)
         lifeOutRectangle.endFill()
         this.hud.addChild(lifeOutRectangle)
-        
+
         this.lifeRectangle = new window.PIXI.Graphics()
         this.lifeRectangle.beginFill(0xFF3300)
         this.lifeRectangle.drawRect(0, 0, this.app.renderer.screen.width, 15)
@@ -149,6 +152,13 @@ class Game extends Component {
         this.startText.anchor.set(.5, .5)
         this.hud.addChild(this.startText)
 
+        this.spellsIcons = []
+        for (var i = 0; i < this.props.user.spells.length; i++) {
+            const ic = new SpellIcon(i, this.props.user.spells[i], this.hud)
+            this.spellsIcons.push( ic )
+            this.hudEntities.push( ic )
+        }
+
         this.app.stage.addChild(this.camera)
         this.app.stage.addChild(this.hud)
 
@@ -160,7 +170,7 @@ class Game extends Component {
 
     gameLoop(delta) {
         const deltatime = delta * 0.016666667
-        
+
         if(this.player) {
 
             if(!vector.isEqual(this.lastPosition, this.player.position)) {
@@ -169,7 +179,7 @@ class Game extends Component {
                 if(newZoom > 1) newZoom = 1
                 this.zoom = newZoom
                 this.camera.scale.set(this.zoom, this.zoom)
-    
+
                 const xPiv = (this.map.data.position.x / 2) - this.camera.originalPivot.x / this.zoom
                 const yPiv = (this.map.data.position.y / 2) - this.camera.originalPivot.y / this.zoom
                 this.camera.pivot.set(xPiv, yPiv)
@@ -189,6 +199,10 @@ class Game extends Component {
             this.map.sprite.height -= this.map.data.decreasePerSecond * deltatime
         }
 
+        for (let i = 0; i < this.hudEntities.length; i++) {
+            this.hudEntities[i].update && this.hudEntities[i].update(deltatime)
+        }
+
         for (let i = 0; i < this.entities.length; i++) {
             this.entities[i].update && this.entities[i].update(deltatime)
 
@@ -206,6 +220,10 @@ class Game extends Component {
 
     playerUseSpell(body) {
         console.log('playerUseSpell', body)
+        if(body.player.id === this.props.user.player.id) {
+            const spellIcon = this.spellsIcons.find(x => x.id === body.spellName)
+            spellIcon.use()
+        }
 
         let spell = null
         switch (body.spellName) {
@@ -283,6 +301,7 @@ class Game extends Component {
 
                 player = new window.PIXI.Sprite( window.textures['player.png'] )
                 player.anchor.set(.5, .5)
+                player.tint = parseInt(playerData.color.replace('#', ''), 16)
                 this.camera.addChild(player)
                 this.players.push(player)
                 this.entities.push(player)
@@ -297,7 +316,7 @@ class Game extends Component {
             player.y = playerData.position.y
             player.vx = playerData.velocity.x
             player.vy = playerData.velocity.y
-            
+
         }
     }
 
@@ -309,7 +328,7 @@ class Game extends Component {
         const yPiv = ((this.app.renderer.screen.height - this.map.data.position.y) / 2)
         this.camera.originalPivot = { x: xPiv, y: yPiv }
         this.camera.pivot.set((this.map.data.position.x / 2) - xPiv, (this.map.data.position.y / 2) - yPiv)
-        
+
         this.map.sprite = new window.PIXI.Sprite(window.resources['/img/BasicArena.png'].texture)
         this.map.sprite.x = this.map.data.position.x
         this.map.sprite.y = this.map.data.position.y
@@ -399,7 +418,7 @@ class Game extends Component {
             x: (xClick / this.zoom) + this.camera.pivot.x,
             y: (yClick / this.zoom) + this.camera.pivot.y
         }
-        
+
         this.emitAction(this.status, pos)
 
     }
@@ -428,7 +447,7 @@ class Game extends Component {
             case 'reflect_shield':
             case 'follower':
                 this.emitAction(spellName)
-                return 
+                return
             default:
                 this.status = spellName
         }
@@ -441,7 +460,7 @@ class Game extends Component {
 
         if(!this.player) {
             this.player = this.players.find(x => x.id === this.props.user.player.id)
-            this.lastPosition = _.clone(this.player.position)            
+            this.lastPosition = _.clone(this.player.position)
             this.forceUpdate()
         }
         window.socketio.emit(`player_${action}`, {
@@ -456,10 +475,10 @@ class Game extends Component {
 
         return (
             <div id="game-mount-container" className="game-container">
-                <div id="game-mount" className="game" ref={r => this.gameDiv = r} 
+                <div id="game-mount" className="game" ref={r => this.gameDiv = r}
                     onMouseDown={this.handleMouseDown}
                     onKeyDown={this.handleKeyDown} tabIndex="1">
-                    
+
                 </div>
             </div>
         )
