@@ -124,18 +124,26 @@
 }
 
 .room-spell-name {
+    height: 2em;
     text-align: center;
 }
 
+.room-spell-icon-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .room-spell-icon {
-    height: 5em;
-    width: 5em;
+    height: 32px;
+    width: 32px;
 }
 
 .room-spell-hotkey-container {
     display: flex;
     justify-content: center;
-    align-items: center;  
+    align-items: center;
 
     position: absolute;
     top: 0;
@@ -175,4 +183,3 @@
     background-color: #2E7D32;
     color: #fafafa;
 }
-

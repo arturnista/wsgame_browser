@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Provider } from 'react-redux'
 import moment from 'moment'
+import _ from 'lodash'
 import * as PIXI from 'pixi.js'
 
 import { Header } from './Components'
@@ -35,11 +36,26 @@ class Root extends Component {
         .add('/img/tileset.json')
         .add('/img/WSSprites.json')
         .add('/img/BasicArena.png')
+        .add('blink.png', '/img/game/blink.png')
+        .add('bomb.png', '/img/game/bomb.png')
+        .add('boomerang.png', '/img/game/boomerang.png')
+        .add('explosion.png', '/img/game/explosion.png')
+        .add('fireball.png', '/img/game/fireball.png')
+        .add('follower.png', '/img/game/follower.png')
+        .add('follower_02.png', '/img/game/follower_02.png')
+        .add('game_05.png', '/img/game/game_05.png')
+        .add('game_07.png', '/img/game/game_07.png')
+        .add('game_10.png', '/img/game/game_10.png')
+        .add('player_left_down.png', '/img/game/player_left_down.png')
+        .add('player_left_up.png', '/img/game/player_left_up.png')
+        .add('player_right_down.png', '/img/game/player_right_down.png')
+        .add('player_right_up.png', '/img/game/player_right_up.png')
+        .add('shield.png', '/img/game/shield.png')
         .load(() => {
-            window.resources = PIXI.loader.resources
             window.textures = {
                 ...PIXI.loader.resources['/img/tileset.json'].textures,
                 ...PIXI.loader.resources['/img/WSSprites.json'].textures,
+                ..._.mapValues(PIXI.loader.resources, x => x.texture),
             }
             this.setState({ isLoading: false })
         })

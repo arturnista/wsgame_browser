@@ -2,9 +2,9 @@ import _ from 'lodash'
 import vector from '../../Utils/vector'
 
 export function createReflectShield(spellData, game, player) {
-    const spell = new window.PIXI.Sprite( window.textures['shield.png'] )
+    const spell = new window.PIXI.Sprite( window.textures['reflect_shield.png'] )
     spell.anchor.set(.5, .5)
-    
+
     let dur = spellData.duration / 1000
     let time = 0
 
@@ -17,7 +17,7 @@ export function createReflectShield(spellData, game, player) {
 
     spell.update = (deltatime) => {
         spell.rotation += 2 * deltatime
-        
+
         time += deltatime
         if(time > dur) game.removeEntity(spell)
 

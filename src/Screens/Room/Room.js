@@ -50,8 +50,8 @@ class Room extends Component {
             this.setState({ offensiveSpells, defensiveSpells })
         })
 
-        window.socketio.on('user_selected_spell', this.handleSelectSpell)   
-        window.socketio.on('user_deselected_spell', this.handleDeselectSpell)   
+        window.socketio.on('user_selected_spell', this.handleSelectSpell)
+        window.socketio.on('user_deselected_spell', this.handleDeselectSpell)
 
         if(_.isEmpty(this.props.room)) {
             this.props.history.replace('/')
@@ -65,8 +65,8 @@ class Room extends Component {
     }
 
     componentWillUnmount() {
-        window.socketio.off('user_selected_spell', this.handleSelectSpell)   
-        window.socketio.off('user_deselected_spell', this.handleDeselectSpell)   
+        window.socketio.off('user_selected_spell', this.handleSelectSpell)
+        window.socketio.off('user_deselected_spell', this.handleDeselectSpell)
     }
 
     handleSelectSpell(body) {
@@ -90,10 +90,10 @@ class Room extends Component {
 
     handleToggleStatus() {
         if(this.state.status === 'waiting') {
-            window.socketio.emit('user_ready', {})               
+            window.socketio.emit('user_ready', {})
             this.setState({ status: 'ready' })
         } else {
-            window.socketio.emit('user_waiting', {})               
+            window.socketio.emit('user_waiting', {})
             this.setState({ status: 'waiting' })
         }
     }
@@ -101,9 +101,9 @@ class Room extends Component {
     handleToggleSpell(spell) {
         const isSelected = this.props.user.spells.find(x => x.id === spell.id)
         if(isSelected) {
-            window.socketio.emit('user_deselect_spell', { spellName: spell.id })             
+            window.socketio.emit('user_deselect_spell', { spellName: spell.id })
         } else {
-            window.socketio.emit('user_select_spell', { spellName: spell.id }) 
+            window.socketio.emit('user_select_spell', { spellName: spell.id })
         }
     }
 
@@ -126,7 +126,9 @@ class Room extends Component {
             <div key={spell.name} className={"room-spell-container " + (isSelected ? 'selected ' : ' ')}
                 onClick={() => this.handleToggleSpell(spell)}>
                 <p className="room-spell-name">{spell.name}</p>
-                <img className="room-spell-icon" src={`/img/${spell.id}.png`}/>
+                <div className='room-spell-icon-container'>
+                    <img className="room-spell-icon" src={`/img/game/${spell.id}.png`}/>
+                </div>
                 {
                     isSelected && (
                         <div className="room-spell-hotkey-container">

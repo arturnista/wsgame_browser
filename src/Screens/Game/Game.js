@@ -9,6 +9,9 @@ import { resetSpells } from '../../Redux/user'
 import SpellIcon from './HUD/SpellIcon'
 import textureMap from './textureMap'
 
+import { winStrings, loseStrings } from '../../constants'
+
+import { createPlayer } from './Player'
 import { createFireball } from './Fireball'
 import { createBoomerang } from './Boomerang'
 import { createFollower } from './Follower'
@@ -146,7 +149,7 @@ class Game extends Component {
         this.knockbackText.anchor.set(.5, .5)
         this.hud.addChild(this.knockbackText)
 
-        this.startText = new window.PIXI.Text('READY?', { fontFamily: 'Arial', fontSize: 35, fill: 0xFAFAFA, align: 'center' })
+        this.startText = new window.PIXI.Text('Ready?', { fontFamily: 'Arial', fontSize: 35, fill: 0xFAFAFA, align: 'center' })
         this.startText.x = this.app.renderer.screen.width / 2
         this.startText.y = this.app.renderer.screen.height / 2
         this.startText.anchor.set(.5, .5)
@@ -283,7 +286,6 @@ class Game extends Component {
 
         }
 
-        let spellsToRemove = []
         this.spells = this.spells.filter(x => {
             if(x.lastTick !== this.tick) {
                 this.removeEntity(x)
@@ -299,9 +301,7 @@ class Game extends Component {
 
             if(_.isNil(player)) {
 
-                player = new window.PIXI.Sprite( window.textures['player.png'] )
-                player.anchor.set(.5, .5)
-                player.tint = parseInt(playerData.color.replace('#', ''), 16)
+                player = createPlayer(playerData, this)
                 this.camera.addChild(player)
                 this.players.push(player)
                 this.entities.push(player)
@@ -329,7 +329,7 @@ class Game extends Component {
         this.camera.originalPivot = { x: xPiv, y: yPiv }
         this.camera.pivot.set((this.map.data.position.x / 2) - xPiv, (this.map.data.position.y / 2) - yPiv)
 
-        this.map.sprite = new window.PIXI.Sprite(window.resources['/img/BasicArena.png'].texture)
+        this.map.sprite = new window.PIXI.Sprite(window.textures['/img/BasicArena.png'].texture)
         this.map.sprite.x = this.map.data.position.x
         this.map.sprite.y = this.map.data.position.y
         this.map.sprite.width = this.map.data.size
@@ -380,18 +380,18 @@ class Game extends Component {
 
         if(this.player && body.winner.id === this.player.id) {
 
-            const winnerText = new window.PIXI.Text('CONGRATZ BRO', { fontFamily: 'Arial', fontSize: 35, fill: 0xFFCC00, align: 'center' })
-            winnerText.x = this.app.renderer.screen.width / 2 - 100
+            const winnerText = new window.PIXI.Text(_.sample(winStrings), { fontFamily: 'Arial', fontSize: 35, fill: 0xFFCC00, align: 'center' })
+            winnerText.x = this.app.renderer.screen.width / 2
             winnerText.y = 150
-            winnerText.anchor.set(0, 0)
+            winnerText.anchor.set(0.5, 0.5)
             this.hud.addChild(winnerText)
 
         } else {
 
-            const loserText = new window.PIXI.Text('NOT TODAY', { fontFamily: 'Arial', fontSize: 35, fill: 0xEECCCC, align: 'center' })
-            loserText.x = this.app.renderer.screen.width / 2 - 100
+            const loserText = new window.PIXI.Text(_.sample(loseStrings), { fontFamily: 'Arial', fontSize: 35, fill: 0xEECCCC, align: 'center' })
+            loserText.x = this.app.renderer.screen.width / 2
             loserText.y = 150
-            loserText.anchor.set(0, 0)
+            loserText.anchor.set(0.5, 0.5)
             this.hud.addChild(loserText)
 
         }
