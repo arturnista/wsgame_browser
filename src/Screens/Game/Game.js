@@ -103,7 +103,7 @@ class Game extends Component {
 
         this.players = []
         this.spells = []
-        this.entities = []
+        this.entities = {}
         this.hudEntities = []
         this.entitiesToRemove = []
         this.map = {}
@@ -206,18 +206,17 @@ class Game extends Component {
             this.hudEntities[i].update && this.hudEntities[i].update(deltatime)
         }
 
-        for (let i = 0; i < this.entities.length; i++) {
-            this.entities[i].update && this.entities[i].update(deltatime)
+        for (const key in this.entities) {
+            this.entities[key].update && this.entities[key].update(deltatime)
 
-            if(this.entities[i].vx) this.entities[i].x += this.entities[i].vx * deltatime
-            if(this.entities[i].vy) this.entities[i].y += this.entities[i].vy * deltatime
+            if(this.entities[key].vx) this.entities[key].x += this.entities[key].vx * deltatime
+            if(this.entities[key].vy) this.entities[key].y += this.entities[key].vy * deltatime
         }
 
         while (this.entitiesToRemove.length > 0) {
             const entity = this.entitiesToRemove.pop()
             this.camera.removeChild(entity)
-            let index = _.findIndex(this.entities, c => c.id !== entity.id)
-            this.entities.splice(index, 1)
+            delete this.entities[entity.id]
         }
     }
 
@@ -241,7 +240,7 @@ class Game extends Component {
 
         if(spell) {
             this.camera.addChild(spell)
-            this.entities.push(spell)
+            this.entities[spell.id] = spell
         }
     }
 
@@ -270,7 +269,7 @@ class Game extends Component {
                 }
                 this.camera.addChild(spell)
                 this.spells.push(spell)
-                this.entities.push(spell)
+                this.entities[spell.id] = spell
             }
 
             spell.id = spellData.id
@@ -304,7 +303,7 @@ class Game extends Component {
                 player = createPlayer(playerData, this)
                 this.camera.addChild(player)
                 this.players.push(player)
-                this.entities.push(player)
+                this.entities[playerData.id] = player
 
             }
 
@@ -329,7 +328,7 @@ class Game extends Component {
         this.camera.originalPivot = { x: xPiv, y: yPiv }
         this.camera.pivot.set((this.map.data.position.x / 2) - xPiv, (this.map.data.position.y / 2) - yPiv)
 
-        this.map.sprite = new window.PIXI.Sprite(window.textures['/img/BasicArena.png'].texture)
+        this.map.sprite = new window.PIXI.Sprite(window.textures['basic_arena.png'])
         this.map.sprite.x = this.map.data.position.x
         this.map.sprite.y = this.map.data.position.y
         this.map.sprite.width = this.map.data.size

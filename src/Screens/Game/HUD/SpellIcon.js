@@ -72,6 +72,11 @@ Icon.prototype.use = function () {
     this.time.visible = true
 }
 
+Icon.prototype.clearCooldown = function () {
+    this.cooldown = 0
+    this.time.visible = false
+}
+
 Icon.prototype.update = function (deltatime) {
     if(this.cooldown > 0) {
         this.cooldown -= deltatime

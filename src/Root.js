@@ -35,7 +35,7 @@ class Root extends Component {
         window.PIXI.loader
         .add('/img/tileset.json')
         .add('/img/WSSprites.json')
-        .add('/img/BasicArena.png')
+        .add('basic_arena.png', '/img/game/basic_arena.png')
         .add('blink.png', '/img/game/blink.png')
         .add('bomb.png', '/img/game/bomb.png')
         .add('boomerang.png', '/img/game/boomerang.png')
@@ -50,7 +50,7 @@ class Root extends Component {
         .add('player_left_up.png', '/img/game/player_left_up.png')
         .add('player_right_down.png', '/img/game/player_right_down.png')
         .add('player_right_up.png', '/img/game/player_right_up.png')
-        .add('shield.png', '/img/game/shield.png')
+        .add('reflect_shield.png', '/img/game/reflect_shield.png')
         .load(() => {
             window.textures = {
                 ...PIXI.loader.resources['/img/tileset.json'].textures,

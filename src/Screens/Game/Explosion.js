@@ -30,7 +30,7 @@ export function createExplosion(spellData, game) {
             spell.width = spellData.radius * 2
             spell.height = spellData.radius * 2
             if(!exploded) {
-                spell.setTexture( window.textures['explosion.png'] )
+                spell.texture = window.textures['explosion.png']
                 exploded = true
             }
             if(t > 1.3) game.removeEntity(spell)
