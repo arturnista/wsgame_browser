@@ -6,7 +6,7 @@ import * as PIXI from 'pixi.js'
 
 import { Header } from './Components'
 import { Router, Route } from 'react-router'
-import { App, Start, Room, Game, NotFound } from './Screens'
+import { App, Start, Room, Game, NotFound, LoadingScreen } from './Screens'
 import createBrowserHistory from 'history/createBrowserHistory'
 import createStore from './Redux/createStore'
 import { setRoom, addUser, removeUser, readyUser, waitingUser } from './Redux/room'
@@ -108,7 +108,7 @@ class Root extends Component {
     }
 
     render() {
-        if(this.state.isLoading) return <div><p>caregano</p></div>
+        if(this.state.isLoading) return <LoadingScreen />
 
         return (
             <Provider store={this.store}>

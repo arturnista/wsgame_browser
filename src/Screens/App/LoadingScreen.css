@@ -1,0 +1,31 @@
+.loading-screen {
+    height: 100vh;
+    width: 100vw;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: #061639;
+}
+
+.loading-screen-container {
+    background-color: #FAFAFA;
+    border: 2px solid #212121;
+    padding: 1em;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.loading-screen-game-name {
+    font-size: 2em;
+    color: #212121;
+}
+
+.loading-screen-text {
+    font-size: .9em;
+    color: #777;
+}
