@@ -7,9 +7,11 @@ export function createPlayer(playerData, game) {
     player.tint = parseInt(playerData.color.replace('#', ''), 16)
 
     let lastTexture = ''
+    let hor = 'right'
+    let ver = 'down'
     player.update = (deltatime) => {
-        let hor = player.metadata.velocity.x > 0 ? 'right' : 'left'
-        let ver = player.metadata.velocity.y > 0 ? 'down' : 'up'
+        if(player.metadata.velocity.x != 0) hor = player.metadata.velocity.x > 0 ? 'right' : 'left'
+        if(player.metadata.velocity.y != 0) ver = player.metadata.velocity.y > 0 ? 'down' : 'up'
 
         let textureName = `player_${hor}_${ver}.png`
         if(lastTexture !== textureName) {

@@ -19,6 +19,8 @@ export function createExplosion(spellData, game) {
     spell.vx = 0
     spell.vy = 0
 
+    let radius = {}
+
     spell.update = (deltatime) => {
         time += deltatime
         let t = time / dur
@@ -27,13 +29,38 @@ export function createExplosion(spellData, game) {
             spell.width = fullSize * t
             spell.height = fullSize * t
         } else {
-            spell.width = spellData.radius * 2
-            spell.height = spellData.radius * 2
+            spell.visible = false
+
             if(!exploded) {
+                radius = new window.PIXI.Sprite( window.textures['explosion_radius.png'] )
+                radius.anchor.set(.5, .5)
+                radius.width = spellData.radius * 2
+                radius.height = spellData.radius * 2
+                radius.x = spellData.position.x
+                radius.y = spellData.position.y
+                game.createEntity(radius)
+
+                for (let index = 0; index < 35; index++) {
+                    const exp = new window.PIXI.Sprite( window.textures['explosion.png'] )
+                    exp.anchor.set(.5, .5)
+                    exp.width = 32
+                    exp.height = 32
+                    const offset = index / 35 * spellData.radius
+                    exp.x = spellData.position.x + (Math.random() * offset * (Math.random()*2|0 || -1))
+                    exp.y = spellData.position.y + (Math.random() * offset * (Math.random()*2|0 || -1))
+                    
+                    setTimeout(() => {
+                        game.createEntity(exp)
+                        setTimeout(() => game.removeEntity(exp), Math.random() * 600)
+                    }, Math.random() * 600)
+                }
                 spell.texture = window.textures['explosion.png']
                 exploded = true
             }
-            if(t > 1.3) game.removeEntity(spell)
+            if(t > 2) {
+                game.removeEntity(spell)
+                game.removeEntity(radius)
+            }
         }
 
     }

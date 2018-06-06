@@ -216,7 +216,9 @@ class Game extends Component {
         while (this.entitiesToRemove.length > 0) {
             const entity = this.entitiesToRemove.pop()
             this.camera.removeChild(entity)
-            delete this.entities[entity.id]
+            if(entity.id && this.entities[entity.id]) {
+                delete this.entities[entity.id]
+            }
         }
     }
 
@@ -240,7 +242,7 @@ class Game extends Component {
 
         if(spell) {
             this.camera.addChild(spell)
-            this.entities[spell.id] = spell
+            this.entities[body.id] = spell
         }
     }
 
@@ -402,6 +404,11 @@ class Game extends Component {
         this.props.resetSpells()
 
         this.props.history.replace('/room')
+    }
+
+    createEntity(entity) {
+        this.camera.addChild(entity)
+        if(entity.id) this.entities[entity.id] = entity
     }
 
     removeEntity(entity) {
