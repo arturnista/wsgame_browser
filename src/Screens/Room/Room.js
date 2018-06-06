@@ -159,9 +159,11 @@ class Room extends Component {
         this.configSpells = {}
         this.state = {
             status: 'waiting',
+            spells: [],
             offensiveSpells: [],
             defensiveSpells: [],
-            selectedSpells: []
+            selectedSpells: [],
+            selectedSpell: {}
         }
 
     }
@@ -174,7 +176,8 @@ class Room extends Component {
             const spellsArr = Object.keys(spells).map(key => ({ id: key, ...spells[key] }))
             const offensiveSpells = spellsArr.filter(x => x.type === 'offensive')
             const defensiveSpells = spellsArr.filter(x => x.type === 'defensive')
-            this.setState({ offensiveSpells, defensiveSpells })
+            this.setState({ spells: spellsArr, offensiveSpells, defensiveSpells })
+            console.log(spellsArr)
         })
 
         window.socketio.on('user_selected_spell', this.handleSelectSpell)
@@ -226,6 +229,10 @@ class Room extends Component {
     }
 
     handleToggleSpell(spell) {
+        this.setState({
+            selectedSpell: this.state.spells.find(x => spell.id === x.id)
+        })
+
         const isSelected = this.props.user.spells.find(x => x.id === spell.id)
         if(isSelected) {
             window.socketio.emit('user_deselect_spell', { spellName: spell.id })
@@ -236,6 +243,8 @@ class Room extends Component {
 
     renderSpell(spell) {
         const isSelected = this.props.user.spells.find(x => x.id === spell.id)
+        const focus = this.state.selectedSpell.id === spell.id
+
         let hotkey = ''
         const spellIndex = _.findIndex(this.props.user.spells, x => x.id === spell.id)
         switch(spellIndex) {
@@ -250,7 +259,7 @@ class Room extends Component {
                 break
         }
         return (
-            <div key={spell.name} className={"room-spell-container " + (isSelected ? 'selected ' : ' ')}
+            <div key={spell.name} className={"room-spell-container " + (isSelected ? 'selected ' : ' ') + (focus? 'focus ' : ' ')}
                 onClick={() => this.handleToggleSpell(spell)}>
                 <p className="room-spell-name">{spell.name}</p>
                 <div className='room-spell-icon-container'>
@@ -333,15 +342,14 @@ class Room extends Component {
                         </div>
                     </div>
                     <div className='room-side-container'>
-                        <div className='room-buttons-container'>
-                            <Button label={toggleText} className={'room-button left ' + this.state.status}
-                                onClick={this.handleToggleStatus}/>
-                            {
-                                this.props.isOwner ?
-                                <Button label='Start' className='room-button right'
-                                    onClick={this.handleStartGame}/>
-                                : <div className='room-button'></div>
-                            }
+                        <div className='room-spell-desc-container'>
+                            <div className='room-spell-desc-icon-container'>
+                                <img className='room-spell-desc-icon' src={`/img/game/${this.state.selectedSpell.id}.png`} />
+                            </div>
+                            <div className='room-spell-desc-info'>
+                                <p className='room-spell-desc-name'>{this.state.selectedSpell.name}</p>
+                                <p className='room-spell-desc-desc'>{this.state.selectedSpell.description}</p>
+                            </div>
                         </div>
                         <div className='room-spells-container'>
                             <div className='room-spells-list-container'>

@@ -190,6 +190,9 @@
 .room-spell-container.selected {
     background-color: #EF5350;
 }
+.room-spell-container.focus {
+    border: 1px solid #FFCC00;
+}
 
 .room-spell-name {
     height: 2em;
@@ -250,4 +253,38 @@
 .room-button.waiting {
     background-color: #2E7D32;
     color: #fafafa;
+}
+
+.room-spell-desc-container {
+    display: flex;
+    height: 4em;
+    padding: 1em;
+    background-color: #FAFAFA;
+}
+
+.room-spell-desc-icon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 64px;
+}
+
+.room-spell-desc-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.room-spell-desc-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.room-spell-desc-name {
+    font-size: 1.2em;
+    color: #212121;
+}
+
+.room-spell-desc-desc {
+    flex: 1;
 }
