@@ -2,14 +2,99 @@
     flex: 1;
 
     display: flex;
-    flex-direction: column;
     justify-content: space-around;
-    padding: 2rem;
 
     background-color: #061639;
 }
 
+.start-side-container {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    margin: 1em;
+    background-color: #FAFAFA;
+}
+
+.start-rooms-list {
+    overflow: auto;
+}
+
+.start-rooms-list-title {
+    margin: 1em 1em 0 1em;
+}
+
+.start-rooms-list-refresh-container {
+    height: 2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    cursor: pointer;
+    background-color: #eee;
+    transition: 300ms;
+}
+.start-rooms-list-refresh-container:hover {
+    background-color: #aaa;
+}
+
+.start-rooms-list-refresh-help {
+    font-size: .7em;
+    color: #555;
+}
+
+.start-room-container {
+    height: 5em;
+    border-bottom: 1px solid #999;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.start-room-name-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.start-room-name {
+    font-size: 1.2em;
+}
+
+.start-room-owner {
+    font-size: .8em;
+    color: #444;
+}
+
+.start-room-players-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.start-room-players-title {
+
+}
+
+.start-room-players-count {
+    /*text-align: center;*/
+}
+
+.start-room-action-container {
+
+}
+
+.start-room-button-enter {
+    width: 100px;
+    background-color: #2E7D32;
+    color: #fafafa;
+}
+
 .start-user-container {
+    flex: 1;
     display: flex;
     flex-direction: column;
     background-color: #fafafa;
@@ -21,7 +106,7 @@
     margin-top: 1em;
 }
 
-.start-room-container {
+.start-room-conf-container {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
@@ -29,18 +114,18 @@
     padding: 1em;
 }
 
-.start-room-title {
+.start-room-conf-title {
     text-align: center;
     color: #212121;
     border-bottom: 1px #999 solid;
 }
 
-.start-input-roomname {
+.start-room-conf-input-roomname {
     margin: .3rem;
     margin-top: 1em;
 }
 
-.start-room-buttons {
+.start-room-conf-buttons {
     flex: 1;
     display: flex;
     justify-content: space-around;
