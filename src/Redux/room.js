@@ -4,6 +4,7 @@ const REMOVE_USER = 'room/REMOVE_USER'
 const READY_USER = 'room/READY_USER'
 const RESET_ROOM = 'room/RESET_ROOM'
 const WAITING_USER = 'room/WAITING_USER'
+const UPDATE_CHAT = 'room/UPDATE_CHAT'
 
 const initialState = null
 
@@ -42,6 +43,11 @@ export default function reducer(state = initialState, action = {}) {
                 ...state,
                 users: state.users.map(x => ({ ...x, status: 'waiting', isReady: false }))
             }
+        case UPDATE_CHAT:
+            return {
+                ...state,
+                chat: action.payload.chat
+            }
         case WAITING_USER:
             return {
                 ...state,
@@ -62,6 +68,7 @@ export function setRoom({ room }) {
             roomJoined: room.name,
             users: room.users,
             owner: room.owner.id,
+            chat: room.chat,
         }
     }
 }
@@ -91,6 +98,16 @@ export function waitingUser(user) {
     return {
         type: WAITING_USER,
         payload: { ...user, id: user.user  }
+    }
+}
+
+export function updateChat(chat) {
+    chat.reverse()
+    return {
+        type: UPDATE_CHAT,
+        payload: {
+            chat
+        }
     }
 }
 

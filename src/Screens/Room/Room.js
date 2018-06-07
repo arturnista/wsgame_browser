@@ -1,9 +1,11 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import _ from 'lodash'
+import moment from 'moment'
 import { Input, Button } from '../../Components'
 import { serverUrl } from '../../constants'
 import { selectSpell, deselectSpell } from '../../Redux/user'
+import { updateChat } from '../../Redux/room'
 import './Room.css'
 
 const mapStateToProps = (state) => ({
@@ -11,136 +13,11 @@ const mapStateToProps = (state) => ({
     room: state.room,
     user: state.user,
     isOwner: state.room ? state.room.owner === state.user.id : false,
-    chat: [
-        {
-            name: 'Uly q',
-            message: 'caralho'
-        }, {
-            name: 'Uly q',
-            message: 'eu to assistindo esse video'
-        }, {
-            name: 'Uly q',
-            message: 'literalmente agora'
-        }, {
-            name: 'Lorek o Profeta',
-            message: 'ah ule'
-        }, {
-            name: 'Uly q',
-            message: 'esse mamaefalei é o retrato'
-        }, {
-            name: 'Lorek o Profeta',
-            message: 'vamo se beja'
-        }, {
-            name: 'Lorek o Profeta',
-            message: 'meu'
-        }, {
-            name: 'Uly q',
-            message: 'do playboy'
-        }, {
-            name: 'Lorek o Profeta',
-            message: 'do branco safado'
-        }, {
-            name: 'Uly q',
-            message: 'pqp'
-        }, {
-            name: 'Lorek o Profeta',
-            message: 'o cara é só mt burro, mano'
-        }, {
-            name: 'Bob',
-            message: 'Bom texto'
-        }, {
-            name: 'Bob',
-            message: 'Pra quem não ouve racionais é fácil de engolir o que esse comédia fala'
-        }, {
-            name: 'Bob',
-            message: '"Nos nove minutos e trinta e nove segundos de vídeo, o youtuber não foi capaz de reconhecer artifícios de linguagem simples, realizar uma básica interpretação de texto e, muito menos, fazer uma construção lógica das ideias que tentou apresentar." Bom resumo do vídeo'
-        }, {
-            name: 'João',
-            message: 'O meu nada a ver vcs julgando a interpretaçao do cara só pq ele tá completamente equivocado e errado!!!!'
-        }, {
-            name: 'João',
-            message: 'Nao mas serio agora alguem aí tem comida to morrendo de fome'
-        }, {
-            name: 'Bob',
-            message: 'O melhor é "enquanto os meus colegas pediam CDS do racionais eu pedia do Gabriel o pensador "'
-        }, {
-            name: 'Bob',
-            message: 'O cara é um sommelier de rap'
-        }, {
-            name: 'Lorek o Profeta',
-            message: 'exato'
-        }, {
-            name: 'Lorek o Profeta',
-            message: 'bah, meu'
-        }, {
-            name: 'Lorek o Profeta',
-            message: 'vai se foder'
-        }, {
-            name: 'Lorek o Profeta',
-            message: 'na moral'
-        }, {
-            name: 'João',
-            message: '😭'
-        }, {
-            name: 'Bob',
-            message: 'Sim. Comecei a ver o vídeo que tu mansou'
-        }, {
-            name: 'Bob',
-            message: 'O cara já começa falando da tentativa do mlk de dividir o rap'
-        }, {
-            name: 'Bob',
-            message: 'Hahaha'
-        }, {
-            name: 'Zieg',
-            message: 'Krl'
-        }, {
-            name: 'Zieg',
-            message: 'Vcs falando de playboy branco ridículo enquanto o nosso medalhista passa fome'
-        }, {
-            name: 'Zieg',
-            message: 'Alguém dá um xisburgui pro Jão'
-        }, {
-            name: 'João',
-            message: 'O valeu zigao'
-        }, {
-            name: 'João',
-            message: '💗'
-        }, {
-            name: 'Uly q',
-            message: 'olhas isso'
-        }, {
-            name: 'Uly q',
-            message: 'because you are not programmers'
-        }, {
-            name: 'Uly q',
-            message: 'hahaha'
-        }, {
-            name: 'Uly q',
-            message: 'pra dar contexto isso é update de dota'
-        }, {
-            name: 'João',
-            message: 'HSUAHSUAHSUS aff gaben subestimando'
-        }, {
-            name: 'Artur Morelle Nista',
-            message: 'SAIJSAIJSAIUSHAU'
-        }, {
-            name: 'Artur Morelle Nista',
-            message: 'af'
-        }, {
-            name: 'Artur Morelle Nista',
-            message: 'ta errado'
-        }, {
-            name: 'Artur Morelle Nista',
-            message: 'sempre vai de 0 a 65'
-        }, {
-            name: 'Artur Morelle Nista',
-            message: '65'
-        },
-    ]
 })
 const mapDispatchToProps = (dispatch) => ({
     selectSpell: (spell) => dispatch(selectSpell(spell)),
     deselectSpell: (spell) => dispatch(deselectSpell(spell)),
+    updateChat: (spell) => dispatch(updateChat(spell)),
 })
 
 class Room extends Component {
@@ -151,10 +28,12 @@ class Room extends Component {
         this.renderUser = this.renderUser.bind(this)
         this.renderChatLine = this.renderChatLine.bind(this)
         this.renderSpell = this.renderSpell.bind(this)
+        this.handleSubmitChatMessage = this.handleSubmitChatMessage.bind(this)
         this.handleStartGame = this.handleStartGame.bind(this)
         this.handleToggleStatus = this.handleToggleStatus.bind(this)
         this.handleSelectSpell = this.handleSelectSpell.bind(this)
         this.handleDeselectSpell = this.handleDeselectSpell.bind(this)
+        this.handleNewChatMessage = this.handleNewChatMessage.bind(this)
 
         this.configSpells = {}
         this.state = {
@@ -163,7 +42,9 @@ class Room extends Component {
             offensiveSpells: [],
             defensiveSpells: [],
             selectedSpells: [],
-            selectedSpell: {}
+            selectedSpell: {},
+            chat: [],
+            chatMessage: ''
         }
 
     }
@@ -177,11 +58,12 @@ class Room extends Component {
             const offensiveSpells = spellsArr.filter(x => x.type === 'offensive')
             const defensiveSpells = spellsArr.filter(x => x.type === 'defensive')
             this.setState({ spells: spellsArr, offensiveSpells, defensiveSpells })
-            console.log(spellsArr)
         })
 
+        window.socketio.on('room_chat_new_message', this.handleNewChatMessage)
         window.socketio.on('user_selected_spell', this.handleSelectSpell)
         window.socketio.on('user_deselected_spell', this.handleDeselectSpell)
+
 
         if(_.isEmpty(this.props.room)) {
             this.props.history.replace('/')
@@ -195,6 +77,7 @@ class Room extends Component {
     }
 
     componentWillUnmount() {
+        window.socketio.off('room_chat_new_message', this.handleNewChatMessage)
         window.socketio.off('user_selected_spell', this.handleSelectSpell)
         window.socketio.off('user_deselected_spell', this.handleDeselectSpell)
     }
@@ -212,6 +95,11 @@ class Room extends Component {
             this.props.deselectSpell({ id: body.spellName, ...body.spellData })
         }
 
+    }
+
+    handleNewChatMessage(body) {
+        console.log('handleNewChatMessage', body)
+        this.props.updateChat(body.chat)
     }
 
     handleStartGame() {
@@ -239,6 +127,13 @@ class Room extends Component {
         } else {
             window.socketio.emit('user_select_spell', { spellName: spell.id })
         }
+    }
+
+    handleSubmitChatMessage() {
+        if(this.state.chatMessage === '') return
+
+        window.socketio.emit('user_submit_message', { message: this.state.chatMessage, user: this.props.user.id })
+        this.setState({ chatMessage: '' })
     }
 
     renderSpell(spell) {
@@ -290,10 +185,16 @@ class Room extends Component {
     }
 
     renderChatLine(body) {
+        const isMine = body.id === this.props.user.id
+        const user = this.props.room.users.find(x => x.id === body.id)
+
         return (
-            <div className='room-chat-line-container'>
+            <div className={'room-chat-line-container ' + (isMine ? 'mine ' : ' ') }>
                 <div className='room-chat-line-content'>
-                    <p className='room-chat-line-user'>{body.name}</p>
+                    <div className='room-chat-line-header'>
+                        <p className='room-chat-line-user' style={{ color: user.color }}>{body.name}</p>
+                        <p className='room-chat-line-date'>{moment(body.createdAt).format('MM:ss')}</p>
+                    </div>
                     <p className='room-chat-line-message'>{body.message}</p>
                 </div>
             </div>
@@ -330,27 +231,37 @@ class Room extends Component {
                         <div className='room-chat-container'>
                             <div className='room-chat-list-container'>
                                 {
-                                    this.props.chat.map(this.renderChatLine)
+                                    this.props.room.chat.map(this.renderChatLine)
                                 }
                             </div>
                             <div className='room-chat-input-container'>
-                                <input className='room-chat-input'/>
-                                <div className='room-chat-input-submit'>
+                                <input className='room-chat-input'
+                                    onChange={e => this.setState({ chatMessage: e.target.value })}
+                                    value={this.state.chatMessage}
+                                    onKeyDown={e => e.key === 'Enter' && this.handleSubmitChatMessage()}/>
+                                <div className='room-chat-input-submit' onClick={this.handleSubmitChatMessage}>
                                     <p className='room-chat-input-submit-label'>Submit</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div className='room-side-container'>
-                        <div className='room-spell-desc-container'>
-                            <div className='room-spell-desc-icon-container'>
-                                <img className='room-spell-desc-icon' src={`/img/game/${this.state.selectedSpell.id}.png`} />
+                        {
+                            !_.isEmpty(this.state.selectedSpell) ?
+                            <div className='room-spell-desc-container'>
+                                <div className='room-spell-desc-icon-container'>
+                                    <img className='room-spell-desc-icon' src={`/img/game/${this.state.selectedSpell.id}.png`} />
+                                </div>
+                                <div className='room-spell-desc-info'>
+                                    <p className='room-spell-desc-name'>{this.state.selectedSpell.name}</p>
+                                    <p className='room-spell-desc-desc'>{this.state.selectedSpell.description}</p>
+                                </div>
                             </div>
-                            <div className='room-spell-desc-info'>
-                                <p className='room-spell-desc-name'>{this.state.selectedSpell.name}</p>
-                                <p className='room-spell-desc-desc'>{this.state.selectedSpell.description}</p>
+                            :
+                            <div className='room-spell-desc-container'>
+                                <p>Click on an Spell Icon to select it.</p>
                             </div>
-                        </div>
+                        }
                         <div className='room-spells-container'>
                             <div className='room-spells-list-container'>
                                 <h2 className='room-spells-list-title'>Offensive spells</h2>
