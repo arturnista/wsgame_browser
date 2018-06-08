@@ -44,14 +44,17 @@ class Root extends Component {
         .add('fireball.png', '/img/game/fireball.png')
         .add('follower.png', '/img/game/follower.png')
         .add('follower_02.png', '/img/game/follower_02.png')
-        .add('game_05.png', '/img/game/game_05.png')
-        .add('game_07.png', '/img/game/game_07.png')
-        .add('game_10.png', '/img/game/game_10.png')
         .add('player_left_down.png', '/img/game/player_left_down.png')
         .add('player_left_up.png', '/img/game/player_left_up.png')
         .add('player_right_down.png', '/img/game/player_right_down.png')
         .add('player_right_up.png', '/img/game/player_right_up.png')
         .add('reflect_shield.png', '/img/game/reflect_shield.png')
+        .add('aim.png', '/img/game/aim.png')
+        .add('aim_spell.png', '/img/game/aim_spell.png')
+        .add('wall.png', '/img/game/wall.png')
+        .add('game_05.png', '/img/game/game_05.png')
+        .add('game_07.png', '/img/game/game_07.png')
+        .add('game_10.png', '/img/game/game_10.png')
         .load(() => {
             window.textures = {
                 ...PIXI.loader.resources['/img/tileset.json'].textures,
