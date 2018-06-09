@@ -35,7 +35,11 @@ class Root extends Component {
         window.PIXI.loader
         .add('/img/tileset.json')
         .add('/img/WSSprites.json')
-        .add('basic_arena.png', '/img/game/basic_arena.png')
+        .add('basic_arena.png', '/img/map/basic_arena.png')
+        .add('grid_normal.png', '/img/map/grid_normal.png')
+        .add('grid_toDestroy.png', '/img/map/grid_toDestroy.png')
+        .add('grid_destroyed.png', '/img/map/grid_destroyed.png')
+        .add('grid_toRevive.png', '/img/map/grid_toRevive.png')
         .add('blink.png', '/img/game/blink.png')
         .add('boomerang.png', '/img/game/boomerang.png')
         .add('bomb.png', '/img/game/bomb.png')

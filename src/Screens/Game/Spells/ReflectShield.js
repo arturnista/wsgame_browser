@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import vector from '../../Utils/vector'
+import vector from '../../../Utils/vector'
 
 export function createReflectShield(spellData, game, player) {
     const spell = new window.PIXI.Sprite( window.textures['reflect_shield.png'] )

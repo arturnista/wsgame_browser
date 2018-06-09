@@ -300,3 +300,69 @@
 .room-spell-desc-desc {
     flex: 1;
 }
+
+.room-map-modal-container {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, .3);
+
+    display: flex;
+    padding: 5em;
+}
+
+.room-map-modal-content {
+    display: flex;
+    flex-direction: column;
+    padding: 2em;
+    border-radius: 5px;
+    background-color: #fafafa;
+}
+
+.room-maps-list {
+    flex: 1;
+    display: flex;    
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.room-map-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    width: 200px;
+    height: 200px;
+    border: 1px solid #222;
+    margin-left: .3em;
+    margin-right: .3em;
+    
+    transition: 300ms all;
+    cursor: pointer;
+}
+.room-map-container:hover {
+    background-color: #ddd;
+}
+.room-map-container.active {
+    background-color: #FFCC00;
+}
+
+.room-map-name {
+
+}
+
+.room-map-img {
+    width: 100px;
+    height: 100px;    
+}
+
+.room-map-action-container {
+        
+}
+
+.room-map-action-button {
+    height: 4em;
+}

@@ -37,6 +37,7 @@ class Room extends Component {
 
         this.configSpells = {}
         this.state = {
+            modalMapShowing: false,
             status: 'waiting',
             spells: [],
             offensiveSpells: [],
@@ -44,7 +45,8 @@ class Room extends Component {
             selectedSpells: [],
             selectedSpell: {},
             chat: [],
-            chatMessage: ''
+            chatMessage: '',
+            mapName: ''
         }
 
     }
@@ -103,7 +105,7 @@ class Room extends Component {
     }
 
     handleStartGame() {
-        window.socketio.emit('game_start', { map: 'BasicArena' })
+        window.socketio.emit('game_start', { map: this.state.mapName })
     }
 
     handleToggleStatus() {
@@ -193,9 +195,43 @@ class Room extends Component {
                 <div className='room-chat-line-content'>
                     <div className='room-chat-line-header'>
                         <p className='room-chat-line-user' style={{ color: user.color }}>{body.name}</p>
-                        <p className='room-chat-line-date'>{moment(body.createdAt).format('MM:ss')}</p>
+                        <p className='room-chat-line-date'>{moment(body.createdAt).format('H:mm')}</p>
                     </div>
                     <p className='room-chat-line-message'>{body.message}</p>
+                </div>
+            </div>
+        )
+    }
+
+    renderMapModal() {
+        if(!this.state.modalMapShowing) return null
+
+        const renderMapItem = (mapName, img, name) => {
+            const isActive = mapName === this.state.mapName
+            const onClick = () => this.setState({ mapName })
+            return (
+                <div key={mapName} className={`room-map-container ${ isActive ? 'active ':' '}`}
+                    onClick={onClick}>
+                    <p className="room-map-name">{ mapName || name }</p>
+                    <img className="room-map-img" src={img} />
+                </div>
+            )
+        }
+
+        return (
+            <div className="room-map-modal-container" onClick={() => this.setState({ modalMapShowing: false })}>
+                <div className="room-map-modal-content" onClick={e => e.stopPropagation()}>
+                    <div className="room-maps-list">
+                        { renderMapItem('', '/img/map/grid_destroyed.png', 'Random') }
+                        { renderMapItem('Basic Arena', '/img/map/basic_arena.png') }
+                        { renderMapItem('Fire Arena', '/img/map/basic_arena.png') }
+                        { renderMapItem('Grid', '/img/map/grid_destroyed.png') }
+                    </div>
+                    <div className="room-map-action-container">
+                        <Button className='room-map-action-button'
+                            label='Start'
+                            onClick={this.handleStartGame}/>
+                    </div>
                 </div>
             </div>
         )
@@ -219,7 +255,7 @@ class Room extends Component {
                             {
                                 this.props.isOwner ?
                                 <Button label='Start' className='room-button right'
-                                    onClick={this.handleStartGame}/>
+                                    onClick={() => this.setState({ modalMapShowing: true })}/>
                                 : <div className='room-button'></div>
                             }
                         </div>
@@ -278,6 +314,7 @@ class Room extends Component {
                         </div>
                     </div>
                 </div>
+                { this.renderMapModal() }
             </div>
         )
 

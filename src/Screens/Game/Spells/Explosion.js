@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import vector from '../../Utils/vector'
+import vector from '../../../Utils/vector'
 
 export function createExplosion(spellData, game) {
     const spell = new window.PIXI.Sprite( window.textures['bomb.png'] )

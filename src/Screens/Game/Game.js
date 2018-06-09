@@ -11,12 +11,17 @@ import textureMap from './textureMap'
 
 import { winStrings, loseStrings } from '../../constants'
 
+import BasicArena from './Maps/BasicArena'
+import FireArena from './Maps/FireArena'
+import Grid from './Maps/Grid'
+
 import { createPlayer } from './Player'
-import { createFireball } from './Fireball'
-import { createBoomerang } from './Boomerang'
-import { createFollower } from './Follower'
-import { createExplosion } from './Explosion'
-import { createReflectShield } from './ReflectShield'
+
+import { createFireball } from './Spells/Fireball'
+import { createBoomerang } from './Spells/Boomerang'
+import { createFollower } from './Spells/Follower'
+import { createExplosion } from './Spells/Explosion'
+import { createReflectShield } from './Spells/ReflectShield'
 
 import './Game.css'
 
@@ -196,10 +201,7 @@ class Game extends Component {
         }
 
         if(!_.isEmpty(this.map)) {
-            this.map.sprite.x = this.map.data.position.x
-            this.map.sprite.y = this.map.data.position.y
-            this.map.sprite.width -= this.map.data.decreasePerSecond * deltatime
-            this.map.sprite.height -= this.map.data.decreasePerSecond * deltatime
+            this.map.update(deltatime)
         }
 
         for (let i = 0; i < this.hudEntities.length; i++) {
@@ -323,41 +325,22 @@ class Game extends Component {
 
     gameMapCreate(body) {
         console.log('gameMapCreate', body)
-        this.map.data = body
-
-        const xPiv = ((this.app.renderer.screen.width - this.map.data.position.x) / 2)
-        const yPiv = ((this.app.renderer.screen.height - this.map.data.position.y) / 2)
-        this.camera.originalPivot = { x: xPiv, y: yPiv }
-        this.camera.pivot.set((this.map.data.position.x / 2) - xPiv, (this.map.data.position.y / 2) - yPiv)
-
-        this.map.sprite = new window.PIXI.Sprite(window.textures['basic_arena.png'])
-        this.map.sprite.x = this.map.data.position.x
-        this.map.sprite.y = this.map.data.position.y
-        this.map.sprite.width = this.map.data.size
-        this.map.sprite.height = this.map.data.size
-        this.map.sprite.anchor.set(.5, .5)
-        this.camera.addChild(this.map.sprite)
-
-        for (let i = 0; i < body.obstacles.length; i++) {
-            const obstacleData = body.obstacles[i]
-            const obstacle = new window.PIXI.Sprite( window.textures['wall.png'] )
-            obstacle.anchor.set(.5, .5)
-            obstacle.x = obstacleData.position.x
-            obstacle.y = obstacleData.position.y
-            obstacle.width = obstacleData.collider.size
-            obstacle.height = obstacleData.collider.size
-            this.camera.addChild(obstacle)
+        switch(body.name) {
+            case 'Basic Arena':
+                this.map = new BasicArena(body, { app: this.app, camera: this.camera })
+                break
+            case 'Fire Arena':
+                this.map = new FireArena(body, { app: this.app, camera: this.camera })
+                break
+            case 'Grid':
+                this.map = new Grid(body, { app: this.app, camera: this.camera })
+                break
         }
-
     }
 
     gameMapUpdate(body) {
         console.log('gameMapUpdate', body)
-        this.map.data = body
-        this.map.sprite.x = this.map.data.position.x
-        this.map.sprite.y = this.map.data.position.y
-        this.map.sprite.width = this.map.data.size
-        this.map.sprite.height = this.map.data.size
+        this.map.updateData(body)
     }
 
     gameStart(body) {
