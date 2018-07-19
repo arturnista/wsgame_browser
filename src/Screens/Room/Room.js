@@ -5,6 +5,7 @@ import moment from 'moment'
 import { Input, Button } from '../../Components'
 import { serverUrl } from '../../constants'
 import { selectSpell, deselectSpell } from '../../Redux/user'
+import { addSpells } from '../../Redux/spells'
 import { updateChat } from '../../Redux/room'
 import './Room.css'
 
@@ -12,12 +13,14 @@ const mapStateToProps = (state) => ({
     game: state.game,
     room: state.room,
     user: state.user,
+    spells: state.spells,
     isOwner: state.room ? state.room.owner === state.user.id : false,
 })
 const mapDispatchToProps = (dispatch) => ({
     selectSpell: (spell) => dispatch(selectSpell(spell)),
     deselectSpell: (spell) => dispatch(deselectSpell(spell)),
     updateChat: (spell) => dispatch(updateChat(spell)),
+    addSpells: (spells) => dispatch(addSpells(spells)),
 })
 
 class Room extends Component {
@@ -39,10 +42,8 @@ class Room extends Component {
         this.state = {
             modalMapShowing: false,
             status: 'waiting',
-            spells: [],
             offensiveSpells: [],
             defensiveSpells: [],
-            selectedSpells: [],
             selectedSpell: {},
             chat: [],
             chatMessage: '',
@@ -59,7 +60,8 @@ class Room extends Component {
             const spellsArr = Object.keys(spells).map(key => ({ id: key, ...spells[key] }))
             const offensiveSpells = spellsArr.filter(x => x.type === 'offensive')
             const defensiveSpells = spellsArr.filter(x => x.type === 'defensive')
-            this.setState({ spells: spellsArr, offensiveSpells, defensiveSpells })
+            this.setState({ offensiveSpells, defensiveSpells })
+            this.props.addSpells(spellsArr)
         })
 
         window.socketio.on('room_chat_new_message', this.handleNewChatMessage)
@@ -87,14 +89,15 @@ class Room extends Component {
     handleSelectSpell(body) {
         console.log('handleSelectSpell', body)
         if(body.user === this.props.user.id) {
-            this.props.selectSpell({ id: body.spellName, ...body.spellData })
+            this.props.selectSpell(body.spellName)
+            
         }
     }
 
     handleDeselectSpell(body) {
         console.log('handleDeselectSpell', body)
         if(body.user === this.props.user.id) {
-            this.props.deselectSpell({ id: body.spellName, ...body.spellData })
+            this.props.deselectSpell(body.spellName)
         }
 
     }
@@ -120,10 +123,10 @@ class Room extends Component {
 
     handleToggleSpell(spell) {
         this.setState({
-            selectedSpell: this.state.spells.find(x => spell.id === x.id)
+            selectedSpell: this.props.spells.find(x => spell.id === x.id)
         })
 
-        const isSelected = this.props.user.spells.find(x => x.id === spell.id)
+        const isSelected = this.props.user.spells.find(x => x === spell.id)
         if(isSelected) {
             window.socketio.emit('user_deselect_spell', { spellName: spell.id })
         } else {
@@ -139,11 +142,11 @@ class Room extends Component {
     }
 
     renderSpell(spell) {
-        const isSelected = this.props.user.spells.find(x => x.id === spell.id)
+        const isSelected = this.props.user.spells.find(x => x === spell.id)
         const focus = this.state.selectedSpell.id === spell.id
 
         let hotkey = ''
-        const spellIndex = _.findIndex(this.props.user.spells, x => x.id === spell.id)
+        const spellIndex = _.findIndex(this.props.user.spells, x => x === spell.id)
         switch(spellIndex) {
             case 0:
                 hotkey = 'Q'

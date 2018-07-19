@@ -11,7 +11,7 @@ export default function reducer(state = initialState, action = {}) {
         case DEFINE_USER:
             return {
                 ...action.payload,
-                spells: []
+                // spells: []
             }
         case DEFINE_PLAYER:
             return {
@@ -21,20 +21,20 @@ export default function reducer(state = initialState, action = {}) {
         case RESET_SPELLS:
             return {
                 ...state,
-                spells: []
+                spells: action.payload.users.find(x => state.id).spells
             }
         case SELECT_SPELL:
             return {
                 ...state,
                 spells: [
                     ...state.spells,
-                    { ...action.payload }
+                    action.payload
                 ]
             }
         case DESELECT_SPELL:
             return {
                 ...state,
-                spells: state.spells.filter(x => x.id !== action.payload.id)
+                spells: state.spells.filter(x => x !== action.payload)
             }
         default:
             return state
@@ -55,9 +55,10 @@ export function definePlayer(playerData) {
     }
 }
 
-export function resetSpells() {
+export function resetSpells(users) {
     return {
-        type: RESET_SPELLS
+        type: RESET_SPELLS,
+        payload: { users: users || [] }
     }
 }
 

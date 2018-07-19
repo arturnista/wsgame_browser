@@ -36,11 +36,12 @@ const mapStateToProps = (state) => ({
     game: state.game,
     user: state.user,
     room: state.room,
+    spells: state.spells,
 })
 const mapDispatchToProps = (dispatch) => ({
     stopGame: () => dispatch(stopGame()),
     resetRoom: () => dispatch(resetRoom()),
-    resetSpells: () => dispatch(resetSpells())
+    resetSpells: (users) => dispatch(resetSpells(users))
 })
 
 class Game extends Component {
@@ -162,7 +163,9 @@ class Game extends Component {
 
         this.spellsIcons = []
         for (var i = 0; i < this.props.user.spells.length; i++) {
-            const ic = new SpellIcon(i, this.props.user.spells[i], this.hud)
+            const spellData = this.props.spells.find(x => this.props.user.spells[i] === x.id)
+            if(!spellData) continue
+            const ic = new SpellIcon(i, spellData, this.hud)
             this.spellsIcons.push( ic )
             this.hudEntities.push( ic )
         }
@@ -384,7 +387,7 @@ class Game extends Component {
     gameEnd(body) {
         this.props.stopGame()
         this.props.resetRoom()
-        this.props.resetSpells()
+        this.props.resetSpells(body.users)
 
         this.props.history.replace('/room')
     }
@@ -417,15 +420,15 @@ class Game extends Component {
         switch (keyPressed) {
             case 'q':
                 if(this.props.user.spells.length <= 0) return
-                this.useSpell(this.props.user.spells[0].id)
+                this.useSpell(this.props.user.spells[0])
                 break
             case 'w':
                 if(this.props.user.spells.length <= 1) return
-                this.useSpell(this.props.user.spells[1].id)
+                this.useSpell(this.props.user.spells[1])
                 break
             case 'e':
                 if(this.props.user.spells.length <= 2) return
-                this.useSpell(this.props.user.spells[2].id)
+                this.useSpell(this.props.user.spells[2])
                 break
         }
     }
