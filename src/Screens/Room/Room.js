@@ -226,8 +226,8 @@ class Room extends Component {
                 <div className="room-map-modal-content" onClick={e => e.stopPropagation()}>
                     <div className="room-maps-list">
                         { renderMapItem('', '/img/map/grid_destroyed.png', 'Random') }
-                        { renderMapItem('Basic Arena', '/img/map/basic_arena.png') }
-                        { renderMapItem('Fire Arena', '/img/map/basic_arena.png') }
+                        { renderMapItem('BasicArena', '/img/map/basic_arena.png', 'Basic Arena') }
+                        { renderMapItem('FireArena', '/img/map/basic_arena.png', 'Fire Arena') }
                         { renderMapItem('Grid', '/img/map/grid_destroyed.png') }
                     </div>
                     <div className="room-map-action-container">

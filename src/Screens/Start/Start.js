@@ -19,9 +19,10 @@ class Start extends Component {
     constructor(props) {
         super(props)
 
+        const name = localStorage.getItem('name')
         this.state = {
-            userName: 'Good user name',
-            roomName: 'A very good room name',
+            userName: name || 'Good user name',
+            roomName: '',
             rooms: []
         }
 
@@ -50,11 +51,15 @@ class Start extends Component {
     }
 
     _handleJoinRoom(name) {
+        localStorage.setItem('name', this.state.userName)
+
         this.setState({ roomJoinedIsOwner: false })
         window.socketio.emit('room_join', { name, userName: this.state.userName })
     }
 
     _handleCreateRoom() {
+        localStorage.setItem('name', this.state.userName)
+
         this.setState({ roomJoinedIsOwner: true })
         window.socketio.emit('room_create', { name: this.state.roomName, userName: this.state.userName })
     }
