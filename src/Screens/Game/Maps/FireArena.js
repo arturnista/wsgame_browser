@@ -16,6 +16,8 @@ function FireArena(data, { app, camera }) {
     this.sprite.anchor.set(.5, .5)
     this.camera.addChild(this.sprite)
 
+    this.updateMask()
+
     for (let i = 0; i < data.obstacles.length; i++) {
         const obstacleData = data.obstacles[i]
         const obstacle = new window.PIXI.Sprite( window.textures['wall.png'] )
