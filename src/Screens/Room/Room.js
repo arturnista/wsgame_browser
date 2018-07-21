@@ -29,6 +29,7 @@ class Room extends Component {
         super(props)
 
         this.renderUser = this.renderUser.bind(this)
+        this.renderBot = this.renderBot.bind(this)
         this.renderChatLine = this.renderChatLine.bind(this)
         this.renderSpell = this.renderSpell.bind(this)
         this.handleSubmitChatMessage = this.handleSubmitChatMessage.bind(this)
@@ -47,7 +48,8 @@ class Room extends Component {
             selectedSpell: {},
             chat: [],
             chatMessage: '',
-            mapName: ''
+            mapName: '',
+            botCount: 0
         }
 
     }
@@ -90,7 +92,6 @@ class Room extends Component {
         console.log('handleSelectSpell', body)
         if(body.user === this.props.user.id) {
             this.props.selectSpell(body.spellName)
-            
         }
     }
 
@@ -108,7 +109,7 @@ class Room extends Component {
     }
 
     handleStartGame() {
-        window.socketio.emit('game_start', { map: this.state.mapName })
+        window.socketio.emit('game_start', { map: this.state.mapName, botCount: this.state.botCount })
     }
 
     handleToggleStatus() {
@@ -189,6 +190,17 @@ class Room extends Component {
         )
     }
 
+    renderBot(idx) {
+        return (
+            <div key={idx}
+                className={'room-user-container ready'}>
+                <div className='room-user-color' style={{ backgroundColor: '#FFCC00' }}></div>
+                <p className={'room-user-name bot'}>Bot Ulysses</p>
+                <p className={'room-user-status bot'} onClick={() => this.setState({ botCount: this.state.botCount - 1 })}>REMOVE BOT</p>
+            </div>
+        )
+    }
+
     renderChatLine(body) {
         const isMine = body.id === this.props.user.id
         const user = this.props.room.users.find(x => x.id === body.id)
@@ -265,6 +277,15 @@ class Room extends Component {
                         <div className='room-users-container'>
                             {
                                 this.props.room.users.map(this.renderUser)
+                            }
+                            {
+                                _.times(this.state.botCount, this.renderBot)
+                            }
+                            {
+                                this.props.isOwner &&
+                                <div className='room-users-addbot-container' onClick={() => this.setState({ botCount: this.state.botCount + 1})}>
+                                    <p className='room-users-addbot'>Add BOT</p>
+                                </div>
                             }
                         </div>
                         <div className='room-chat-container'>

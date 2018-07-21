@@ -388,7 +388,10 @@ class Game extends Component {
         finalScreenBackgroundRect.endFill()
         this.hud.addChild(finalScreenBackgroundRect)
 
-        const winner = this.props.room.users.find(x => x.id === body.winner.userId)
+        let winner = this.props.room.users.find(x => x.id === body.winner.userId)
+        if(!winner) {
+            winner = { name: 'Bot Ulysses', color: '#FFCC00' }
+        }
 
         const size = winner.name.length * 33
 

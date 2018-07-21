@@ -41,6 +41,28 @@
     overflow: auto;
 }
 
+.room-users-addbot-container {
+
+}
+
+.room-users-addbot {
+    height: 4rem;
+    min-height: 4rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed #555;
+    background-color: #FAFAFA;
+    cursor: pointer;
+    
+    transition: 300ms;
+}
+
+.room-users-addbot:hover {
+    background-color: #FFCC00;
+}
+
 .room-user-container {
     height: 4rem;
     min-height: 4rem;
@@ -72,11 +94,19 @@
 .room-user-name.you {
     font-size: 1.2em;
 }
+.room-user-name.bot {
+    font-size: .8em;
+}
 
 .room-user-status {
     color: #EF5350;
 }
 .room-user-status.ready {
+    font-weight: bold;
+    color: #FAFAFA;
+}
+.room-user-status.bot {
+    cursor: pointer;
     font-weight: bold;
     color: #FAFAFA;
 }
