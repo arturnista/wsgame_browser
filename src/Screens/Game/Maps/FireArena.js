@@ -16,6 +16,8 @@ function FireArena(data, { app, camera }) {
     this.sprite.anchor.set(.5, .5)
     this.camera.addChild(this.sprite)
 
+    this.updateMask()
+
     for (let i = 0; i < data.obstacles.length; i++) {
         const obstacleData = data.obstacles[i]
         const obstacle = new window.PIXI.Sprite( window.textures['wall.png'] )
@@ -32,15 +34,25 @@ FireArena.prototype.updateData = function(data) {
     this.data = data
     this.sprite.x = this.data.position.x
     this.sprite.y = this.data.position.y
-    this.sprite.width = this.data.size
-    this.sprite.height = this.data.size
+    this.updateMask()
+}
+
+FireArena.prototype.updateMask = function() {       
+    this.camera.removeChild(this.mask)
+    this.mask = new window.PIXI.Graphics()
+
+    this.mask.beginFill(0xFFF, 0)
+    this.mask.drawCircle(this.data.position.x, this.data.position.y, this.currentSize / 2)
+    this.mask.endFill()
+    this.sprite.mask = this.mask
+    this.camera.addChild(this.mask)
 }
 
 FireArena.prototype.update = function(deltatime) {
-    this.sprite.x = this.data.position.x
-    this.sprite.y = this.data.position.y
-    this.sprite.width -= this.data.decreasePerSecond * deltatime
-    this.sprite.height -= this.data.decreasePerSecond * deltatime
+    if(this.data.decreasePerSecond > 0) {
+        this.currentSize -= this.data.decreasePerSecond * deltatime
+        this.updateMask()
+    }
 }
 
 export default FireArena

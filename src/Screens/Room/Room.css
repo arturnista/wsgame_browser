@@ -182,6 +182,7 @@
     display: flex;
     justify-content: space-around;
     flex-wrap: wrap;
+    overflow: auto;
 }
 
 .room-spell-container {
@@ -195,6 +196,7 @@
     width: 5em;
     padding: .3em;
     cursor: pointer;
+    margin-bottom: .3em;
 
     background-color: #eee;
     border: 1px solid #212121;
@@ -316,6 +318,7 @@
 
 .room-map-modal-content {
     display: flex;
+    flex: 1;
     flex-direction: column;
     padding: 2em;
     border-radius: 5px;
@@ -327,6 +330,7 @@
     display: flex;    
     flex-wrap: wrap;
     justify-content: space-around;
+    overflow: auto;
 }
 
 .room-map-container {
