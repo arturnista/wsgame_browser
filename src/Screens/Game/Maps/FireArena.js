@@ -13,6 +13,7 @@ function FireArena(data, { app, camera }) {
     this.sprite.y = this.data.position.y
     this.sprite.width = this.data.size
     this.sprite.height = this.data.size
+    this.currentSize = this.data.size
     this.sprite.anchor.set(.5, .5)
     this.camera.addChild(this.sprite)
 
@@ -34,6 +35,7 @@ FireArena.prototype.updateData = function(data) {
     this.data = data
     this.sprite.x = this.data.position.x
     this.sprite.y = this.data.position.y
+    this.currentSize = this.data.size
     this.updateMask()
 }
 

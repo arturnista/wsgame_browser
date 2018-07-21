@@ -59,6 +59,7 @@ class Game extends Component {
         this.gameMapCreate = this.gameMapCreate.bind(this)
         this.gameMapUpdate = this.gameMapUpdate.bind(this)
         this.playerUseSpell = this.playerUseSpell.bind(this)
+        this.playerCreate = this.playerCreate.bind(this)
         this.gameStart = this.gameStart.bind(this)
         this.gameWillEnd = this.gameWillEnd.bind(this)
         this.gameEnd = this.gameEnd.bind(this)
@@ -86,6 +87,7 @@ class Game extends Component {
         window.socketio.on('map_create', this.gameMapCreate)
         window.socketio.on('map_update', this.gameMapUpdate)
         window.socketio.on('player_use_spell', this.playerUseSpell)
+        window.socketio.on('player_create', this.playerCreate)
         window.socketio.on('game_start', this.gameStart)
         window.socketio.on('game_will_end', this.gameWillEnd)
         window.socketio.on('game_end', this.gameEnd)
@@ -113,7 +115,6 @@ class Game extends Component {
         this.hudEntities = []
         this.entitiesToRemove = []
         this.map = {}
-        this.firstSync = true
         this.tick = 0
 
         // Load a texture
@@ -126,9 +127,11 @@ class Game extends Component {
         window.socketio.off('sync', this.gameSync)
         window.socketio.off('map_create', this.gameMapCreate)
         window.socketio.off('map_update', this.gameMapUpdate)
+        window.socketio.off('game_start', this.gameStart)
         window.socketio.off('game_will_end', this.gameWillEnd)
         window.socketio.off('game_end', this.gameEnd)
         window.socketio.off('player_use_spell', this.playerUseSpell)
+        window.socketio.on('player_create', this.playerCreate)
     }
 
     handleLoad() {
@@ -136,6 +139,7 @@ class Game extends Component {
         this.camera = new window.PIXI.Container()
         this.camera.hitArea = new window.PIXI.Rectangle(0, 0, 1000, 1000)
         this.hud = new window.PIXI.Container()
+        this.startGameHud = new window.PIXI.Container()
 
         let lifeOutRectangle = new window.PIXI.Graphics()
         lifeOutRectangle.beginFill(0xEEEEEE)
@@ -159,7 +163,14 @@ class Game extends Component {
         this.startText.x = this.app.renderer.screen.width / 2
         this.startText.y = this.app.renderer.screen.height / 2
         this.startText.anchor.set(.5, .5)
-        this.hud.addChild(this.startText)
+        this.startGameHud.addChild(this.startText)
+
+        this.startTime = 4
+        this.startTimeText = new window.PIXI.Text(this.startTime, { fontFamily: 'Arial', fontSize: 35, fill: 0xFAFAFA, align: 'center' })
+        this.startTimeText.x = this.app.renderer.screen.width / 2
+        this.startTimeText.y = this.app.renderer.screen.height / 2 + 50
+        this.startTimeText.anchor.set(.5, .5)
+        this.startGameHud.addChild(this.startTimeText)
 
         this.spellsIcons = []
         for (var i = 0; i < this.props.user.spells.length; i++) {
@@ -169,6 +180,8 @@ class Game extends Component {
             this.spellsIcons.push( ic )
             this.hudEntities.push( ic )
         }
+
+        this.hud.addChild(this.startGameHud)
 
         this.app.stage.addChild(this.camera)
         this.app.stage.addChild(this.hud)
@@ -181,6 +194,12 @@ class Game extends Component {
 
     gameLoop(delta) {
         const deltatime = delta * 0.016666667
+        if(!this.gameIsRunning) {
+            this.startTime -= deltatime
+            const nTime = Math.round(this.startTime)
+            if(nTime > 0) this.startTimeText.text = nTime
+            else this.startTimeText.text = 'GO!'
+        }
 
         if(this.player) {
 
@@ -201,6 +220,8 @@ class Game extends Component {
             this.lifeRectangle.width = this.app.renderer.screen.width * (this.player.metadata.life / 100)
             this.knockbackText.text = this.player.metadata.knockbackValue.toFixed(0)
 
+        } else {
+            this.player = this.players.find(x => x.id === this.myPlayerData.id)
         }
 
         if(!_.isEmpty(this.map)) {
@@ -225,6 +246,13 @@ class Game extends Component {
                 delete this.entities[entity.id]
             }
         }
+    }
+
+
+    playerCreate(body) {
+        console.log('player_create', body)
+        this.myPlayerData = body
+        this.lastPosition = _.clone(this.myPlayerData.position)
     }
 
     playerUseSpell(body) {
@@ -347,7 +375,7 @@ class Game extends Component {
     }
 
     gameStart(body) {
-        this.hud.removeChild(this.startText)
+        this.hud.removeChild(this.startGameHud)
         this.gameIsRunning = true
     }
 
@@ -355,17 +383,28 @@ class Game extends Component {
         console.log('gameWillEnd', body, this.props.user)
 
         let finalScreenBackgroundRect = new window.PIXI.Graphics()
-        finalScreenBackgroundRect.beginFill(0x212121, .6)
+        finalScreenBackgroundRect.beginFill(0x212121, .8)
         finalScreenBackgroundRect.drawRect(0, 0, this.app.renderer.screen.width, this.app.renderer.screen.height)
         finalScreenBackgroundRect.endFill()
         this.hud.addChild(finalScreenBackgroundRect)
 
-        const nameText = new window.PIXI.Text(this.props.user.name, { fontFamily: 'Arial', fontSize: 30, fill: 0xFAFAFA, align: 'center' })
-        nameText.x = this.app.renderer.screen.width / 2 - 100
-        nameText.y = 100
-        this.hud.addChild(nameText)
+        const winner = this.props.room.users.find(x => x.id === body.winner.userId)
 
-        if(this.player && body.winner.id === this.player.id) {
+        const size = winner.name.length * 33
+
+        let winnerTextBackground = new window.PIXI.Graphics()
+        winnerTextBackground.beginFill(0x212121, 1)
+        winnerTextBackground.drawRect(this.app.renderer.screen.width / 2 - size / 2, 220, size, 60)
+        winnerTextBackground.endFill()
+        this.hud.addChild(winnerTextBackground)
+
+        const winnerText = new window.PIXI.Text(`Winner ${winner.name}`, { fontFamily: 'Arial', fontSize: 30, fill: parseInt(winner.color.replace('#', ''), 16), align: 'center' })
+        winnerText.anchor.set(.5, .5)
+        winnerText.x = this.app.renderer.screen.width / 2
+        winnerText.y = 250
+        this.hud.addChild(winnerText)
+
+        if(body.winner.userId === this.props.user.id) {
 
             const winnerText = new window.PIXI.Text(_.sample(winStrings), { fontFamily: 'Arial', fontSize: 35, fill: 0xFFCC00, align: 'center' })
             winnerText.x = this.app.renderer.screen.width / 2
@@ -449,12 +488,6 @@ class Game extends Component {
         if(!this.gameIsRunning) return
 
         if(!mousePosition) mousePosition = { x: 0, y: 0 }
-
-        if(!this.player) {
-            this.player = this.players.find(x => x.id === this.props.user.player.id)
-            this.lastPosition = _.clone(this.player.position)
-            this.forceUpdate()
-        }
         window.socketio.emit(`player_${action}`, {
             id: this.player.id,
             position: mousePosition,
