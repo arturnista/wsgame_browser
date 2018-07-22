@@ -69,7 +69,7 @@ class Game extends Component {
         this.zoomOption = 1
 
         this.player = null
-        this.status = ''
+        this.status = 'move'
 
     }
 
@@ -131,7 +131,7 @@ class Game extends Component {
         window.socketio.off('game_will_end', this.gameWillEnd)
         window.socketio.off('game_end', this.gameEnd)
         window.socketio.off('player_use_spell', this.playerUseSpell)
-        window.socketio.on('player_create', this.playerCreate)
+        window.socketio.off('player_create', this.playerCreate)
     }
 
     handleLoad() {
@@ -153,7 +153,8 @@ class Game extends Component {
         this.lifeRectangle.endFill()
         this.hud.addChild(this.lifeRectangle)
 
-        this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 35, fill: 0x22B222, align: 'center' })
+        // this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 35, fill: 0x22B222, align: 'center' })
+        this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 35, fill: parseInt(this.props.user.color.replace('#', ''), 16), align: 'center' })
         this.knockbackText.x = this.app.renderer.screen.width / 2
         this.knockbackText.y = 35
         this.knockbackText.anchor.set(.5, .5)
@@ -197,8 +198,12 @@ class Game extends Component {
         if(!this.gameIsRunning) {
             this.startTime -= deltatime
             const nTime = Math.round(this.startTime)
+            this.startTimeText.style.fontSize += deltatime * 10
             if(nTime > 0) this.startTimeText.text = nTime
-            else this.startTimeText.text = 'GO!'
+            else {
+                this.startTimeText.text = 'GO!'
+                this.startTimeText.style.fill = 0xFFCC00
+            }
         }
 
         if(this.player) {
@@ -217,8 +222,13 @@ class Game extends Component {
                 this.lastPosition = _.clone(this.player.position)
             }
 
-            this.lifeRectangle.width = this.app.renderer.screen.width * (this.player.metadata.life / 100)
-            this.knockbackText.text = this.player.metadata.knockbackValue.toFixed(0)
+            const lifePerc = this.player.metadata.life / 100
+            if(this.lastLifePerc !== lifePerc) {
+                this.lifeRectangle.width = this.app.renderer.screen.width * lifePerc
+                this.lastLifePerc = lifePerc
+            }
+            const knockbackValue = this.player.metadata.knockbackValue.toFixed(0)
+            if(this.knockbackText.text !== knockbackValue) this.knockbackText.text = knockbackValue
 
         } else {
             this.player = this.players.find(x => x.id === this.myPlayerData.id)

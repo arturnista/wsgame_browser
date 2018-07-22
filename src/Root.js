@@ -84,6 +84,7 @@ class Root extends Component {
             window.socketio.on('myuser_joined_room', (body) => {
                 console.log('myuser_joined_room', body)
                 this.store.dispatch( setRoom({ room: body.room, user: body.user }) )
+                this.store.dispatch( defineUser(body.user) )
             })
 
             window.socketio.on('user_joined_room', (body) => {
