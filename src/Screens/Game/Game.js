@@ -5,7 +5,7 @@ import { Input, Button } from '../../Components'
 import vector from '../../Utils/vector'
 import { resetRoom } from '../../Redux/room'
 import { stopGame } from '../../Redux/game'
-import { resetSpells } from '../../Redux/user'
+import { userEndGame } from '../../Redux/user'
 import SpellIcon from './HUD/SpellIcon'
 import textureMap from './textureMap'
 
@@ -41,7 +41,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = (dispatch) => ({
     stopGame: () => dispatch(stopGame()),
     resetRoom: () => dispatch(resetRoom()),
-    resetSpells: (users) => dispatch(resetSpells(users))
+    userEndGame: (user) => dispatch(userEndGame(user))
 })
 
 class Game extends Component {
@@ -205,33 +205,35 @@ class Game extends Component {
                 this.startTimeText.style.fill = 0xFFCC00
             }
         }
+        
+        if(!this.props.user.isObserver) {
+            if(this.player) {
 
-        if(this.player) {
+                if(!vector.isEqual(this.lastPosition, this.player.position)) {
+                    const dist = vector.distance(this.map.data.position, this.player.position)
+                    let newZoom = 300 / dist
+                    if(newZoom > 1) newZoom = 1
+                    this.zoom = newZoom
+                    this.camera.scale.set(this.zoom, this.zoom)
 
-            if(!vector.isEqual(this.lastPosition, this.player.position)) {
-                const dist = vector.distance(this.map.data.position, this.player.position)
-                let newZoom = 300 / dist
-                if(newZoom > 1) newZoom = 1
-                this.zoom = newZoom
-                this.camera.scale.set(this.zoom, this.zoom)
+                    const xPiv = (this.map.data.position.x / 2) - this.camera.originalPivot.x / this.zoom
+                    const yPiv = (this.map.data.position.y / 2) - this.camera.originalPivot.y / this.zoom
+                    this.camera.pivot.set(xPiv, yPiv)
 
-                const xPiv = (this.map.data.position.x / 2) - this.camera.originalPivot.x / this.zoom
-                const yPiv = (this.map.data.position.y / 2) - this.camera.originalPivot.y / this.zoom
-                this.camera.pivot.set(xPiv, yPiv)
+                    this.lastPosition = _.clone(this.player.position)
+                }
 
-                this.lastPosition = _.clone(this.player.position)
+                const lifePerc = this.player.metadata.life / 100
+                if(this.lastLifePerc !== lifePerc) {
+                    this.lifeRectangle.width = this.app.renderer.screen.width * lifePerc
+                    this.lastLifePerc = lifePerc
+                }
+                const knockbackValue = this.player.metadata.knockbackValue.toFixed(0)
+                if(this.knockbackText.text !== knockbackValue) this.knockbackText.text = knockbackValue
+
+            } else {
+                this.player = this.players.find(x => x.id === this.myPlayerData.id)
             }
-
-            const lifePerc = this.player.metadata.life / 100
-            if(this.lastLifePerc !== lifePerc) {
-                this.lifeRectangle.width = this.app.renderer.screen.width * lifePerc
-                this.lastLifePerc = lifePerc
-            }
-            const knockbackValue = this.player.metadata.knockbackValue.toFixed(0)
-            if(this.knockbackText.text !== knockbackValue) this.knockbackText.text = knockbackValue
-
-        } else {
-            this.player = this.players.find(x => x.id === this.myPlayerData.id)
         }
 
         if(!_.isEmpty(this.map)) {
@@ -267,7 +269,7 @@ class Game extends Component {
 
     playerUseSpell(body) {
         console.log('playerUseSpell', body)
-        if(body.player.id === this.props.user.player.id) {
+        if(!this.props.user.isObserver && body.player.id === this.props.user.player.id) {
             const spellIcon = this.spellsIcons.find(x => x.id === body.spellName)
             spellIcon.use()
         }
@@ -439,7 +441,7 @@ class Game extends Component {
     gameEnd(body) {
         this.props.stopGame()
         this.props.resetRoom()
-        this.props.resetSpells(body.users)
+        this.props.userEndGame(body.users.find(x => x.id === this.props.user.id))
 
         this.props.history.replace('/room')
     }

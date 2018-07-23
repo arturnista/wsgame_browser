@@ -1,6 +1,6 @@
 const DEFINE_USER = 'user/DEFINE_USER'
 const DEFINE_PLAYER = 'user/DEFINE_PLAYER'
-const RESET_SPELLS = 'user/RESET_SPELLS'
+const USER_END_GAME = 'user/USER_END_GAME'
 const SELECT_SPELL = 'user/SELECT_SPELL'
 const DESELECT_SPELL = 'user/DESELECT_SPELL'
 
@@ -18,10 +18,13 @@ export default function reducer(state = initialState, action = {}) {
                 ...state,
                 player: { ...action.payload }
             }
-        case RESET_SPELLS:
+        case USER_END_GAME:
+            console.log(state.user);
+        
             return {
                 ...state,
-                spells: action.payload.users.find(x => state.id).spells
+                spells: action.payload.user.spells,
+                isObserver: action.payload.user.isObserver
             }
         case SELECT_SPELL:
             return {
@@ -55,10 +58,10 @@ export function definePlayer(playerData) {
     }
 }
 
-export function resetSpells(users) {
+export function userEndGame(user) {
     return {
-        type: RESET_SPELLS,
-        payload: { users: users || [] }
+        type: USER_END_GAME,
+        payload: { user: user || {} }
     }
 }
 

@@ -10,7 +10,6 @@ import { App, Start, Room, Game, NotFound, LoadingScreen } from './Screens'
 import createBrowserHistory from 'history/createBrowserHistory'
 import createStore from './Redux/createStore'
 import { setRoom, addUser, removeUser, readyUser, waitingUser } from './Redux/room'
-import { startGame } from './Redux/game'
 import { defineUser, definePlayer } from './Redux/user'
 import './Root.css'
 
@@ -102,11 +101,6 @@ class Root extends Component {
             window.socketio.on('user_left_room', (body) => {
                 console.log('user_left_room', body)
                 this.store.dispatch( removeUser(body) )
-            })
-
-            window.socketio.on('game_will_start', (body) => {
-                console.log('game_will_start', body)
-                this.store.dispatch( startGame(body) )
             })
 
             window.socketio.on('disconnect', () => {

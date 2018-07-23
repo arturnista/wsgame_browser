@@ -4,9 +4,10 @@ import _ from 'lodash'
 import moment from 'moment'
 import { Input, Button } from '../../Components'
 import { serverUrl } from '../../constants'
-import { selectSpell, deselectSpell } from '../../Redux/user'
+import { defineUser, selectSpell, deselectSpell } from '../../Redux/user'
 import { addSpells } from '../../Redux/spells'
 import { updateChat } from '../../Redux/room'
+import { startGame } from '../../Redux/game'
 import './Room.css'
 
 const mapStateToProps = (state) => ({
@@ -21,6 +22,8 @@ const mapDispatchToProps = (dispatch) => ({
     deselectSpell: (spell) => dispatch(deselectSpell(spell)),
     updateChat: (spell) => dispatch(updateChat(spell)),
     addSpells: (spells) => dispatch(addSpells(spells)),
+    defineUser: (data) => dispatch(defineUser(data)),
+    startGame: (data) => dispatch(startGame(data)),
 })
 
 class Room extends Component {
@@ -33,6 +36,7 @@ class Room extends Component {
         this.renderChatLine = this.renderChatLine.bind(this)
         this.renderSpell = this.renderSpell.bind(this)
         this.handleSubmitChatMessage = this.handleSubmitChatMessage.bind(this)
+        this.handleWillStartGame = this.handleWillStartGame.bind(this)
         this.handleStartGame = this.handleStartGame.bind(this)
         this.handleToggleStatus = this.handleToggleStatus.bind(this)
         this.handleSelectSpell = this.handleSelectSpell.bind(this)
@@ -43,6 +47,7 @@ class Room extends Component {
         this.state = {
             modalMapShowing: false,
             status: 'waiting',
+            isObserver: props.user.isObserver || false,
             offensiveSpells: [],
             defensiveSpells: [],
             selectedSpell: {},
@@ -69,6 +74,7 @@ class Room extends Component {
         window.socketio.on('room_chat_new_message', this.handleNewChatMessage)
         window.socketio.on('user_selected_spell', this.handleSelectSpell)
         window.socketio.on('user_deselected_spell', this.handleDeselectSpell)
+        window.socketio.on('game_will_start', this.handleWillStartGame)
 
 
         if(_.isEmpty(this.props.room)) {
@@ -86,6 +92,7 @@ class Room extends Component {
         window.socketio.off('room_chat_new_message', this.handleNewChatMessage)
         window.socketio.off('user_selected_spell', this.handleSelectSpell)
         window.socketio.off('user_deselected_spell', this.handleDeselectSpell)
+        window.socketio.off('game_will_start', this.handleWillStartGame)
     }
 
     handleSelectSpell(body) {
@@ -106,6 +113,12 @@ class Room extends Component {
     handleNewChatMessage(body) {
         console.log('handleNewChatMessage', body)
         this.props.updateChat(body.chat)
+    }
+
+    handleWillStartGame(body) {
+        console.log('game_will_start', body)
+        this.props.startGame(body)
+        this.props.defineUser({ isObserver: this.state.isObserver })
     }
 
     handleStartGame() {
@@ -272,6 +285,14 @@ class Room extends Component {
                                 <Button label='Start' className='room-button right'
                                     onClick={() => this.setState({ modalMapShowing: true })}/>
                                 : <div className='room-button'></div>
+                            }
+                            {
+                                !this.state.isObserver ?
+                                <Button label='Become observer' className='room-button right'
+                                    onClick={() => this.setState({ isObserver: true }, () => window.socketio.emit('user_become_observer', {}))}/>
+                                :
+                                <Button label='Become normal' className='room-button right'
+                                    onClick={() => this.setState({ isObserver: false }, () => window.socketio.emit('user_become_player', {}))}/>
                             }
                         </div>
                         <div className='room-users-container'>
