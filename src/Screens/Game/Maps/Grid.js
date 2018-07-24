@@ -2,6 +2,7 @@ function Grid(data, { app, camera }) {
     this.app = app
     this.camera = camera
     this.data = data
+    this.originalSize = (this.data.size / 2) - 100
 
     const xPiv = ((this.app.renderer.screen.width - this.data.position.x) / 2)
     const yPiv = ((this.app.renderer.screen.height - this.data.position.y) / 2)

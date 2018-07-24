@@ -286,25 +286,30 @@ class Room extends Component {
                 <div className="room-content-container">
                     <div className='room-side-container'>
                         <div className='room-buttons-container'>
-                            <Button label={toggleText} className={'room-button left ' + this.state.status}
-                                onClick={this.handleToggleStatus}/>
+                            {
+                                !this.state.isObserver &&
+                                <Button label={toggleText} className={'room-button left ' + this.state.status}
+                                    onClick={this.handleToggleStatus}/>
+                            }
                             {
                                 this.props.isOwner ?
                                 <Button label='Start' className='room-button right'
                                     onClick={() => this.setState({ modalMapShowing: true })}/>
                                 : <div className='room-button'></div>
                             }
-                            {
-                                !this.state.isObserver ?
-                                <Button label='Become observer' className='room-button right'
-                                    onClick={() => this.setState({ isObserver: true }, () => window.socketio.emit('user_become_observer', {}))}/>
-                                :
-                                <Button label='Become normal' className='room-button right'
-                                    onClick={() => this.setState({ isObserver: false }, () => window.socketio.emit('user_become_player', {}))}/>
-                            }
                         </div>
                         <div className='room-users-container'>
-                            <p className='room-users-text'>Observers: {this.props.room.observers.length}</p>
+                            <div className='room-users-container-header'>
+                                <p className='room-users-obs-text'>Observers: {this.props.room.observers.length}</p>
+                                {
+                                    !this.state.isObserver ?
+                                    <Button label='Become observer' className='room-users-obs-button'
+                                        onClick={() => this.setState({ isObserver: true }, () => window.socketio.emit('user_become_observer', {}))}/>
+                                    :
+                                    <Button label='Become player' className='room-users-obs-button'
+                                        onClick={() => this.setState({ isObserver: false }, () => window.socketio.emit('user_become_player', {}))}/>
+                                }
+                            </div>
                             {
                                 this.props.room.users.map(this.renderUser)
                             }

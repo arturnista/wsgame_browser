@@ -21,6 +21,7 @@ function BasicArena(data, { app, camera }) {
     this.sprite.y = this.data.position.y
     this.sprite.width = this.data.size
     this.sprite.height = this.data.size
+    this.originalSize = this.data.size / 2
     this.currentSize = this.data.size
     this.sprite.anchor.set(.5, .5)
     this.camera.addChild(this.sprite)

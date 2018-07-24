@@ -207,7 +207,7 @@ class Game extends Component {
         if(!this.gameIsRunning) {
             this.startTime -= deltatime
             const nTime = Math.round(this.startTime)
-            this.startTimeText.style.fontSize += deltatime * 10
+            this.startTimeText.style.fontSize = (5 - nTime) * 10
             if(nTime > 0) this.startTimeText.text = nTime
             else {
                 this.startTimeText.text = 'GO!'
@@ -221,7 +221,8 @@ class Game extends Component {
 
                 if(!vector.isEqual(this.lastPosition, this.player.position)) {
                     const dist = vector.distance(this.map.data.position, this.player.position)
-                    let newZoom = 300 / dist
+                    let newZoom = this.map.originalSize / dist
+                    
                     if(newZoom > 1) newZoom = 1
                     this.zoom = newZoom
                     this.camera.scale.set(this.zoom, this.zoom)
@@ -281,7 +282,7 @@ class Game extends Component {
     playerCreate(body) {
         console.log('player_create', body)
         this.myPlayerData = body
-        this.lastPosition = _.clone(this.myPlayerData.position)
+        // this.lastPosition = _.clone(this.myPlayerData.position)
     }
 
     playerUseSpell(body) {
@@ -433,7 +434,7 @@ class Game extends Component {
             winner = { name: 'Bot Ulysses', color: '#FFCC00' }
         }
 
-        const size = winner.name.length * 33
+        const size =  (6 + winner.name.length) * 33
 
         let winnerTextBackground = new window.PIXI.Graphics()
         winnerTextBackground.beginFill(0x212121, 1)
