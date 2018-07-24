@@ -107,7 +107,6 @@ class Room extends Component {
         if(body.user === this.props.user.id) {
             this.props.deselectSpell(body.spellName)
         }
-
     }
 
     handleNewChatMessage(body) {
@@ -117,8 +116,8 @@ class Room extends Component {
 
     handleWillStartGame(body) {
         console.log('game_will_start', body)
-        this.props.startGame(body)
         this.props.defineUser({ isObserver: this.state.isObserver })
+        this.props.startGame(body)
     }
 
     handleStartGame() {
@@ -296,6 +295,7 @@ class Room extends Component {
                             }
                         </div>
                         <div className='room-users-container'>
+                            <p className='room-users-text'>Observers: 10</p>
                             {
                                 this.props.room.users.map(this.renderUser)
                             }

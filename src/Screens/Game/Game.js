@@ -7,6 +7,7 @@ import { resetRoom } from '../../Redux/room'
 import { stopGame } from '../../Redux/game'
 import { userEndGame } from '../../Redux/user'
 import SpellIcon from './HUD/SpellIcon'
+import ObsPlayer from './HUD/ObsPlayer'
 import textureMap from './textureMap'
 
 import { winStrings, loseStrings } from '../../constants'
@@ -139,26 +140,46 @@ class Game extends Component {
         this.camera = new window.PIXI.Container()
         this.camera.hitArea = new window.PIXI.Rectangle(0, 0, 1000, 1000)
         this.hud = new window.PIXI.Container()
+        this.obsPlayers = []
+        
+        if(this.props.user.isObserver) {
+
+            this.observersHud = new window.PIXI.Container()
+            this.hud.addChild(this.observersHud)
+
+        } else {
+
+            let lifeOutRectangle = new window.PIXI.Graphics()
+            lifeOutRectangle.beginFill(0xEEEEEE)
+            lifeOutRectangle.drawRect(0, 0, this.app.renderer.screen.width, 15)
+            lifeOutRectangle.endFill()
+            this.hud.addChild(lifeOutRectangle)
+
+            this.lifeRectangle = new window.PIXI.Graphics()
+            this.lifeRectangle.beginFill(0xFF3300)
+            this.lifeRectangle.drawRect(0, 0, this.app.renderer.screen.width, 15)
+            this.lifeRectangle.endFill()
+            this.hud.addChild(this.lifeRectangle)
+
+            // this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 35, fill: 0x22B222, align: 'center' })
+            this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 35, fill: parseInt(this.props.user.color.replace('#', ''), 16), align: 'center' })
+            this.knockbackText.x = this.app.renderer.screen.width / 2
+            this.knockbackText.y = 35
+            this.knockbackText.anchor.set(.5, .5)
+            this.hud.addChild(this.knockbackText)
+
+            this.spellsIcons = []
+            for (var i = 0; i < this.props.user.spells.length; i++) {
+                const spellData = this.props.spells.find(x => this.props.user.spells[i] === x.id)
+                if(!spellData) continue
+                const ic = new SpellIcon(i, spellData, this.hud)
+                this.spellsIcons.push( ic )
+                this.hudEntities.push( ic )
+            }
+
+        }  
+
         this.startGameHud = new window.PIXI.Container()
-
-        let lifeOutRectangle = new window.PIXI.Graphics()
-        lifeOutRectangle.beginFill(0xEEEEEE)
-        lifeOutRectangle.drawRect(0, 0, this.app.renderer.screen.width, 15)
-        lifeOutRectangle.endFill()
-        this.hud.addChild(lifeOutRectangle)
-
-        this.lifeRectangle = new window.PIXI.Graphics()
-        this.lifeRectangle.beginFill(0xFF3300)
-        this.lifeRectangle.drawRect(0, 0, this.app.renderer.screen.width, 15)
-        this.lifeRectangle.endFill()
-        this.hud.addChild(this.lifeRectangle)
-
-        // this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 35, fill: 0x22B222, align: 'center' })
-        this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 35, fill: parseInt(this.props.user.color.replace('#', ''), 16), align: 'center' })
-        this.knockbackText.x = this.app.renderer.screen.width / 2
-        this.knockbackText.y = 35
-        this.knockbackText.anchor.set(.5, .5)
-        this.hud.addChild(this.knockbackText)
 
         this.startText = new window.PIXI.Text('Ready?', { fontFamily: 'Arial', fontSize: 35, fill: 0xFAFAFA, align: 'center' })
         this.startText.x = this.app.renderer.screen.width / 2
@@ -171,16 +192,7 @@ class Game extends Component {
         this.startTimeText.x = this.app.renderer.screen.width / 2
         this.startTimeText.y = this.app.renderer.screen.height / 2 + 50
         this.startTimeText.anchor.set(.5, .5)
-        this.startGameHud.addChild(this.startTimeText)
-
-        this.spellsIcons = []
-        for (var i = 0; i < this.props.user.spells.length; i++) {
-            const spellData = this.props.spells.find(x => this.props.user.spells[i] === x.id)
-            if(!spellData) continue
-            const ic = new SpellIcon(i, spellData, this.hud)
-            this.spellsIcons.push( ic )
-            this.hudEntities.push( ic )
-        }
+        this.startGameHud.addChild(this.startTimeText)    
 
         this.hud.addChild(this.startGameHud)
 
@@ -207,6 +219,7 @@ class Game extends Component {
         }
         
         if(!this.props.user.isObserver) {
+
             if(this.player) {
 
                 if(!vector.isEqual(this.lastPosition, this.player.position)) {
@@ -234,6 +247,13 @@ class Game extends Component {
             } else {
                 this.player = this.players.find(x => x.id === this.myPlayerData.id)
             }
+        } else {
+
+            for(const i in this.players) {
+                const obsPlayer = this.obsPlayers.find(x => x.id === this.players[i].id)
+                obsPlayer.sync(this.players[i])
+            }
+
         }
 
         if(!_.isEmpty(this.map)) {
@@ -269,7 +289,10 @@ class Game extends Component {
 
     playerUseSpell(body) {
         console.log('playerUseSpell', body)
-        if(!this.props.user.isObserver && body.player.id === this.props.user.player.id) {
+        if(this.props.user.isObserver) {
+            const obsPlayer = this.obsPlayers.find(x => x.id === body.player.id)
+            obsPlayer.useSpell(body.spellName)
+        } else if(body.player.id === this.props.user.player.id) {
             const spellIcon = this.spellsIcons.find(x => x.id === body.spellName)
             spellIcon.use()
         }
@@ -387,12 +410,20 @@ class Game extends Component {
     }
 
     gameStart(body) {
+        console.log('gameStart', body)
+        if(this.props.user.isObserver) {
+            for(const k in body.players) {
+                const obsPlayer = new ObsPlayer(k, body.players[k], this.observersHud, { spells: this.props.spells })
+                this.obsPlayers.push(obsPlayer)
+                this.hudEntities.push(obsPlayer)
+            }
+        }
         this.hud.removeChild(this.startGameHud)
         this.gameIsRunning = true
     }
 
     gameWillEnd(body) {
-        console.log('gameWillEnd', body, this.props.user)
+        console.log('gameWillEnd', body)
 
         let finalScreenBackgroundRect = new window.PIXI.Graphics()
         finalScreenBackgroundRect.beginFill(0x212121, .8)
@@ -439,6 +470,7 @@ class Game extends Component {
     }
 
     gameEnd(body) {
+        console.log('gameEnd', body)
         this.props.stopGame()
         this.props.resetRoom()
         this.props.userEndGame(body.users.find(x => x.id === this.props.user.id))
@@ -456,6 +488,7 @@ class Game extends Component {
     }
 
     handleMouseDown(event) {
+        if(this.props.user.isObserver) return
 
         event.preventDefault()
         const xClick = event.clientX
@@ -470,6 +503,7 @@ class Game extends Component {
     }
 
     handleKeyDown(e) {
+        if(this.props.user.isObserver) return
         const keyPressed = e.key.toLowerCase()
         switch (keyPressed) {
             case 'q':
@@ -488,6 +522,7 @@ class Game extends Component {
     }
 
     useSpell(name) {
+        if(this.props.user.isObserver) return
         const spellName = 'spell_' + name
         switch (name) {
             case 'reflect_shield':
@@ -500,6 +535,7 @@ class Game extends Component {
     }
 
     emitAction(action, mousePosition) {
+        if(this.props.user.isObserver) return
         if(!this.gameIsRunning) return
 
         if(!mousePosition) mousePosition = { x: 0, y: 0 }

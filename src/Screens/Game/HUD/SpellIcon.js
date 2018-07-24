@@ -11,50 +11,52 @@ const border = 2
 const borderHalf = border / 2
 
 export default
-function Icon(index, spellData, hud) {
+function Icon(index, spellData, hud, { noHotkey, xOffset = 0, yOffset = 0 } = { xOffset: 0, yOffset: 0 }) {
     this.index = index
     this.spellData = spellData
     this.id = spellData.id
 
     const texture = textureMap[spellData.id]
-    let hotkey
-    switch (index) {
-        case 0:
-            hotkey = 'Q'
-            break
-        case 1:
-            hotkey = 'W'
-            break
-        case 2:
-            hotkey = 'E'
-            break
-        default:
-            hotkey = '?'
+    let hotkey = ''
+    if(!noHotkey) {
+        switch (index) {
+            case 0:
+                hotkey = 'Q'
+                break
+            case 1:
+                hotkey = 'W'
+                break
+            case 2:
+                hotkey = 'E'
+                break
+            default:
+                hotkey = '?'
+        }
     }
 
-    const xAmount = (size + 5) * index
+    const xAmount = (size + 5) * index + xOffset
 
     let iconBackground = new window.PIXI.Graphics()
     iconBackground.beginFill(0x212121)
     iconBackground.lineStyle(border, 0xFAFAFA)
-    iconBackground.drawRect(xAmount + borderHalf, 15 + borderHalf, size, size)
+    iconBackground.drawRect(xAmount + borderHalf, 15 + borderHalf + yOffset, size, size)
     iconBackground.endFill()
     hud.addChild(iconBackground)
 
     const iconSprite = new window.PIXI.Sprite( window.textures[texture] )
     iconSprite.x = xAmount + diffHalf
-    iconSprite.y = 15 + diffHalf
+    iconSprite.y = 15 + diffHalf + yOffset
     hud.addChild(iconSprite)
 
     const iconTime = new window.PIXI.Text(10, { fontFamily: 'Arial', fontSize: 15, fill: 0xFAFAFA, align: 'center' })
     iconTime.x = xAmount + iconSize + diff
-    iconTime.y = iconSize + 15 + diff
+    iconTime.y = iconSize + 15 + diff + yOffset
     iconTime.anchor.set(1, 1)
     hud.addChild(iconTime)
 
     const iconHotkey = new window.PIXI.Text(hotkey, { fontFamily: 'Arial', fontSize: 15, fill: 0xFAFAFA, align: 'center' })
     iconHotkey.x = xAmount + iconSize + diff
-    iconHotkey.y = 15
+    iconHotkey.y = 15 + yOffset
     iconHotkey.anchor.set(1, 0)
     hud.addChild(iconHotkey)
 

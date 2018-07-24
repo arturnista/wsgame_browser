@@ -10,6 +10,7 @@ export default function reducer(state = initialState, action = {}) {
     switch (action.type) {
         case DEFINE_USER:
             return {
+                ...state,
                 ...action.payload,
                 // spells: []
             }
@@ -19,8 +20,6 @@ export default function reducer(state = initialState, action = {}) {
                 player: { ...action.payload }
             }
         case USER_END_GAME:
-            console.log(state.user);
-        
             return {
                 ...state,
                 spells: action.payload.user.spells,

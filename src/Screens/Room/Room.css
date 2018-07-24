@@ -32,6 +32,7 @@
 }
 
 .room-users-container {
+    position: relative;
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -39,6 +40,15 @@
     margin-bottom: .5em;
     background-color: #FAFAFA;
     overflow: auto;
+}
+
+.room-users-text {
+    padding: 0;
+    margin: 0;
+    font-size: .9em;
+    color: #333;
+    position: absolute;
+    right: 0;
 }
 
 .room-users-addbot-container {
