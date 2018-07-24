@@ -8,6 +8,12 @@ function Grid(data, { app, camera }) {
     this.camera.originalPivot = { x: xPiv, y: yPiv }
     this.camera.pivot.set((this.data.position.x / 2) - xPiv, (this.data.position.y / 2) - yPiv)
 
+    const bg = new window.PIXI.extras.TilingSprite(window.textures['basic_arena_bg.png'], this.app.renderer.screen.width * 10, this.app.renderer.screen.height * 10)
+    bg.anchor.set(.5, .5)
+    bg.x = this.data.position.x
+    bg.y = this.data.position.y
+    this.camera.addChild(bg)
+
     this.blocks = []
     for (let i = 0; i < data.blocks.length; i++) {
         const blockData = data.blocks[i]

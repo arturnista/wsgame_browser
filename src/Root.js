@@ -35,6 +35,8 @@ class Root extends Component {
         .add('/img/tileset.json')
         .add('/img/WSSprites.json')
         .add('basic_arena.png', '/img/map/basic_arena.png')
+        .add('basic_arena_bg.png', '/img/map/basic_arena_bg.png')
+        .add('fire_arena_bg.png', '/img/map/fire_arena_bg.png')
         .add('grid_normal.png', '/img/map/grid_normal.png')
         .add('grid_toDestroy.png', '/img/map/grid_toDestroy.png')
         .add('grid_destroyed.png', '/img/map/grid_destroyed.png')

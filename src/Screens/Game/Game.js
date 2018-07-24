@@ -134,7 +134,6 @@ class Game extends Component {
     }
 
     handleLoad() {
-
         this.camera = new window.PIXI.Container()
         this.camera.hitArea = new window.PIXI.Rectangle(0, 0, 1000, 1000)
         this.hud = new window.PIXI.Container()
