@@ -5,6 +5,7 @@ const READY_USER = 'room/READY_USER'
 const RESET_ROOM = 'room/RESET_ROOM'
 const WAITING_USER = 'room/WAITING_USER'
 const UPDATE_CHAT = 'room/UPDATE_CHAT'
+const UPDATE_ROOM = 'room/UPDATE_ROOM'
 
 const initialState = null
 
@@ -28,7 +29,8 @@ export default function reducer(state = initialState, action = {}) {
         case REMOVE_USER:
             return {
                 ...state,
-                users: state.users.filter(x => x.id !== action.payload.id)
+                users: state.users.filter(x => x.id !== action.payload.id),
+                observers: state.observers.filter(x => x.id !== action.payload.id),
             }
         case READY_USER:
             return {
@@ -56,6 +58,11 @@ export default function reducer(state = initialState, action = {}) {
                     return { ...x, status: 'waiting', isReady: true }
                 })
             }
+        case UPDATE_ROOM:
+            return {
+                ...state,
+                ...action.payload,
+            }
         default:
             return state
     }
@@ -66,7 +73,8 @@ export function setRoom({ room }) {
         type: SET_ROOM,
         payload: {
             roomJoined: room.name,
-            users: room.users,
+            users: room.users.filter(x => !x.isObserver),
+            observers: room.users.filter(x => x.isObserver),
             owner: room.owner.id,
             chat: room.chat,
         }
@@ -111,6 +119,17 @@ export function updateChat(chat) {
     }
 }
 
+export function updateRoom(room) {
+    return {
+        type: UPDATE_ROOM,
+        payload: {
+            ...room,
+            users: room.users.filter(x => !x.isObserver),
+            observers: room.users.filter(x => x.isObserver),
+            owner: room.owner.id,
+        }
+    }
+}
 
 export function resetRoom() {
     return {

@@ -26,8 +26,6 @@ import { createReflectShield } from './Spells/ReflectShield'
 
 import './Game.css'
 
-// bump = new window.Bump(PIXI)
-
 let type = 'WebGL'
 if(!window.PIXI.utils.isWebGLSupported()){
     type = 'canvas'

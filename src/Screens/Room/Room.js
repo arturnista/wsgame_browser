@@ -6,7 +6,7 @@ import { Input, Button } from '../../Components'
 import { serverUrl } from '../../constants'
 import { defineUser, selectSpell, deselectSpell } from '../../Redux/user'
 import { addSpells } from '../../Redux/spells'
-import { updateChat } from '../../Redux/room'
+import { updateRoom, updateChat } from '../../Redux/room'
 import { startGame } from '../../Redux/game'
 import './Room.css'
 
@@ -18,12 +18,13 @@ const mapStateToProps = (state) => ({
     isOwner: state.room ? state.room.owner === state.user.id : false,
 })
 const mapDispatchToProps = (dispatch) => ({
-    selectSpell: (spell) => dispatch(selectSpell(spell)),
-    deselectSpell: (spell) => dispatch(deselectSpell(spell)),
-    updateChat: (spell) => dispatch(updateChat(spell)),
-    addSpells: (spells) => dispatch(addSpells(spells)),
-    defineUser: (data) => dispatch(defineUser(data)),
-    startGame: (data) => dispatch(startGame(data)),
+    selectSpell: spell => dispatch(selectSpell(spell)),
+    deselectSpell: spell => dispatch(deselectSpell(spell)),
+    updateChat: spell => dispatch(updateChat(spell)),
+    addSpells: spells => dispatch(addSpells(spells)),
+    defineUser: data => dispatch(defineUser(data)),
+    startGame: data => dispatch(startGame(data)),
+    updateRoom: room => dispatch(updateRoom(room))
 })
 
 class Room extends Component {
@@ -42,6 +43,7 @@ class Room extends Component {
         this.handleSelectSpell = this.handleSelectSpell.bind(this)
         this.handleDeselectSpell = this.handleDeselectSpell.bind(this)
         this.handleNewChatMessage = this.handleNewChatMessage.bind(this)
+        this.handleUpdateRoom = this.handleUpdateRoom.bind(this)
 
         this.configSpells = {}
         this.state = {
@@ -71,6 +73,7 @@ class Room extends Component {
             this.props.addSpells(spellsArr)
         })
 
+        window.socketio.on('room_update', this.handleUpdateRoom)
         window.socketio.on('room_chat_new_message', this.handleNewChatMessage)
         window.socketio.on('user_selected_spell', this.handleSelectSpell)
         window.socketio.on('user_deselected_spell', this.handleDeselectSpell)
@@ -89,6 +92,7 @@ class Room extends Component {
     }
 
     componentWillUnmount() {
+        window.socketio.off('room_update', this.handleUpdateRoom)
         window.socketio.off('room_chat_new_message', this.handleNewChatMessage)
         window.socketio.off('user_selected_spell', this.handleSelectSpell)
         window.socketio.off('user_deselected_spell', this.handleDeselectSpell)
@@ -118,6 +122,11 @@ class Room extends Component {
         console.log('game_will_start', body)
         this.props.defineUser({ isObserver: this.state.isObserver })
         this.props.startGame(body)
+    }
+
+    handleUpdateRoom(body) {
+        console.log('handleUpdateRoom', body)
+        this.props.updateRoom(body.room)
     }
 
     handleStartGame() {
@@ -295,7 +304,7 @@ class Room extends Component {
                             }
                         </div>
                         <div className='room-users-container'>
-                            <p className='room-users-text'>Observers: 10</p>
+                            <p className='room-users-text'>Observers: {this.props.room.observers.length}</p>
                             {
                                 this.props.room.users.map(this.renderUser)
                             }
