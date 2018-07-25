@@ -138,7 +138,10 @@ class Game extends Component {
         this.camera = new window.PIXI.Container()
         this.camera.hitArea = new window.PIXI.Rectangle(0, 0, 1000, 1000)
         this.hud = new window.PIXI.Container()
+        this.mapContainer = new window.PIXI.Container()
         this.obsPlayers = []
+        
+        this.camera.addChild(this.mapContainer)
         
         if(this.props.user.isObserver) {
 
@@ -420,13 +423,13 @@ class Game extends Component {
         console.log('gameMapCreate', body)
         switch(body.name) {
             case 'Basic Arena':
-                this.map = new BasicArena(body, { app: this.app, camera: this.camera })
+                this.map = new BasicArena(body, { app: this.app, camera: this.camera, parent: this.mapContainer })
                 break
             case 'Fire Arena':
-                this.map = new FireArena(body, { app: this.app, camera: this.camera })
+                this.map = new FireArena(body, { app: this.app, camera: this.camera, parent: this.mapContainer })
                 break
             case 'Grid':
-                this.map = new Grid(body, { app: this.app, camera: this.camera })
+                this.map = new Grid(body, { app: this.app, camera: this.camera, parent: this.mapContainer })
                 break
         }
     }
@@ -505,8 +508,9 @@ class Game extends Component {
         this.props.history.replace('/room')
     }
 
-    createEntity(entity) {
-        this.camera.addChild(entity)
+    createEntity(entity, idx = -1) {
+        if(idx >= 0) this.camera.addChildAt(entity, idx)
+        else this.camera.addChild(entity)
         if(entity.id) this.entities[entity.id] = entity
     }
 

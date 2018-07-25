@@ -19,7 +19,13 @@ export function createExplosion(spellData, game) {
     spell.vx = 0
     spell.vy = 0
 
-    let radius = {}
+    let radius = new window.PIXI.Sprite( window.textures['explosion_radius.png'] )
+    radius.anchor.set(.5, .5)
+    radius.width = spellData.radius * 2
+    radius.height = spellData.radius * 2
+    radius.x = spellData.position.x
+    radius.y = spellData.position.y
+    game.createEntity(radius, 3)
 
     spell.update = (deltatime) => {
         time += deltatime
@@ -32,13 +38,6 @@ export function createExplosion(spellData, game) {
             spell.visible = false
 
             if(!exploded) {
-                radius = new window.PIXI.Sprite( window.textures['explosion_radius.png'] )
-                radius.anchor.set(.5, .5)
-                radius.width = spellData.radius * 2
-                radius.height = spellData.radius * 2
-                radius.x = spellData.position.x
-                radius.y = spellData.position.y
-                game.createEntity(radius)
 
                 for (let index = 0; index < 35; index++) {
                     const exp = new window.PIXI.Sprite( window.textures['explosion.png'] )

@@ -1,20 +1,20 @@
 import _ from 'lodash'
 
-function BasicArena(data, { app, camera }) {
+function BasicArena(data, { app, camera, parent }) {
     this.app = app
-    this.camera = camera
+    this.parent = parent
     this.data = data
 
     const xPiv = ((this.app.renderer.screen.width - this.data.position.x) / 2)
     const yPiv = ((this.app.renderer.screen.height - this.data.position.y) / 2)
-    this.camera.originalPivot = { x: xPiv, y: yPiv }
-    this.camera.pivot.set((this.data.position.x / 2) - xPiv, (this.data.position.y / 2) - yPiv)
+    camera.originalPivot = { x: xPiv, y: yPiv }
+    camera.pivot.set((this.data.position.x / 2) - xPiv, (this.data.position.y / 2) - yPiv)
 
     const bg = new window.PIXI.extras.TilingSprite(window.textures['basic_arena_bg.png'], this.app.renderer.screen.width * 10, this.app.renderer.screen.height * 10)
     bg.anchor.set(.5, .5)
     bg.x = this.data.position.x
     bg.y = this.data.position.y
-    this.camera.addChild(bg)
+    this.parent.addChild(bg)
 
     this.sprite = new window.PIXI.Sprite(window.textures['basic_arena.png'])
     this.sprite.x = this.data.position.x
@@ -24,7 +24,7 @@ function BasicArena(data, { app, camera }) {
     this.originalSize = this.data.size / 2
     this.currentSize = this.data.size
     this.sprite.anchor.set(.5, .5)
-    this.camera.addChild(this.sprite)
+    this.parent.addChild(this.sprite)
 
     this.updateMask()
 
@@ -35,8 +35,8 @@ function BasicArena(data, { app, camera }) {
         obstacle.x = obstacleData.position.x
         obstacle.y = obstacleData.position.y
         obstacle.width = obstacleData.collider.size
-        obstacle.height = obstacleData.collider.size
-        this.camera.addChild(obstacle)
+        obstacle.height = obstacleData.collider.size * 1.1
+        this.parent.addChild(obstacle)
     }
 }
 
@@ -49,14 +49,14 @@ BasicArena.prototype.updateData = function(data) {
 }
 
 BasicArena.prototype.updateMask = function() {       
-    this.camera.removeChild(this.mask)
+    this.parent.removeChild(this.mask)
     this.mask = new window.PIXI.Graphics()
 
     this.mask.beginFill(0xFFF, 1)
     this.mask.drawCircle(this.data.position.x, this.data.position.y, this.currentSize / 2)
     this.mask.endFill()
     this.sprite.mask = this.mask
-    this.camera.addChild(this.mask)
+    this.parent.addChild(this.mask)
 }
 
 BasicArena.prototype.update = function(deltatime) {

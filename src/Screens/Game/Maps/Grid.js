@@ -1,19 +1,19 @@
-function Grid(data, { app, camera }) {
+function Grid(data, { app, camera, parent }) {
     this.app = app
-    this.camera = camera
+    this.parent = parent
     this.data = data
     this.originalSize = (this.data.size / 2) - 100
 
     const xPiv = ((this.app.renderer.screen.width - this.data.position.x) / 2)
     const yPiv = ((this.app.renderer.screen.height - this.data.position.y) / 2)
-    this.camera.originalPivot = { x: xPiv, y: yPiv }
-    this.camera.pivot.set((this.data.position.x / 2) - xPiv, (this.data.position.y / 2) - yPiv)
+    camera.originalPivot = { x: xPiv, y: yPiv }
+    camera.pivot.set((this.data.position.x / 2) - xPiv, (this.data.position.y / 2) - yPiv)
 
     const bg = new window.PIXI.extras.TilingSprite(window.textures['basic_arena_bg.png'], this.app.renderer.screen.width * 10, this.app.renderer.screen.height * 10)
     bg.anchor.set(.5, .5)
     bg.x = this.data.position.x
     bg.y = this.data.position.y
-    this.camera.addChild(bg)
+    this.parent.addChild(bg)
 
     this.blocks = []
     for (let i = 0; i < data.blocks.length; i++) {
@@ -25,7 +25,7 @@ function Grid(data, { app, camera }) {
         sprite.width = blockData.size
         sprite.height = blockData.size
 
-        this.camera.addChild(sprite)
+        this.parent.addChild(sprite)
         this.blocks.push({ sprite, data: blockData })
     }
 }
