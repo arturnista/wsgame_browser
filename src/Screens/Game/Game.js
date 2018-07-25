@@ -69,6 +69,7 @@ class Game extends Component {
 
         this.player = null
         this.status = 'move'
+        this.cameraType = this.props.user.isObserver ? 'observer' : 'player'
 
     }
 
@@ -207,9 +208,10 @@ class Game extends Component {
         if(!this.gameIsRunning) {
             this.startTime -= deltatime
             const nTime = Math.round(this.startTime)
-            this.startTimeText.style.fontSize = (5 - nTime) * 10
-            if(nTime > 0) this.startTimeText.text = nTime
-            else {
+            this.startTimeText.style.fontSize = (5 - nTime) * 20
+            if(nTime > 0) {
+                this.startTimeText.text = nTime
+            } else {
                 this.startTimeText.text = 'GO!'
                 this.startTimeText.style.fill = 0xFFCC00
             }
@@ -218,21 +220,7 @@ class Game extends Component {
         if(!this.props.user.isObserver) {
 
             if(this.player) {
-
-                if(!vector.isEqual(this.lastPosition, this.player.position)) {
-                    const dist = vector.distance(this.map.data.position, this.player.position)
-                    let newZoom = this.map.originalSize / dist
-                    
-                    if(newZoom > 1) newZoom = 1
-                    this.zoom = newZoom
-                    this.camera.scale.set(this.zoom, this.zoom)
-
-                    const xPiv = (this.map.data.position.x / 2) - this.camera.originalPivot.x / this.zoom
-                    const yPiv = (this.map.data.position.y / 2) - this.camera.originalPivot.y / this.zoom
-                    this.camera.pivot.set(xPiv, yPiv)
-
-                    this.lastPosition = _.clone(this.player.position)
-                }
+                if(this.player.metadata.status !== 'alive') this.cameraType = 'observer'
 
                 const lifePerc = this.player.metadata.life / 100
                 if(this.lastLifePerc !== lifePerc) {
@@ -246,13 +234,15 @@ class Game extends Component {
                 this.player = this.players.find(x => x.id === this.myPlayerData.id)
             }
         } else {
-
+            
             for(const i in this.players) {
                 const obsPlayer = this.obsPlayers.find(x => x.id === this.players[i].id)
                 obsPlayer.sync(this.players[i])
             }
 
         }
+
+        this.cameraBehaviour()
 
         if(!_.isEmpty(this.map)) {
             this.map.update(deltatime)
@@ -278,6 +268,37 @@ class Game extends Component {
         }
     }
 
+    cameraBehaviour() {
+
+        this.playerTarget = this.player
+        if(!this.playerTarget) return
+
+        if(this.cameraType === 'player') {
+
+            if(!vector.isEqual(this.lastPosition, this.playerTarget.position)) {
+                const dist = vector.distance(this.map.data.position, this.playerTarget.position)
+                this.changeCameraZoom( this.map.originalSize / dist )
+                
+                this.lastPosition = _.clone(this.playerTarget.position)
+            }
+
+        } else {
+
+            this.changeCameraZoom(1)
+
+        }
+    }
+
+    changeCameraZoom(nZoom) {
+        if(nZoom > 1) nZoom = 1
+
+        this.zoom = nZoom
+        this.camera.scale.set(this.zoom, this.zoom)
+
+        const xPiv = (this.map.data.position.x / 2) - this.camera.originalPivot.x / this.zoom
+        const yPiv = (this.map.data.position.y / 2) - this.camera.originalPivot.y / this.zoom
+        this.camera.pivot.set(xPiv, yPiv)
+    }
 
     playerCreate(body) {
         console.log('player_create', body)

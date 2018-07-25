@@ -1,5 +1,6 @@
 import textureMap from '../textureMap'
 import SpellIcon from './SpellIcon'
+import { invertColor } from '../../../Utils/color'
 
 const size = 138
 
@@ -11,10 +12,24 @@ function ObsPlayer(index, playerData, hud, { spells }) {
 
     this.offset = index * 100
 
-    this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 15, fill: parseInt(playerData.color.replace('#', ''), 16), align: 'center' })
-    this.knockbackText.x = size / 2
+    let nameBGRectangle = new window.PIXI.Graphics()
+    nameBGRectangle.beginFill(parseInt(playerData.color.replace('#', ''), 16))
+    nameBGRectangle.drawRect(0, this.offset, size, 20)
+    nameBGRectangle.endFill()
+    this.hud.addChild(nameBGRectangle)
+
+    const invColor = invertColor(playerData.color, { bw: true })
+
+    this.nameText = new window.PIXI.Text(playerData.name, { fontFamily: 'Arial', fontSize: 15, fill: parseInt(invColor.replace('#', ''), 16), align: 'center' })
+    this.nameText.x = 0
+    this.nameText.y = this.offset
+    this.nameText.anchor.set(0, 0)
+    this.hud.addChild(this.nameText)
+
+    this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 15, fill: parseInt(invColor.replace('#', ''), 16), align: 'center' })
+    this.knockbackText.x = size
     this.knockbackText.y = this.offset
-    this.knockbackText.anchor.set(.5, 0)
+    this.knockbackText.anchor.set(1, 0)
     this.hud.addChild(this.knockbackText)
 
     let lifeOutRectangle = new window.PIXI.Graphics()

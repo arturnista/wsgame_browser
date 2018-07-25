@@ -48,6 +48,7 @@
     align-items: center;
     justify-content: flex-end;
     background-color: #ccc;
+    min-height: 2em;
 }
 
 .room-users-obs-text {
