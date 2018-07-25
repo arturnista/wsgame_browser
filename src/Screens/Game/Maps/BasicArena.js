@@ -52,7 +52,7 @@ BasicArena.prototype.updateMask = function() {
     this.camera.removeChild(this.mask)
     this.mask = new window.PIXI.Graphics()
 
-    this.mask.beginFill(0xFFF, 0)
+    this.mask.beginFill(0xFFF, 1)
     this.mask.drawCircle(this.data.position.x, this.data.position.y, this.currentSize / 2)
     this.mask.endFill()
     this.sprite.mask = this.mask

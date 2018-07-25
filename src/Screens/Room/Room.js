@@ -280,27 +280,37 @@ class Room extends Component {
 
         return (
             <div className="room-container">
-                <div className="room-info-container">
+                {/* <div className="room-info-container">
                     <h2 className="room-name">{ this.props.room.roomJoined }</h2>
-                </div>
+                </div> */}
                 <div className="room-content-container">
                     <div className='room-side-container'>
                         <div className='room-buttons-container'>
                             {
-                                !this.state.isObserver &&
+                                !this.state.isObserver ?
                                 <Button label={toggleText} className={'room-button left ' + this.state.status}
                                     onClick={this.handleToggleStatus}/>
+                                : <div className='room-button left'></div>
                             }
                             {
                                 this.props.isOwner ?
                                 <Button label='Start' className='room-button right'
                                     onClick={() => this.setState({ modalMapShowing: true })}/>
-                                : <div className='room-button'></div>
+                                : <div className='room-button right'></div>
                             }
                         </div>
                         <div className='room-users-container'>
                             <div className='room-users-container-header'>
-                                <p className='room-users-obs-text'>Observers: {this.props.room.observers.length}</p>
+                                {
+                                    this.props.isOwner &&
+                                    <Button label='Add bot' className='room-users-obs-button small'
+                                        onClick={() => this.setState({ botCount: this.state.botCount + 1})}/>
+                                }
+                                {
+                                    this.props.isOwner &&
+                                    <Button label='Remove bot' className='room-users-obs-button small'
+                                        onClick={() => this.setState({ botCount: this.state.botCount - 1})}/>
+                                }
                                 {
                                     !this.state.isObserver ?
                                     <Button label='Become observer' className='room-users-obs-button'
@@ -309,18 +319,13 @@ class Room extends Component {
                                     <Button label='Become player' className='room-users-obs-button'
                                         onClick={() => this.setState({ isObserver: false }, () => window.socketio.emit('user_become_player', {}))}/>
                                 }
+                                <p className='room-users-obs-text'>Observers: {this.props.room.observers.length}</p>
                             </div>
                             {
                                 this.props.room.users.map(this.renderUser)
                             }
                             {
                                 _.times(this.state.botCount, this.renderBot)
-                            }
-                            {
-                                this.props.isOwner &&
-                                <div className='room-users-addbot-container' onClick={() => this.setState({ botCount: this.state.botCount + 1})}>
-                                    <p className='room-users-addbot'>Add BOT</p>
-                                </div>
                             }
                         </div>
                         <div className='room-chat-container'>
@@ -346,6 +351,10 @@ class Room extends Component {
                             <div className='room-spell-desc-container'>
                                 <div className='room-spell-desc-icon-container'>
                                     <img className='room-spell-desc-icon' src={`/img/game/${this.state.selectedSpell.id}.png`} />
+                                    {/* <div>
+                                        <p>{this.state.selectedSpell.cooldown / 1000} sec</p>
+                                        <p>{this.state.selectedSpell.knockbackIncrement}%</p>
+                                    </div> */}
                                 </div>
                                 <div className='room-spell-desc-info'>
                                     <p className='room-spell-desc-name'>{this.state.selectedSpell.name}</p>

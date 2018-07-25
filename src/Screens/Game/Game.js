@@ -188,8 +188,8 @@ class Game extends Component {
         this.startTime = 4
         this.startTimeText = new window.PIXI.Text(this.startTime, { fontFamily: 'Arial', fontSize: 35, fill: 0xFAFAFA, align: 'center' })
         this.startTimeText.x = this.app.renderer.screen.width / 2
-        this.startTimeText.y = this.app.renderer.screen.height / 2 + 50
-        this.startTimeText.anchor.set(.5, .5)
+        this.startTimeText.y = this.app.renderer.screen.height / 2 + 35
+        this.startTimeText.anchor.set(.5, 0)
         this.startGameHud.addChild(this.startTimeText)    
 
         this.hud.addChild(this.startGameHud)
@@ -269,11 +269,12 @@ class Game extends Component {
     }
 
     cameraBehaviour() {
-
-        this.playerTarget = this.player
-        if(!this.playerTarget) return
+        if(_.isEmpty(this.map)) return
 
         if(this.cameraType === 'player') {
+
+            this.playerTarget = this.player
+            if(!this.playerTarget) return
 
             if(!vector.isEqual(this.lastPosition, this.playerTarget.position)) {
                 const dist = vector.distance(this.map.data.position, this.playerTarget.position)
@@ -284,7 +285,14 @@ class Game extends Component {
 
         } else {
 
-            this.changeCameraZoom(1)
+            const dist = this.players.reduce((dist, player) => {
+                if(player.metadata.status !== 'alive') return dist
+                const d = vector.distance(this.map.data.position, player.position)
+                return d > dist ? d : dist
+            }, 0)
+            let nZoom = this.map.originalSize / dist
+            if(nZoom < .7) nZoom = .7
+            this.changeCameraZoom(nZoom)
 
         }
     }
