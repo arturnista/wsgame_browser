@@ -2,9 +2,20 @@ import _ from 'lodash'
 import vector from '../../Utils/vector'
 
 export function createPlayer(playerData, game) {
-    const player = new window.PIXI.Sprite( window.textures['player.png'] )
-    player.anchor.set(.5, .5)
-    player.tint = parseInt(playerData.color.replace('#', ''), 16)
+    const player = new window.PIXI.Container()
+
+    const playerNameText = new window.PIXI.Text(playerData.name, { fontFamily: 'Arial', fontSize: 15, fill: 0xFAFAFA, align: 'center', stroke: 0x000000, strokeThickness: 2 })
+    playerNameText.x = 0
+    playerNameText.y = -20
+    playerNameText.anchor.set(.5, 1)
+    player.addChild(playerNameText)
+    
+    const playerSprite = new window.PIXI.Sprite( window.textures['player.png'] )
+    playerSprite.anchor.set(.5, .5)
+    playerSprite.width = playerData.collider.size
+    playerSprite.height = playerData.collider.size
+    playerSprite.tint = parseInt(playerData.color.replace('#', ''), 16)
+    player.addChild(playerSprite)
 
     let lastTexture = ''
     let hor = 'right'
@@ -16,7 +27,7 @@ export function createPlayer(playerData, game) {
         let textureName = `player_${hor}_${ver}.png`
         if(lastTexture !== textureName) {
             lastTexture = textureName
-            player.texture = window.textures[textureName]
+            playerSprite.texture = window.textures[textureName]
         }
     }
 

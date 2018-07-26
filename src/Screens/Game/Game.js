@@ -422,8 +422,6 @@ class Game extends Component {
 
             player.id = playerData.id
             player.metadata = { ...playerData }
-            player.width = playerData.collider.size
-            player.height = playerData.collider.size
             player.x = playerData.position.x
             player.y = playerData.position.y
             player.vx = playerData.velocity.x
@@ -569,6 +567,9 @@ class Game extends Component {
             case 'e':
                 if(this.props.user.spells.length <= 2) return
                 this.useSpell(this.props.user.spells[2])
+                break
+            case 's':
+                this.status = 'move'
                 break
         }
     }

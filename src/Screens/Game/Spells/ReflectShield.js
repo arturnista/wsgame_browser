@@ -10,8 +10,8 @@ export function createReflectShield(spellData, game, player) {
 
     spell.id = spellData.id
     spell.metadata = { ...spellData }
-    spell.width = player.width * 1.3
-    spell.height = player.height * 1.3
+    spell.width = player.metadata.collider.size * 1.3
+    spell.height = player.metadata.collider.size * 1.3
     spell.x = spellData.position.x
     spell.y = spellData.position.y
 
