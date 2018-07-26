@@ -25,7 +25,7 @@ export function createExplosion(spellData, game) {
     radius.height = spellData.radius * 2
     radius.x = spellData.position.x
     radius.y = spellData.position.y
-    game.createEntity(radius, 3)
+    game.createSpell(radius)
 
     spell.update = (deltatime) => {
         time += deltatime
@@ -49,16 +49,16 @@ export function createExplosion(spellData, game) {
                     exp.y = spellData.position.y + (Math.random() * offset * (Math.random()*2|0 || -1))
                     
                     setTimeout(() => {
-                        game.createEntity(exp)
-                        setTimeout(() => game.removeEntity(exp), Math.random() * 600)
+                        game.createSpell(exp)
+                        setTimeout(() => game.removeSpell(exp), Math.random() * 600)
                     }, Math.random() * 600)
                 }
                 spell.texture = window.textures['explosion.png']
                 exploded = true
             }
             if(t > 2) {
-                game.removeEntity(spell)
-                game.removeEntity(radius)
+                game.removeSpell(spell)
+                game.removeSpell(radius)
             }
         }
 

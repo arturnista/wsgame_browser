@@ -114,6 +114,7 @@ class Game extends Component {
         this.entities = {}
         this.hudEntities = []
         this.entitiesToRemove = []
+        this.spellsToRemove = []
         this.map = {}
         this.tick = 0
 
@@ -139,9 +140,13 @@ class Game extends Component {
         this.camera.hitArea = new window.PIXI.Rectangle(0, 0, 1000, 1000)
         this.hud = new window.PIXI.Container()
         this.mapContainer = new window.PIXI.Container()
+        this.spellsContainer = new window.PIXI.Container()
+        this.entitiesContainer = new window.PIXI.Container()
         this.obsPlayers = []
         
         this.camera.addChild(this.mapContainer)
+        this.camera.addChild(this.spellsContainer)
+        this.camera.addChild(this.entitiesContainer)
         
         if(this.props.user.isObserver) {
 
@@ -264,7 +269,15 @@ class Game extends Component {
 
         while (this.entitiesToRemove.length > 0) {
             const entity = this.entitiesToRemove.pop()
-            this.camera.removeChild(entity)
+            this.entitiesContainer.removeChild(entity)
+            if(entity.id && this.entities[entity.id]) {
+                delete this.entities[entity.id]
+            }
+        }
+
+        while (this.spellsToRemove.length > 0) {
+            const entity = this.spellsToRemove.pop()
+            this.spellsContainer.removeChild(entity)
             if(entity.id && this.entities[entity.id]) {
                 delete this.entities[entity.id]
             }
@@ -339,7 +352,7 @@ class Game extends Component {
         }
 
         if(spell) {
-            this.camera.addChild(spell)
+            this.spellsContainer.addChild(spell)
             this.entities[body.id] = spell
         }
     }
@@ -367,7 +380,7 @@ class Game extends Component {
                         spell.anchor.set(.5, .5)
                         break
                 }
-                this.camera.addChild(spell)
+                this.spellsContainer.addChild(spell)
                 this.spells.push(spell)
                 this.entities[spell.id] = spell
             }
@@ -387,7 +400,7 @@ class Game extends Component {
 
         this.spells = this.spells.filter(x => {
             if(x.lastTick !== this.tick) {
-                this.removeEntity(x)
+                this.removeSpell(x)
                 return false
             }
             return true
@@ -401,7 +414,7 @@ class Game extends Component {
             if(_.isNil(player)) {
 
                 player = createPlayer(playerData, this)
-                this.camera.addChild(player)
+                this.entitiesContainer.addChild(player)
                 this.players.push(player)
                 this.entities[playerData.id] = player
 
@@ -508,14 +521,22 @@ class Game extends Component {
         this.props.history.replace('/room')
     }
 
-    createEntity(entity, idx = -1) {
-        if(idx >= 0) this.camera.addChildAt(entity, idx)
-        else this.camera.addChild(entity)
-        if(entity.id) this.entities[entity.id] = entity
+    createSpell(spell) {
+        this.spellsContainer.addChild(spell)
+        if(spell.id) this.entities[spell.id] = spell
     }
 
+    createEntity(entity) {
+        this.entitiesContainer.addChild(entity)
+        if(entity.id) this.entities[entity.id] = entity
+    }
+    
     removeEntity(entity) {
         this.entitiesToRemove.push(entity)
+    }
+    
+    removeSpell(spell) {
+        this.spellsToRemove.push(spell)
     }
 
     handleMouseDown(event) {

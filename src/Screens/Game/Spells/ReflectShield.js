@@ -19,7 +19,7 @@ export function createReflectShield(spellData, game, player) {
         spell.rotation += 2 * deltatime
 
         time += deltatime
-        if(time > dur) game.removeEntity(spell)
+        if(time > dur) game.removeSpell(spell)
 
         spell.x = player.x
         spell.y = player.y
