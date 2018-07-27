@@ -136,6 +136,8 @@ class Game extends Component {
     }
 
     handleLoad() {
+        if(_.isEmpty(this.props.user)) return
+
         this.camera = new window.PIXI.Container()
         this.camera.hitArea = new window.PIXI.Rectangle(0, 0, 1000, 1000)
         this.hud = new window.PIXI.Container()
@@ -157,28 +159,27 @@ class Game extends Component {
 
             let lifeOutRectangle = new window.PIXI.Graphics()
             lifeOutRectangle.beginFill(0xEEEEEE)
-            lifeOutRectangle.drawRect(0, 0, this.app.renderer.screen.width, 15)
+            lifeOutRectangle.drawRect(0, 0, this.app.renderer.screen.width, 20)
             lifeOutRectangle.endFill()
             this.hud.addChild(lifeOutRectangle)
 
             this.lifeRectangle = new window.PIXI.Graphics()
             this.lifeRectangle.beginFill(0xFF3300)
-            this.lifeRectangle.drawRect(0, 0, this.app.renderer.screen.width, 15)
+            this.lifeRectangle.drawRect(0, 0, this.app.renderer.screen.width, 20)
             this.lifeRectangle.endFill()
             this.hud.addChild(this.lifeRectangle)
 
-            // this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 35, fill: 0x22B222, align: 'center' })
-            this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 35, fill: parseInt(this.props.user.color.replace('#', ''), 16), align: 'center' })
+            this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 20, fill: parseInt(this.props.user.color.replace('#', ''), 16), align: 'center', strokeThickness: 1 })
             this.knockbackText.x = this.app.renderer.screen.width / 2
-            this.knockbackText.y = 35
-            this.knockbackText.anchor.set(.5, .5)
+            this.knockbackText.anchor.set(.5, 0)
             this.hud.addChild(this.knockbackText)
 
             this.spellsIcons = []
+            const off = (this.props.user.spells.length * 55 - 5) / 2
             for (var i = 0; i < this.props.user.spells.length; i++) {
                 const spellData = this.props.spells.find(x => this.props.user.spells[i] === x.id)
                 if(!spellData) continue
-                const ic = new SpellIcon(i, spellData, this.hud)
+                const ic = new SpellIcon(i, spellData, this.hud, { xOffset: this.app.renderer.screen.width / 2 - off, yOffset: 23 })
                 this.spellsIcons.push( ic )
                 this.hudEntities.push( ic )
             }
