@@ -43,7 +43,7 @@ export default function reducer(state = initialState, action = {}) {
         case RESET_ROOM:
             return {
                 ...state,
-                users: state.users.map(x => ({ ...x, status: 'waiting', isReady: false }))
+                users: action.users
             }
         case UPDATE_CHAT:
             return {
@@ -131,8 +131,9 @@ export function updateRoom(room) {
     }
 }
 
-export function resetRoom() {
+export function resetRoom(users) {
     return {
         type: RESET_ROOM,
+        users
     }
 }

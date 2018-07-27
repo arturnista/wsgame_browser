@@ -39,7 +39,7 @@ const mapStateToProps = (state) => ({
 })
 const mapDispatchToProps = (dispatch) => ({
     stopGame: () => dispatch(stopGame()),
-    resetRoom: () => dispatch(resetRoom()),
+    resetRoom: (users) => dispatch(resetRoom(users)),
     userEndGame: (user) => dispatch(userEndGame(user))
 })
 
@@ -520,7 +520,7 @@ class Game extends Component {
     gameEnd(body) {
         console.log('gameEnd', body)
         this.props.stopGame()
-        this.props.resetRoom()
+        this.props.resetRoom(body.users)
         this.props.userEndGame(body.users.find(x => x.id === this.props.user.id))
 
         this.props.history.replace('/room')
