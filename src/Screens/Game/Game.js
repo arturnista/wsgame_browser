@@ -656,7 +656,10 @@ class Game extends Component {
             const distance = vector.distance(this.player.position, this.mousePosition)
             if(distance > this.selectedSpellData.distance) {
                 const direc = vector.direction(this.player.position, this.mousePosition)
-                finishPos = vector.add(this.player.position, vector.multiply(direc, this.selectedSpellData.distance))
+                const angle = Math.atan2(direc.y, direc.x)
+                const xProj = Math.cos(angle) * this.selectedSpellData.distance
+                const yProj = Math.sin(angle) * this.selectedSpellData.distance
+                finishPos = vector.add(this.player.position, { x: xProj, y: yProj })
             }
         }
         
