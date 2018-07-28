@@ -105,9 +105,17 @@
 }
 
 .room-user-color {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     height: 1.5em;
     width: 1.5em;
     border: 1px solid #212121;
+}
+
+.room-user-win {
+    font-size: .7em;
 }
 
 .room-user-name {

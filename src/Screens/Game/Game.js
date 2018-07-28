@@ -39,7 +39,7 @@ const mapStateToProps = (state) => ({
 })
 const mapDispatchToProps = (dispatch) => ({
     stopGame: () => dispatch(stopGame()),
-    resetRoom: () => dispatch(resetRoom()),
+    resetRoom: (users) => dispatch(resetRoom(users)),
     userEndGame: (user) => dispatch(userEndGame(user))
 })
 
@@ -51,6 +51,7 @@ class Game extends Component {
 
         this.handleLoad = this.handleLoad.bind(this)
         this.handleMouseDown = this.handleMouseDown.bind(this)
+        this.handleMouseMove = this.handleMouseMove.bind(this)
         this.handleKeyDown = this.handleKeyDown.bind(this)
         this.gameLoop = this.gameLoop.bind(this)
 
@@ -63,6 +64,7 @@ class Game extends Component {
         this.gameWillEnd = this.gameWillEnd.bind(this)
         this.gameEnd = this.gameEnd.bind(this)
 
+        this.selectedSpellData = null
         this.gameIsRunning = false
         this.zoom = 1
         this.zoomOption = 1
@@ -136,12 +138,16 @@ class Game extends Component {
     }
 
     handleLoad() {
+        if(_.isEmpty(this.props.user)) return
+
         this.camera = new window.PIXI.Container()
         this.camera.hitArea = new window.PIXI.Rectangle(0, 0, 1000, 1000)
         this.hud = new window.PIXI.Container()
+
         this.mapContainer = new window.PIXI.Container()
         this.spellsContainer = new window.PIXI.Container()
         this.entitiesContainer = new window.PIXI.Container()
+        
         this.obsPlayers = []
         
         this.camera.addChild(this.mapContainer)
@@ -157,28 +163,27 @@ class Game extends Component {
 
             let lifeOutRectangle = new window.PIXI.Graphics()
             lifeOutRectangle.beginFill(0xEEEEEE)
-            lifeOutRectangle.drawRect(0, 0, this.app.renderer.screen.width, 15)
+            lifeOutRectangle.drawRect(0, 0, this.app.renderer.screen.width, 20)
             lifeOutRectangle.endFill()
             this.hud.addChild(lifeOutRectangle)
 
             this.lifeRectangle = new window.PIXI.Graphics()
             this.lifeRectangle.beginFill(0xFF3300)
-            this.lifeRectangle.drawRect(0, 0, this.app.renderer.screen.width, 15)
+            this.lifeRectangle.drawRect(0, 0, this.app.renderer.screen.width, 20)
             this.lifeRectangle.endFill()
             this.hud.addChild(this.lifeRectangle)
 
-            // this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 35, fill: 0x22B222, align: 'center' })
-            this.knockbackText = new window.PIXI.Text(100, { fontFamily: 'Arial', fontSize: 35, fill: parseInt(this.props.user.color.replace('#', ''), 16), align: 'center' })
+            this.knockbackText = new window.PIXI.Text('', { fontFamily: 'Arial', fontSize: 20, fill: parseInt(this.props.user.color.replace('#', ''), 16), align: 'center', strokeThickness: 1 })
             this.knockbackText.x = this.app.renderer.screen.width / 2
-            this.knockbackText.y = 35
-            this.knockbackText.anchor.set(.5, .5)
+            this.knockbackText.anchor.set(.5, 0)
             this.hud.addChild(this.knockbackText)
 
             this.spellsIcons = []
+            const off = (this.props.user.spells.length * 55 - 5) / 2
             for (var i = 0; i < this.props.user.spells.length; i++) {
                 const spellData = this.props.spells.find(x => this.props.user.spells[i] === x.id)
                 if(!spellData) continue
-                const ic = new SpellIcon(i, spellData, this.hud)
+                const ic = new SpellIcon(i, spellData, this.hud, { xOffset: this.app.renderer.screen.width / 2 - off, yOffset: 23 })
                 this.spellsIcons.push( ic )
                 this.hudEntities.push( ic )
             }
@@ -513,7 +518,7 @@ class Game extends Component {
     gameEnd(body) {
         console.log('gameEnd', body)
         this.props.stopGame()
-        this.props.resetRoom()
+        this.props.resetRoom(body.users)
         this.props.userEndGame(body.users.find(x => x.id === this.props.user.id))
 
         this.props.history.replace('/room')
@@ -547,9 +552,34 @@ class Game extends Component {
             x: (xClick / this.zoom) + this.camera.pivot.x,
             y: (yClick / this.zoom) + this.camera.pivot.y
         }
-
         this.emitAction(this.status, pos)
 
+    }
+
+    handleMouseMove(event) {
+        const xClick = event.clientX
+        const yClick = event.clientY - 96
+        this.mousePosition =  {
+            x: (xClick / this.zoom) + this.camera.pivot.x,
+            y: (yClick / this.zoom) + this.camera.pivot.y
+        }
+        if(!this.player || !this.selectedSpellData || !this.spellPrediction) return
+        
+        if(this.selectedSpellData.distance) {
+
+            const distance = vector.distance(this.player.position, this.mousePosition)
+            if(distance < this.selectedSpellData.distance) {
+                this.spellPrediction.x = this.mousePosition.x
+                this.spellPrediction.y = this.mousePosition.y
+            } else {
+                const direc = vector.direction(this.player.position, this.mousePosition)
+                const pos = vector.multiply(direc, this.selectedSpellData.distance)
+                
+                this.spellPrediction.x = pos.x
+                this.spellPrediction.y = pos.y
+            }
+        }
+        
     }
 
     handleKeyDown(e) {
@@ -569,13 +599,17 @@ class Game extends Component {
                 this.useSpell(this.props.user.spells[2])
                 break
             case 's':
-                this.status = 'move'
+                this.resetAction()
+                break
+            case 'escape':
+                this.resetAction()
                 break
         }
     }
 
     useSpell(name) {
         if(this.props.user.isObserver) return
+
         const spellName = 'spell_' + name
         switch (name) {
             case 'reflect_shield':
@@ -584,6 +618,38 @@ class Game extends Component {
                 return
             default:
                 this.status = spellName
+        }
+
+        this.selectedSpellData = this.props.spells.find(x => x.id === name)
+
+        if(!this.spellPrediction) {
+            this.spellPrediction = new window.PIXI.Container()
+            this.spellsContainer.addChild(this.spellPrediction)
+        }
+        this.spellPrediction.removeChild(this.spellPrediction.children[0])
+
+        switch (name) {
+            case 'boomerang':
+            case 'fireball':
+            case 'blink':
+                this.spellPrediction.visible = true
+                let oneTimePred = new window.PIXI.Graphics()
+                oneTimePred.beginFill(0xFAFAFA, .1)
+                oneTimePred.lineStyle(2, 0x1976D2)
+                oneTimePred.drawCircle(0, 0, 5)
+                oneTimePred.endFill()
+                this.spellPrediction.addChild(oneTimePred)
+                break
+                
+            case 'explosion':
+                this.spellPrediction.visible = true
+                let circlePred = new window.PIXI.Graphics()
+                circlePred.beginFill(0xFAFAFA, .1)
+                circlePred.lineStyle(2, 0x1976D2)
+                circlePred.drawCircle(0, 0, this.selectedSpellData.radius)
+                circlePred.endFill()
+                this.spellPrediction.addChild(circlePred)
+                break
         }
     }
 
@@ -597,7 +663,14 @@ class Game extends Component {
             position: mousePosition,
             direction: vector.direction(this.player.position, mousePosition),
         })
+
+        this.resetAction()
+    }
+
+    resetAction() {
         this.status = 'move'
+        if(this.spellPrediction) this.spellPrediction.visible = false
+        this.selectedSpellData = null
     }
 
     render() {
@@ -605,6 +678,7 @@ class Game extends Component {
         return (
             <div id="game-mount-container" className="game-container">
                 <div id="game-mount" className="game" ref={r => this.gameDiv = r}
+                    onMouseMove={this.handleMouseMove}
                     onMouseDown={this.handleMouseDown}
                     onKeyDown={this.handleKeyDown} tabIndex="1">
 

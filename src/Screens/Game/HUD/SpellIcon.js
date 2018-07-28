@@ -1,18 +1,23 @@
 import textureMap from '../textureMap'
 
-const size = 42
-const iconSize = 32
-const iconSizeHalf = iconSize / 2
-
-const diff = size - iconSize
-const diffHalf = diff / 2
-
-const border = 2
-const borderHalf = border / 2
-
 export default
-function Icon(index, spellData, hud, { noHotkey, xOffset = 0, yOffset = 0 } = { xOffset: 0, yOffset: 0 }) {
+function Icon(index, spellData, hud, { noHotkey, xOffset = 0, yOffset = 0, size = 50 } = { xOffset: 0, yOffset: 0, size: 50 }) {
     this.index = index
+    this.size = size
+
+    const padding = 5
+
+    const iconSize = 32
+    const iconSizeHalf = iconSize / 2
+
+    const diff = size - iconSize
+    const diffHalf = diff / 2
+
+    this.border = 2
+    this.borderHalf = this.border / 2
+
+    this.spellIconContainer = new window.PIXI.Container()
+
     this.spellData = spellData
     this.id = spellData.id
 
@@ -34,31 +39,37 @@ function Icon(index, spellData, hud, { noHotkey, xOffset = 0, yOffset = 0 } = { 
         }
     }
 
-    const xAmount = (size + 5) * index + xOffset
+    const xAmount = (this.size + padding) * index
 
-    let iconBackground = new window.PIXI.Graphics()
+    const iconBackground = new window.PIXI.Graphics()
     iconBackground.beginFill(0x212121)
-    iconBackground.lineStyle(border, 0xFAFAFA)
-    iconBackground.drawRect(xAmount + borderHalf, 15 + borderHalf + yOffset, size, size)
+    iconBackground.lineStyle(this.border, 0xFAFAFA)
+    iconBackground.drawRect(this.borderHalf, this.borderHalf, this.size, this.size)
     iconBackground.endFill()
-    hud.addChild(iconBackground)
+    this.spellIconContainer.addChild(iconBackground)
 
     const iconSprite = new window.PIXI.Sprite( window.textures[texture] )
-    iconSprite.x = xAmount + diffHalf
-    iconSprite.y = 15 + diffHalf + yOffset
-    hud.addChild(iconSprite)
+    iconSprite.x = this.size / 2
+    iconSprite.y = this.size / 2
+    iconSprite.anchor.set(.5, .5)
+    this.spellIconContainer.addChild(iconSprite)
 
     const iconTime = new window.PIXI.Text(10, { fontFamily: 'Arial', fontSize: 15, fill: 0xFAFAFA, align: 'center' })
-    iconTime.x = xAmount + iconSize + diff
-    iconTime.y = iconSize + 15 + diff + yOffset
+    iconTime.x = iconSize + diff
+    iconTime.y = iconSize + diff
     iconTime.anchor.set(1, 1)
-    hud.addChild(iconTime)
+    this.spellIconContainer.addChild(iconTime)
 
     const iconHotkey = new window.PIXI.Text(hotkey, { fontFamily: 'Arial', fontSize: 15, fill: 0xFAFAFA, align: 'center' })
-    iconHotkey.x = xAmount + iconSize + diff
-    iconHotkey.y = 15 + yOffset
+    iconHotkey.x = iconSize + diff
+    iconHotkey.y = 0
     iconHotkey.anchor.set(1, 0)
-    hud.addChild(iconHotkey)
+
+    this.spellIconContainer.x = xAmount + xOffset
+    this.spellIconContainer.y = yOffset
+    this.spellIconContainer.addChild(iconHotkey)
+
+    hud.addChild(this.spellIconContainer)
 
     this.background = iconBackground
     this.sprite = iconSprite
@@ -72,11 +83,21 @@ Icon.prototype.use = function () {
     this.cooldown = this.spellData.cooldown / 1000
     this.time.text = this.cooldown.toFixed(1)
     this.time.visible = true
+
+    this.background.beginFill(0xFF0000)
+    this.background.lineStyle(this.border, 0xFAFAFA)
+    this.background.drawRect(this.borderHalf, this.borderHalf, this.size, this.size)
+    this.background.endFill()
 }
 
 Icon.prototype.clearCooldown = function () {
     this.cooldown = 0
     this.time.visible = false
+
+    this.background.beginFill(0x212121)
+    this.background.lineStyle(this.border, 0xFAFAFA)
+    this.background.drawRect(this.borderHalf, this.borderHalf, this.size, this.size)
+    this.background.endFill()
 }
 
 Icon.prototype.update = function (deltatime) {
@@ -85,6 +106,7 @@ Icon.prototype.update = function (deltatime) {
         this.time.text = this.cooldown.toFixed(1)
         if(this.cooldown < 0) {
             this.time.visible = false
+            this.clearCooldown()
         }
     }
 }

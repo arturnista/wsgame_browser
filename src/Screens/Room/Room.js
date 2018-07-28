@@ -204,7 +204,9 @@ class Room extends Component {
         return (
             <div key={user.id}
                 className={'room-user-container ' + user.status}>
-                <div className='room-user-color' style={{ backgroundColor: user.color }}></div>
+                <div className='room-user-color' style={{ backgroundColor: user.color }}>
+                    <p className='room-user-win'>{user.winCount}</p>
+                </div>
                 <p className={'room-user-name ' + (isOwner ? 'owner ' : ' ') + (isYou ? 'you' : '')}>{user.name}</p>
                 <p className={'room-user-status ' + user.status}>{user.status.toUpperCase()}</p>
             </div>

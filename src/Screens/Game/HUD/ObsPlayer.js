@@ -3,6 +3,7 @@ import SpellIcon from './SpellIcon'
 import { invertColor } from '../../../Utils/color'
 
 const size = 138
+const iconPadding = 40
 
 export default
 function ObsPlayer(index, playerData, hud, { spells }) {
@@ -48,7 +49,7 @@ function ObsPlayer(index, playerData, hud, { spells }) {
     for (var i = 0; i < playerData.spells.length; i++) {
         const spellData = spells.find(x => playerData.spells[i] === x.id)
         if(!spellData) continue
-        const ic = new SpellIcon(i, spellData, this.hud, { noHotkey: true, yOffset: this.offset + 30 })
+        const ic = new SpellIcon(i, spellData, this.hud, { noHotkey: true, yOffset: this.offset + iconPadding, size: 42 })
         this.spellsIcons.push( ic )
     }
 }
