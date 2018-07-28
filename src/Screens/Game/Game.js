@@ -234,7 +234,7 @@ class Game extends Component {
 
             if(this.player) {
                 if(this.player.metadata.status !== 'alive') this.cameraType = 'observer'
-
+                
                 const lifePerc = this.player.metadata.life / 100
                 if(this.lastLifePerc !== lifePerc) {
                     this.lifeRectangle.width = this.app.renderer.screen.width * lifePerc
@@ -300,6 +300,8 @@ class Game extends Component {
             if(!vector.isEqual(this.lastPosition, this.playerTarget.position)) {
                 const dist = vector.distance(this.map.data.position, this.playerTarget.position)
                 this.changeCameraZoom( this.map.originalSize / dist )
+
+                this.updateSpellPrediction()                        
                 
                 this.lastPosition = _.clone(this.playerTarget.position)
             }
@@ -320,6 +322,7 @@ class Game extends Component {
 
     changeCameraZoom(nZoom) {
         if(nZoom > 1) nZoom = 1
+        if(this.zoom === nZoom) return
 
         this.zoom = nZoom
         this.camera.scale.set(this.zoom, this.zoom)
@@ -563,23 +566,7 @@ class Game extends Component {
             x: (xClick / this.zoom) + this.camera.pivot.x,
             y: (yClick / this.zoom) + this.camera.pivot.y
         }
-        if(!this.player || !this.selectedSpellData || !this.spellPrediction) return
-        
-        if(this.selectedSpellData.distance) {
-
-            const distance = vector.distance(this.player.position, this.mousePosition)
-            if(distance < this.selectedSpellData.distance) {
-                this.spellPrediction.x = this.mousePosition.x
-                this.spellPrediction.y = this.mousePosition.y
-            } else {
-                const direc = vector.direction(this.player.position, this.mousePosition)
-                const pos = vector.multiply(direc, this.selectedSpellData.distance)
-                
-                this.spellPrediction.x = pos.x
-                this.spellPrediction.y = pos.y
-            }
-        }
-        
+        this.updateSpellPrediction()
     }
 
     handleKeyDown(e) {
@@ -619,7 +606,10 @@ class Game extends Component {
             default:
                 this.status = spellName
         }
+        this.createSpellPrediction(name)
+    }
 
+    createSpellPrediction(name) {
         this.selectedSpellData = this.props.spells.find(x => x.id === name)
 
         if(!this.spellPrediction) {
@@ -627,6 +617,7 @@ class Game extends Component {
             this.spellsContainer.addChild(this.spellPrediction)
         }
         this.spellPrediction.removeChild(this.spellPrediction.children[0])
+        this.spellPrediction.hasLine = false
 
         switch (name) {
             case 'boomerang':
@@ -635,9 +626,11 @@ class Game extends Component {
                 this.spellPrediction.visible = true
                 let oneTimePred = new window.PIXI.Graphics()
                 oneTimePred.beginFill(0xFAFAFA, .1)
-                oneTimePred.lineStyle(2, 0x1976D2)
-                oneTimePred.drawCircle(0, 0, 5)
-                oneTimePred.endFill()
+                    .lineStyle(2, 0x1976D2)
+                    .moveTo(this.player.position.x - this.mousePosition.x, this.player.position.y - this.mousePosition.y)
+                    .lineTo(0, 0)
+                    .drawCircle(0, 0, 10)
+                this.spellPrediction.hasLine = true
                 this.spellPrediction.addChild(oneTimePred)
                 break
                 
@@ -651,6 +644,38 @@ class Game extends Component {
                 this.spellPrediction.addChild(circlePred)
                 break
         }
+    }
+
+    updateSpellPrediction() {
+        if(!this.player || !this.selectedSpellData || !this.spellPrediction) return
+        
+        let finishPos = this.mousePosition
+
+        if(this.selectedSpellData.distance) {
+
+            const distance = vector.distance(this.player.position, this.mousePosition)
+            if(distance > this.selectedSpellData.distance) {
+                const direc = vector.direction(this.player.position, this.mousePosition)
+                finishPos = vector.add(this.player.position, vector.multiply(direc, this.selectedSpellData.distance))
+            }
+        }
+        
+        if(this.spellPrediction.hasLine) {
+            const nPos = {
+                x: this.player.position.x - finishPos.x,
+                y: this.player.position.y - finishPos.y
+            }
+            const dir = vector.direction(finishPos, this.player.position)
+            this.spellPrediction.children[0].clear()
+            this.spellPrediction.children[0].beginFill(0xFAFAFA, .1)
+                    .lineStyle(2, 0x1976D2)
+                    .moveTo(nPos.x, nPos.y)
+                    .lineTo(dir.x * 10, dir.y * 10)
+                    .drawCircle(0, 0, 10)
+        }
+
+        this.spellPrediction.x = finishPos.x
+        this.spellPrediction.y = finishPos.y
     }
 
     emitAction(action, mousePosition) {
