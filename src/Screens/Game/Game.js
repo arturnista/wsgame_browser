@@ -547,7 +547,7 @@ class Game extends Component {
 
     handleMouseDown(event) {
         if(this.props.user.isObserver) return
-
+        
         event.preventDefault()
         const xClick = event.clientX
         const yClick = event.clientY - 96
@@ -555,7 +555,11 @@ class Game extends Component {
             x: (xClick / this.zoom) + this.camera.pivot.x,
             y: (yClick / this.zoom) + this.camera.pivot.y
         }
-        this.emitAction(this.status, pos)
+        if(event.button === 2) {
+            this.emitAction('move', pos)
+        } else {
+            this.emitAction(this.status, pos)
+        }
 
     }
 
@@ -708,6 +712,7 @@ class Game extends Component {
                 <div id="game-mount" className="game" ref={r => this.gameDiv = r}
                     onMouseMove={this.handleMouseMove}
                     onMouseDown={this.handleMouseDown}
+                    onContextMenu={e => e.preventDefault()}
                     onKeyDown={this.handleKeyDown} tabIndex="1">
 
                 </div>
