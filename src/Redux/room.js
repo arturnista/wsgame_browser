@@ -43,7 +43,8 @@ export default function reducer(state = initialState, action = {}) {
         case RESET_ROOM:
             return {
                 ...state,
-                users: action.users
+                users: action.users,
+                observers: action.observers,
             }
         case UPDATE_CHAT:
             return {
@@ -134,6 +135,7 @@ export function updateRoom(room) {
 export function resetRoom(users) {
     return {
         type: RESET_ROOM,
-        users
+        users: users.filter(x => !x.isObserver),
+        observers: users.filter(x => x.isObserver),
     }
 }

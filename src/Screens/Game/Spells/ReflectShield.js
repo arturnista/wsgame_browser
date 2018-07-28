@@ -12,14 +12,17 @@ export function createReflectShield(spellData, game, player) {
     spell.metadata = { ...spellData }
     spell.width = player.metadata.collider.size * 1.3
     spell.height = player.metadata.collider.size * 1.3
-    spell.x = spellData.position.x
-    spell.y = spellData.position.y
+    spell.x = player.x
+    spell.y = player.y
 
     spell.update = (deltatime) => {
         spell.rotation += 2 * deltatime
 
         time += deltatime
-        if(time > dur) game.removeSpell(spell)
+        if(time > dur) {
+            game.removeSpell(spell)
+            return
+        }
 
         spell.x = player.x
         spell.y = player.y

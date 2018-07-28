@@ -84,29 +84,34 @@ Icon.prototype.use = function () {
     this.time.text = this.cooldown.toFixed(1)
     this.time.visible = true
 
-    this.background.beginFill(0xFF0000)
-    this.background.lineStyle(this.border, 0xFAFAFA)
-    this.background.drawRect(this.borderHalf, this.borderHalf, this.size, this.size)
-    this.background.endFill()
+    this.background.clear()
+        .beginFill(0xFF0000)
+        .lineStyle(this.border, 0xFAFAFA)
+        .drawRect(this.borderHalf, this.borderHalf, this.size, this.size)
+        .endFill()
 }
 
 Icon.prototype.clearCooldown = function () {
     this.cooldown = 0
     this.time.visible = false
 
-    this.background.beginFill(0x212121)
-    this.background.lineStyle(this.border, 0xFAFAFA)
-    this.background.drawRect(this.borderHalf, this.borderHalf, this.size, this.size)
-    this.background.endFill()
+    this.background.clear()
+        .beginFill(0x212121)
+        .lineStyle(this.border, 0xFAFAFA)
+        .drawRect(this.borderHalf, this.borderHalf, this.size, this.size)
+        .endFill()
 }
 
 Icon.prototype.update = function (deltatime) {
     if(this.cooldown > 0) {
         this.cooldown -= deltatime
-        this.time.text = this.cooldown.toFixed(1)
-        if(this.cooldown < 0) {
-            this.time.visible = false
-            this.clearCooldown()
+        const text = this.cooldown.toFixed(1)
+        if(text !== this.lastText) {
+            this.time.text = text
+            this.lastText = text
         }
+    } else {
+        this.time.visible = false
+        this.clearCooldown()
     }
 }

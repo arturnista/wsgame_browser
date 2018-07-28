@@ -5,6 +5,10 @@ function BasicArena(data, { app, camera, parent }) {
     this.parent = parent
     this.data = data
 
+    this.originalSize = this.data.size / 2
+    this.currentSize = this.data.size
+    this.lastSize = this.currentSize + 10
+
     const xPiv = ((this.app.renderer.screen.width - this.data.position.x) / 2)
     const yPiv = ((this.app.renderer.screen.height - this.data.position.y) / 2)
     camera.originalPivot = { x: xPiv, y: yPiv }
@@ -21,12 +25,10 @@ function BasicArena(data, { app, camera, parent }) {
     this.sprite.y = this.data.position.y
     this.sprite.width = this.data.size
     this.sprite.height = this.data.size
-    this.originalSize = this.data.size / 2
-    this.currentSize = this.data.size
     this.sprite.anchor.set(.5, .5)
     this.parent.addChild(this.sprite)
 
-    this.updateMask()
+    this.updateMask(true)
 
     for (let i = 0; i < data.obstacles.length; i++) {
         const obstacleData = data.obstacles[i]
@@ -48,15 +50,20 @@ BasicArena.prototype.updateData = function(data) {
     this.updateMask()
 }
 
-BasicArena.prototype.updateMask = function() {       
-    this.parent.removeChild(this.mask)
-    this.mask = new window.PIXI.Graphics()
+BasicArena.prototype.updateMask = function(force) {   
+    if(this.lastSize - this.currentSize < 1) return
+    this.lastSize = this.currentSize
 
-    this.mask.beginFill(0xFFF, 1)
-    this.mask.drawCircle(this.data.position.x, this.data.position.y, this.currentSize / 2)
-    this.mask.endFill()
-    this.sprite.mask = this.mask
-    this.parent.addChild(this.mask)
+    if(!this.mask) {
+        this.mask = new window.PIXI.Graphics()
+        this.sprite.mask = this.mask
+        this.parent.addChild(this.mask)
+    }
+
+    this.mask.clear()
+        .beginFill(0xFFF, 0)
+        .drawCircle(this.data.position.x, this.data.position.y, this.currentSize / 2)
+        .endFill()
 }
 
 BasicArena.prototype.update = function(deltatime) {

@@ -228,6 +228,7 @@ class Game extends Component {
                 this.startTimeText.text = 'GO!'
                 this.startTimeText.style.fill = 0xFFCC00
             }
+            return
         }
         
         if(!this.props.user.isObserver) {
@@ -480,40 +481,57 @@ class Game extends Component {
         finalScreenBackgroundRect.endFill()
         this.hud.addChild(finalScreenBackgroundRect)
 
-        let winner = this.props.room.users.find(x => x.id === body.winner.userId)
-        if(!winner) {
-            winner = { name: 'Bot Ulysses', color: '#FFCC00' }
-        }
+        if(body.winner) {
 
-        const size =  (6 + winner.name.length) * 33
+            const size = (6 + body.winner.name.length) * 33
 
-        let winnerTextBackground = new window.PIXI.Graphics()
-        winnerTextBackground.beginFill(0x212121, 1)
-        winnerTextBackground.drawRect(this.app.renderer.screen.width / 2 - size / 2, 220, size, 60)
-        winnerTextBackground.endFill()
-        this.hud.addChild(winnerTextBackground)
+            let winnerTextBackground = new window.PIXI.Graphics()
+            winnerTextBackground.beginFill(0x212121, 1)
+            winnerTextBackground.drawRect(this.app.renderer.screen.width / 2 - size / 2, 220, size, 60)
+            winnerTextBackground.endFill()
+            this.hud.addChild(winnerTextBackground)
 
-        const winnerText = new window.PIXI.Text(`Winner ${winner.name}`, { fontFamily: 'Arial', fontSize: 30, fill: parseInt(winner.color.replace('#', ''), 16), align: 'center' })
-        winnerText.anchor.set(.5, .5)
-        winnerText.x = this.app.renderer.screen.width / 2
-        winnerText.y = 250
-        this.hud.addChild(winnerText)
-
-        if(body.winner.userId === this.props.user.id) {
-
-            const winnerText = new window.PIXI.Text(_.sample(winStrings), { fontFamily: 'Arial', fontSize: 35, fill: 0xFFCC00, align: 'center' })
+            const winnerText = new window.PIXI.Text(`Winner ${body.winner.name}`, { fontFamily: 'Arial', fontSize: 30, fill: parseInt(body.winner.color.replace('#', ''), 16), align: 'center' })
+            winnerText.anchor.set(.5, .5)
             winnerText.x = this.app.renderer.screen.width / 2
-            winnerText.y = 150
-            winnerText.anchor.set(0.5, 0.5)
+            winnerText.y = 250
             this.hud.addChild(winnerText)
+
+            if(!this.props.user.isObserver) {
+                
+                if(body.winner.userId === this.props.user.id) {
+
+                    const winnerText = new window.PIXI.Text(_.sample(winStrings), { fontFamily: 'Arial', fontSize: 35, fill: 0xFFCC00, align: 'center' })
+                    winnerText.x = this.app.renderer.screen.width / 2
+                    winnerText.y = 150
+                    winnerText.anchor.set(0.5, 0.5)
+                    this.hud.addChild(winnerText)
+
+                } else {
+
+                    const loserText = new window.PIXI.Text(_.sample(loseStrings), { fontFamily: 'Arial', fontSize: 35, fill: 0xEECCCC, align: 'center' })
+                    loserText.x = this.app.renderer.screen.width / 2
+                    loserText.y = 150
+                    loserText.anchor.set(0.5, 0.5)
+                    this.hud.addChild(loserText)
+
+                }
+                
+            }
 
         } else {
 
-            const loserText = new window.PIXI.Text(_.sample(loseStrings), { fontFamily: 'Arial', fontSize: 35, fill: 0xEECCCC, align: 'center' })
-            loserText.x = this.app.renderer.screen.width / 2
-            loserText.y = 150
-            loserText.anchor.set(0.5, 0.5)
-            this.hud.addChild(loserText)
+            let drawTextBackground = new window.PIXI.Graphics()
+            drawTextBackground.beginFill(0x212121, 1)
+            drawTextBackground.drawRect(this.app.renderer.screen.width / 2 - 231, 220, 462, 60)
+            drawTextBackground.endFill()
+            this.hud.addChild(drawTextBackground)
+
+            const drawText = new window.PIXI.Text(`That's a DRAW!`, { fontFamily: 'Arial', fontSize: 30, fill: 0xFFCC00, align: 'center' })
+            drawText.anchor.set(.5, .5)
+            drawText.x = this.app.renderer.screen.width / 2
+            drawText.y = 250
+            this.hud.addChild(drawText)
 
         }
     }

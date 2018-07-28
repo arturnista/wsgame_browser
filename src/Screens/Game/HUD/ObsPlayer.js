@@ -61,8 +61,18 @@ ObsPlayer.prototype.useSpell = function (spellName) {
 
 ObsPlayer.prototype.sync = function (playerData) {
     const lifePerc = playerData.metadata.life / 100
-    this.lifeRectangle.width = size * lifePerc    
-    this.knockbackText.text = playerData.metadata.knockbackValue.toFixed(0)
+    const width = size * lifePerc
+
+    if(this.lastWidth !== width) {
+        this.lifeRectangle.width = width
+        this.lastWidth = width
+    }
+    
+    const text = playerData.metadata.knockbackValue.toFixed(0)
+    if(this.lastText !== text) {
+        this.knockbackText.text = text
+        this.lastText = text
+    }
 }
 
 ObsPlayer.prototype.update = function (deltatime) {

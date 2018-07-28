@@ -2,6 +2,10 @@ function FireArena(data, { app, camera, parent }) {
     this.app = app
     this.parent = parent
     this.data = data
+    
+    this.originalSize = this.data.size / 2
+    this.currentSize = this.data.size
+    this.lastSize = this.currentSize + 10
 
     const xPiv = ((this.app.renderer.screen.width - this.data.position.x) / 2)
     const yPiv = ((this.app.renderer.screen.height - this.data.position.y) / 2)
@@ -19,8 +23,6 @@ function FireArena(data, { app, camera, parent }) {
     this.sprite.y = this.data.position.y
     this.sprite.width = this.data.size
     this.sprite.height = this.data.size
-    this.originalSize = this.data.size / 2
-    this.currentSize = this.data.size
     this.sprite.anchor.set(.5, .5)
     this.parent.addChild(this.sprite)
 
@@ -46,15 +48,20 @@ FireArena.prototype.updateData = function(data) {
     this.updateMask()
 }
 
-FireArena.prototype.updateMask = function() {       
-    this.parent.removeChild(this.mask)
-    this.mask = new window.PIXI.Graphics()
+FireArena.prototype.updateMask = function() {
+    if(this.lastSize - this.currentSize < 1) return
+    this.lastSize = this.currentSize
 
-    this.mask.beginFill(0xFFF, 0)
-    this.mask.drawCircle(this.data.position.x, this.data.position.y, this.currentSize / 2)
-    this.mask.endFill()
-    this.sprite.mask = this.mask
-    this.parent.addChild(this.mask)
+    if(!this.mask) {
+        this.mask = new window.PIXI.Graphics()
+        this.sprite.mask = this.mask
+        this.parent.addChild(this.mask)
+    }
+
+    this.mask.clear()
+        .beginFill(0xFFF, 0)
+        .drawCircle(this.data.position.x, this.data.position.y, this.currentSize / 2)
+        .endFill() 
 }
 
 FireArena.prototype.update = function(deltatime) {
