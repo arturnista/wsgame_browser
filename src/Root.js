@@ -6,7 +6,7 @@ import * as PIXI from 'pixi.js'
 
 import { Header } from './Components'
 import { Router, Route } from 'react-router'
-import { App, Start, Room, Game, NotFound, LoadingScreen } from './Screens'
+import { App, Start, Room, Game, WhatsNew, LoadingScreen } from './Screens'
 import createBrowserHistory from 'history/createBrowserHistory'
 import createStore from './Redux/createStore'
 import { setRoom, addUser, removeUser, readyUser, waitingUser } from './Redux/room'
@@ -122,6 +122,7 @@ class Root extends Component {
                         <Route exact path="/" component={Start} />
                         <Route exact path="/room" component={Room} />
                         <Route exact path="/game" component={Game} />
+                        <Route exact path="/whatsnew" component={WhatsNew} />
                     </div>
                 </Router>
             </Provider>

@@ -1,6 +1,7 @@
 .header-container {
     display: flex;
-    height: 6em;
+    flex-direction: column;
+    height: 96px;
     background-color: #444;
     justify-content: center;
     align-items: center;
@@ -8,5 +9,16 @@
 
 .header-title {
     color: #FAFAFA;
-    font-size: 2em;
+    font-size: 1em;
+    text-decoration: none;
+    display: flex;
+}
+
+.header-link {
+    margin-top: 1em;
+    color: #FAFAFA;
+    font-size: 1em;
+    text-decoration: none;
+    align-self: flex-end;
+    margin-right: 2em;
 }

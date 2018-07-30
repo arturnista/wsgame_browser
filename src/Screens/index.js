@@ -4,6 +4,7 @@ import Room from './Room/Room'
 import NotFound from './NotFound/NotFound'
 import Game from './Game/Game'
 import LoadingScreen from './App/LoadingScreen'
+import WhatsNew from './WhatsNew/WhatsNew'
 
 export {
     App,
@@ -11,5 +12,6 @@ export {
     Room,
     NotFound,
     Game,
-    LoadingScreen
+    LoadingScreen,
+    WhatsNew,
 }
