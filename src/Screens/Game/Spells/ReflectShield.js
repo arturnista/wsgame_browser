@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import uuid from 'uuid'
 import vector from '../../../Utils/vector'
 
 export function createReflectShield(spellData, game, player) {
@@ -8,7 +9,6 @@ export function createReflectShield(spellData, game, player) {
     let dur = spellData.duration / 1000
     let time = 0
 
-    spell.id = spellData.id
     spell.metadata = { ...spellData }
     spell.width = player.metadata.collider.size * 1.3
     spell.height = player.metadata.collider.size * 1.3

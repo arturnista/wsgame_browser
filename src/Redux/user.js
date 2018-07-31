@@ -1,5 +1,4 @@
 const DEFINE_USER = 'user/DEFINE_USER'
-const DEFINE_PLAYER = 'user/DEFINE_PLAYER'
 const USER_END_GAME = 'user/USER_END_GAME'
 const SELECT_SPELL = 'user/SELECT_SPELL'
 const DESELECT_SPELL = 'user/DESELECT_SPELL'
@@ -13,11 +12,6 @@ export default function reducer(state = initialState, action = {}) {
                 ...state,
                 ...action.payload,
                 // spells: []
-            }
-        case DEFINE_PLAYER:
-            return {
-                ...state,
-                player: { ...action.payload }
             }
         case USER_END_GAME:
             return {
@@ -47,13 +41,6 @@ export function defineUser(userData) {
     return {
         type: DEFINE_USER,
         payload: userData
-    }
-}
-
-export function definePlayer(playerData) {
-    return {
-        type: DEFINE_PLAYER,
-        payload: playerData
     }
 }
 

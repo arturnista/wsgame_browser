@@ -59,7 +59,7 @@ class Game extends Component {
 
         this.gameState = this.gameState.bind(this)
 
-        this.gameSync = this.gameSync.bind(this)
+        this.updateEntities = this.updateEntities.bind(this)
         this.gameMapCreate = this.gameMapCreate.bind(this)
         this.spellCasted = this.spellCasted.bind(this)
         this.gameStart = this.gameStart.bind(this)
@@ -335,12 +335,13 @@ class Game extends Component {
     /* =================================
         GAME STATE CHANGE FUNCTIONS
     ================================= */
+
     gameState(body) {
         if(body.entity_created) this.createEntities(body.entity_created)
         if(body.entity_deleted) this.deleteEntities(body.entity_deleted)
         if(body.spell_casted) this.spellCasted(body.spell_casted)
         if(body.map_update) this.map.updateData(body.map_update[0])
-        this.gameSync(body.entities)
+        this.updateEntities(body.entities)
     }
 
     createEntities(entities) {
@@ -366,6 +367,9 @@ class Game extends Component {
                 case 'teleportation_orb':
                     entityCreated = createTeleportationOrb(entityData)
                     this.createSpell(entityCreated)
+
+                    if(entityData.owner === this.player.id) this.teleportationOrbId = entityCreated.id
+
                     break
                 case 'player':
                     entityCreated = createPlayer(entityData, this)
@@ -396,7 +400,10 @@ class Game extends Component {
                 case 'fireball':
                 case 'boomerang':
                 case 'follower':
+                    this.removeSpell(entityData)
+                    break
                 case 'teleportation_orb':
+                    if(entityData.owner === this.player.id) this.teleportationOrbId = ''
                     this.removeSpell(entityData)
                     break
                 default:
@@ -405,16 +412,16 @@ class Game extends Component {
         }
     }
 
-    spellCasted(body) {
-        console.log('spellCasted', body)
+    spellCasted(spells) {
+        console.log('spellCasted', spells)
         
-        for (let i = 0; i < body.length; i++) {
-            const spellData = body[i]
+        for (let i = 0; i < spells.length; i++) {
+            const spellData = spells[i]
             
             if(this.props.user.isObserver) {
                 const obsPlayer = this.obsPlayers.find(x => x.id === spellData.player.id)
                 obsPlayer.useSpell(spellData.spellName)
-            } else if(spellData.player.id === this.props.user.player.id) {
+            } else if(spellData.player.id === this.player.id) {
                 const spellIcon = this.spellsIcons.find(x => x.id === spellData.spellName)
                 spellIcon.use()
             }
@@ -436,11 +443,11 @@ class Game extends Component {
 
     }
 
-    gameSync(body) {
+    updateEntities(body) {
         for (let i = 0; i < body.spells.length; i++) {
 
             const spellData = body.spells[i]
-            let spell = this.entities[spellData.id]
+            const spell = this.entities[spellData.id]
 
             spell.id = spellData.id
             spell.metadata = { ...spellData }
@@ -456,7 +463,7 @@ class Game extends Component {
         for (let i = 0; i < body.players.length; i++) {
 
             const playerData = body.players[i]
-            let player = this.entities[playerData.id]
+            const player = this.entities[playerData.id]
 
             player.id = playerData.id
             player.metadata = { ...playerData }

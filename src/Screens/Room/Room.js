@@ -6,7 +6,7 @@ import { Input, Button } from '../../Components'
 import { serverUrl } from '../../constants'
 import { defineUser, selectSpell, deselectSpell } from '../../Redux/user'
 import { addSpells } from '../../Redux/spells'
-import { updateRoom, updateChat } from '../../Redux/room'
+import { addUser, removeUser, readyUser, waitingUser, updateRoom, updateChat } from '../../Redux/room'
 import { startGame } from '../../Redux/game'
 import './Room.css'
 
@@ -24,7 +24,11 @@ const mapDispatchToProps = (dispatch) => ({
     addSpells: spells => dispatch(addSpells(spells)),
     defineUser: data => dispatch(defineUser(data)),
     startGame: data => dispatch(startGame(data)),
-    updateRoom: room => dispatch(updateRoom(room))
+    updateRoom: room => dispatch(updateRoom(room)),
+    addUser: user => dispatch(addUser(user)),
+    removeUser: user => dispatch(removeUser(user)),
+    readyUser: user => dispatch(readyUser(user)),
+    waitingUser: user => dispatch(waitingUser(user)),
 })
 
 class Room extends Component {
@@ -44,6 +48,10 @@ class Room extends Component {
         this.handleDeselectSpell = this.handleDeselectSpell.bind(this)
         this.handleNewChatMessage = this.handleNewChatMessage.bind(this)
         this.handleUpdateRoom = this.handleUpdateRoom.bind(this)
+        this.handleAddUser = this.handleAddUser.bind(this)
+        this.handleReadyUser = this.handleReadyUser.bind(this)
+        this.handleWaitingUser = this.handleWaitingUser.bind(this)
+        this.handleRemoveUser = this.handleRemoveUser.bind(this)
 
         this.configSpells = {}
         this.state = {
@@ -73,12 +81,16 @@ class Room extends Component {
             this.props.addSpells(spellsArr)
         })
 
+        window.socketio.on('user_joined_room', this.handleAddUser)
+        window.socketio.on('user_ready', this.handleReadyUser)
+        window.socketio.on('user_waiting', this.handleWaitingUser)
+        window.socketio.on('user_left_room', this.handleRemoveUser)
         window.socketio.on('room_update', this.handleUpdateRoom)
         window.socketio.on('room_chat_new_message', this.handleNewChatMessage)
         window.socketio.on('user_selected_spell', this.handleSelectSpell)
         window.socketio.on('user_deselected_spell', this.handleDeselectSpell)
-        window.socketio.on('game_will_start', this.handleWillStartGame)
 
+        window.socketio.on('game_will_start', this.handleWillStartGame)
 
         if(_.isEmpty(this.props.room)) {
             this.props.history.replace('/')
@@ -92,6 +104,10 @@ class Room extends Component {
     }
 
     componentWillUnmount() {
+        window.socketio.off('user_joined_room', this.handleAddUser)
+        window.socketio.off('user_ready', this.handleReadyUser)
+        window.socketio.off('user_waiting', this.handleWaitingUser)
+        window.socketio.off('user_left_room', this.handleRemoveUser)
         window.socketio.off('room_update', this.handleUpdateRoom)
         window.socketio.off('room_chat_new_message', this.handleNewChatMessage)
         window.socketio.off('user_selected_spell', this.handleSelectSpell)
@@ -99,6 +115,26 @@ class Room extends Component {
         window.socketio.off('game_will_start', this.handleWillStartGame)
     }
 
+    handleAddUser(body) {
+        console.log('handleAddUser', body)
+        this.props.addUser(body.user)
+    }
+
+    handleReadyUser(body) {
+        console.log('handleReadyUser', body)
+        this.props.readyUser(body)
+    }
+
+    handleWaitingUser(body) {
+        console.log('handleWaitingUser', body)
+        this.props.waitingUser(body)
+    }
+
+    handleRemoveUser(body) {
+        console.log('handleRemoveUser', body)
+        this.props.removeUser(body)
+    }
+    
     handleSelectSpell(body) {
         console.log('handleSelectSpell', body)
         if(body.user === this.props.user.id) {

@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import uuid from 'uuid'
 import vector from '../../../Utils/vector'
 
 export function createExplosion(spellData, game) {
@@ -10,12 +11,11 @@ export function createExplosion(spellData, game) {
     let time = 0
     let exploded = false
 
-    spell.id = spellData.id
     spell.metadata = { ...spellData }
     spell.width = 0
     spell.height = 0
-    spell.x = spellData.position.x
-    spell.y = spellData.position.y
+    spell.x = spellData.castData.position.x
+    spell.y = spellData.castData.position.y
     spell.vx = 0
     spell.vy = 0
 
@@ -23,8 +23,8 @@ export function createExplosion(spellData, game) {
     radius.anchor.set(.5, .5)
     radius.width = spellData.radius * 2
     radius.height = spellData.radius * 2
-    radius.x = spellData.position.x
-    radius.y = spellData.position.y
+    radius.x = spellData.castData.position.x
+    radius.y = spellData.castData.position.y
     game.createSpell(radius)
 
     spell.update = (deltatime) => {
@@ -45,8 +45,8 @@ export function createExplosion(spellData, game) {
                     exp.width = 32
                     exp.height = 32
                     const offset = index / 35 * spellData.radius
-                    exp.x = spellData.position.x + (Math.random() * offset * (Math.random()*2|0 || -1))
-                    exp.y = spellData.position.y + (Math.random() * offset * (Math.random()*2|0 || -1))
+                    exp.x = spellData.castData.position.x + (Math.random() * offset * (Math.random()*2|0 || -1))
+                    exp.y = spellData.castData.position.y + (Math.random() * offset * (Math.random()*2|0 || -1))
                     
                     setTimeout(() => {
                         game.createSpell(exp)

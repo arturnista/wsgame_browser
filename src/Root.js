@@ -9,8 +9,8 @@ import { Router, Route } from 'react-router'
 import { App, Start, Room, Game, WhatsNew, LoadingScreen } from './Screens'
 import createBrowserHistory from 'history/createBrowserHistory'
 import createStore from './Redux/createStore'
-import { setRoom, addUser, removeUser, readyUser, waitingUser } from './Redux/room'
-import { defineUser, definePlayer } from './Redux/user'
+import { setRoom } from './Redux/room'
+import { defineUser } from './Redux/user'
 import './Root.css'
 
 window.PIXI = PIXI
@@ -74,11 +74,6 @@ class Root extends Component {
         window.socketio.on('connect', (socket) => {
             console.log('SocketIO :: Connected')
 
-            window.socketio.on('player_create', (body) => {
-                console.log('player_create', body)
-                this.store.dispatch( definePlayer(body) )
-            })
-
             window.socketio.on('myuser_info', (body) => {
                 console.log('myuser_info', body)
                 this.store.dispatch( defineUser(body) )
@@ -88,23 +83,6 @@ class Root extends Component {
                 console.log('myuser_joined_room', body)
                 this.store.dispatch( setRoom({ room: body.room, user: body.user }) )
                 this.store.dispatch( defineUser(body.user) )
-            })
-
-            window.socketio.on('user_joined_room', (body) => {
-                console.log('user_joined_room', body)
-                this.store.dispatch( addUser(body.user) )
-            })
-            window.socketio.on('user_ready', (body) => {
-                console.log('user_ready', body)
-                this.store.dispatch( readyUser(body) )
-            })
-            window.socketio.on('user_waiting', (body) => {
-                console.log('user_waiting', body)
-                this.store.dispatch( waitingUser(body) )
-            })
-            window.socketio.on('user_left_room', (body) => {
-                console.log('user_left_room', body)
-                this.store.dispatch( removeUser(body) )
             })
 
             window.socketio.on('disconnect', () => {
