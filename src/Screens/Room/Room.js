@@ -51,7 +51,7 @@ class Room extends Component {
             status: 'waiting',
             isObserver: props.user.isObserver || false,
             offensiveSpells: [],
-            defensiveSpells: [],
+            supportSpells: [],
             selectedSpell: {},
             chat: [],
             chatMessage: '',
@@ -68,8 +68,8 @@ class Room extends Component {
             this.configSpells = spells._config
             const spellsArr = Object.keys(spells).map(key => ({ id: key, ...spells[key] }))
             const offensiveSpells = spellsArr.filter(x => x.type === 'offensive')
-            const defensiveSpells = spellsArr.filter(x => x.type === 'defensive')
-            this.setState({ offensiveSpells, defensiveSpells })
+            const supportSpells = spellsArr.filter(x => x.type === 'support')
+            this.setState({ offensiveSpells, supportSpells })
             this.props.addSpells(spellsArr)
         })
 
@@ -376,9 +376,9 @@ class Room extends Component {
                                 </div>
                             </div>
                             <div className='room-spells-list-container'>
-                                <h2 className='room-spells-list-title'>Defensive spells</h2>
+                                <h2 className='room-spells-list-title'>Support spells</h2>
                                 <div className='room-spells-list'>
-                                    { this.state.defensiveSpells.map(this.renderSpell) }
+                                    { this.state.supportSpells.map(this.renderSpell) }
                                 </div>
                             </div>
                         </div>
