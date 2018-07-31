@@ -41,6 +41,8 @@ class Root extends Component {
         .add('grid_toDestroy.png', '/img/map/grid_toDestroy.png')
         .add('grid_destroyed.png', '/img/map/grid_destroyed.png')
         .add('grid_toRevive.png', '/img/map/grid_toRevive.png')
+        .add('wall.png', '/img/game/wall.png')
+
         .add('blink.png', '/img/game/blink.png')
         .add('boomerang.png', '/img/game/boomerang.png')
         .add('bomb.png', '/img/game/bomb.png')
@@ -56,7 +58,7 @@ class Root extends Component {
         .add('reflect_shield.png', '/img/game/reflect_shield.png')
         .add('aim.png', '/img/game/aim.png')
         .add('aim_spell.png', '/img/game/aim_spell.png')
-        .add('wall.png', '/img/game/wall.png')
+        .add('teleportation_orb.png', '/img/game/teleportation_orb.png')
         .add('game_05.png', '/img/game/game_05.png')
         .add('game_07.png', '/img/game/game_07.png')
         .add('game_10.png', '/img/game/game_10.png')

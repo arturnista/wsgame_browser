@@ -23,6 +23,7 @@ import { createBoomerang } from './Spells/Boomerang'
 import { createFollower } from './Spells/Follower'
 import { createExplosion } from './Spells/Explosion'
 import { createReflectShield } from './Spells/ReflectShield'
+import { createTeleportationOrb } from './Spells/TeleportationOrb'
 
 import './Game.css'
 
@@ -383,6 +384,9 @@ class Game extends Component {
                         break
                     case 'follower':
                         spell = createFollower(spellData)
+                        break
+                    case 'teleportation_orb':
+                        spell = createTeleportationOrb(spellData)
                         break
                     default:
                         spell = new window.PIXI.Sprite( window.textures['cube.png'] )
