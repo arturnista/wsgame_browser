@@ -3,6 +3,7 @@ import vector from '../../Utils/vector'
 
 export function createPlayer(playerData, game) {
     const player = new window.PIXI.Container()
+    player.id = playerData.id
 
     const playerNameText = new window.PIXI.Text(playerData.name, { fontFamily: 'Arial', fontSize: 15, fill: 0xFAFAFA, align: 'center', stroke: 0x000000, strokeThickness: 2 })
     playerNameText.x = 0

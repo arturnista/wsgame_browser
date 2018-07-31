@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import _ from 'lodash'
+import uuid from 'uuid'
 import { Input, Button } from '../../Components'
 import vector from '../../Utils/vector'
 import { resetRoom } from '../../Redux/room'
@@ -60,9 +61,7 @@ class Game extends Component {
 
         this.gameSync = this.gameSync.bind(this)
         this.gameMapCreate = this.gameMapCreate.bind(this)
-        this.gameMapUpdate = this.gameMapUpdate.bind(this)
-        this.playerUseSpell = this.playerUseSpell.bind(this)
-        this.playerCreate = this.playerCreate.bind(this)
+        this.spellCasted = this.spellCasted.bind(this)
         this.gameStart = this.gameStart.bind(this)
         this.gameWillEnd = this.gameWillEnd.bind(this)
         this.gameEnd = this.gameEnd.bind(this)
@@ -100,10 +99,7 @@ class Game extends Component {
 
         window.socketio.on('game_state', this.gameState)
 
-        window.socketio.on('sync', this.gameSync)
         window.socketio.on('map_create', this.gameMapCreate)
-        window.socketio.on('map_update', this.gameMapUpdate)
-        window.socketio.on('player_use_spell', this.playerUseSpell)
         window.socketio.on('player_create', this.playerCreate)
         window.socketio.on('game_start', this.gameStart)
         window.socketio.on('game_will_end', this.gameWillEnd)
@@ -135,14 +131,10 @@ class Game extends Component {
         this.app.ticker.remove(this.gameLoop)
         window.socketio.off('game_state', this.gameState)
 
-        window.socketio.off('sync', this.gameSync)
         window.socketio.off('map_create', this.gameMapCreate)
-        window.socketio.off('map_update', this.gameMapUpdate)
         window.socketio.off('game_start', this.gameStart)
         window.socketio.off('game_will_end', this.gameWillEnd)
         window.socketio.off('game_end', this.gameEnd)
-        window.socketio.off('player_use_spell', this.playerUseSpell)
-        window.socketio.off('player_create', this.playerCreate)
     }
 
     handleLoad() {
@@ -252,9 +244,8 @@ class Game extends Component {
                 const knockbackValue = this.player.metadata.knockbackValue.toFixed(0)
                 if(this.knockbackText.text !== knockbackValue) this.knockbackText.text = knockbackValue
 
-            } else {
-                this.player = this.players.find(x => x.id === this.myPlayerData.id)
             }
+
         } else {
             
             for(const i in this.players) {
@@ -341,75 +332,115 @@ class Game extends Component {
         this.camera.pivot.set(xPiv, yPiv)
     }
 
-    playerCreate(body) {
-        console.log('player_create', body)
-        this.myPlayerData = body
-        // this.lastPosition = _.clone(this.myPlayerData.position)
-    }
-
-    playerUseSpell(body) {
-        console.log('playerUseSpell', body)
-        if(this.props.user.isObserver) {
-            const obsPlayer = this.obsPlayers.find(x => x.id === body.player.id)
-            obsPlayer.useSpell(body.spellName)
-        } else if(body.player.id === this.props.user.player.id) {
-            const spellIcon = this.spellsIcons.find(x => x.id === body.spellName)
-            spellIcon.use()
-        }
-
-        let spell = null
-        switch (body.spellName) {
-            case 'explosion':
-                spell = createExplosion(body, this)
-                break
-            case 'reflect_shield':
-                const player = this.players.find(x => x.id === body.player.id)
-                spell = createReflectShield(body, this, player)
-                break
-        }
-
-        if(spell) {
-            this.spellsContainer.addChild(spell)
-            this.entities[body.id] = spell
-        }
-    }
-
+    /* =================================
+        GAME STATE CHANGE FUNCTIONS
+    ================================= */
     gameState(body) {
-        console.log('gameState', body);
+        if(body.entity_created) this.createEntities(body.entity_created)
+        if(body.entity_deleted) this.deleteEntities(body.entity_deleted)
+        if(body.spell_casted) this.spellCasted(body.spell_casted)
+        if(body.map_update) this.map.updateData(body.map_update[0])
+        this.gameSync(body.entities)
+    }
+
+    createEntities(entities) {
+        console.log('createEntities', entities)
         
+        for (let i = 0; i < entities.length; i++) {
+            const entityData = entities[i]
+            let entityCreated = null
+
+            switch (entityData.type) {
+                case 'fireball':
+                    entityCreated = createFireball(entityData)
+                    this.createSpell(entityCreated)
+                    break
+                case 'boomerang':
+                    entityCreated = createBoomerang(entityData)
+                    this.createSpell(entityCreated)
+                    break
+                case 'follower':
+                    entityCreated = createFollower(entityData)
+                    this.createSpell(entityCreated)
+                    break
+                case 'teleportation_orb':
+                    entityCreated = createTeleportationOrb(entityData)
+                    this.createSpell(entityCreated)
+                    break
+                case 'player':
+                    entityCreated = createPlayer(entityData, this)
+                    this.createPlayer(entityCreated)
+                    if(entityData.userId === this.props.user.id) this.player = entityCreated
+                    break
+            }
+
+            if(entityCreated) {
+                entityCreated.id = entityData.id
+                entityCreated.x = entityData.position.x
+                entityCreated.y = entityData.position.y
+                entityCreated.vx = entityData.velocity.x
+                entityCreated.vy = entityData.velocity.y
+
+                entityCreated.metadata = { ...entityData }
+            }
+        }
+    }
+
+    deleteEntities(entities) {
+        console.log('deleteEntities', entities)
+
+        for (let i = 0; i < entities.length; i++) {
+            const entityData = entities[i]
+
+            switch (entityData.type) {
+                case 'fireball':
+                case 'boomerang':
+                case 'follower':
+                case 'teleportation_orb':
+                    this.removeSpell(entityData)
+                    break
+                default:
+                    this.removeEntity(entityData)
+            }
+        }
+    }
+
+    spellCasted(body) {
+        console.log('spellCasted', body)
+        
+        for (let i = 0; i < body.length; i++) {
+            const spellData = body[i]
+            
+            if(this.props.user.isObserver) {
+                const obsPlayer = this.obsPlayers.find(x => x.id === spellData.player.id)
+                obsPlayer.useSpell(spellData.spellName)
+            } else if(spellData.player.id === this.props.user.player.id) {
+                const spellIcon = this.spellsIcons.find(x => x.id === spellData.spellName)
+                spellIcon.use()
+            }
+
+            let spell = null
+            switch (spellData.spellName) {
+                case 'explosion':
+                    const explosion = createExplosion(spellData, this)
+                    this.createSpell(explosion)
+                    break
+                case 'reflect_shield':
+                    const player = this.players.find(x => x.id === spellData.player.id)
+                    const reflect = createReflectShield(spellData, this, player)
+                    this.createSpell(reflect)
+                    break
+            }
+
+        }
+
     }
 
     gameSync(body) {
-        this.tick++
-        this.teleportationOrbId = ''
         for (let i = 0; i < body.spells.length; i++) {
 
             const spellData = body.spells[i]
-            let spell = this.spells.find(x => x.id === spellData.id)
-
-            if(_.isNil(spell)) {
-                switch (spellData.type) {
-                    case 'fireball':
-                        spell = createFireball(spellData)
-                        break
-                    case 'boomerang':
-                        spell = createBoomerang(spellData)
-                        break
-                    case 'follower':
-                        spell = createFollower(spellData)
-                        break
-                    case 'teleportation_orb':
-                        spell = createTeleportationOrb(spellData)
-                        break
-                    default:
-                        spell = new window.PIXI.Sprite( window.textures['cube.png'] )
-                        spell.anchor.set(.5, .5)
-                        break
-                }
-                this.spellsContainer.addChild(spell)
-                this.spells.push(spell)
-                this.entities[spell.id] = spell
-            }
+            let spell = this.entities[spellData.id]
 
             spell.id = spellData.id
             spell.metadata = { ...spellData }
@@ -420,38 +451,12 @@ class Game extends Component {
             spell.vx = spellData.velocity.x
             spell.vy = spellData.velocity.y
 
-            switch (spellData.type) {
-                case 'teleportation_orb':
-                    if(spellData.owner === this.props.user.player.id) this.teleportationOrbId = body.id
-                    break
-            }
-
-
-            spell.lastTick = this.tick
-
         }
-
-        this.spells = this.spells.filter(x => {
-            if(x.lastTick !== this.tick) {
-                this.removeSpell(x)
-                return false
-            }
-            return true
-        })
 
         for (let i = 0; i < body.players.length; i++) {
 
             const playerData = body.players[i]
-            let player = this.players.find(x => x.id === playerData.id)
-
-            if(_.isNil(player)) {
-
-                player = createPlayer(playerData, this)
-                this.entitiesContainer.addChild(player)
-                this.players.push(player)
-                this.entities[playerData.id] = player
-
-            }
+            let player = this.entities[playerData.id]
 
             player.id = playerData.id
             player.metadata = { ...playerData }
@@ -461,6 +466,38 @@ class Game extends Component {
             player.vy = playerData.velocity.y
 
         }
+    }
+
+    /* =================================
+        END GAME STATE CHANGE FUNCTIONS
+    ================================= */
+
+    createSpell(spell) {
+        if(!spell.id) spell.id = uuid.v4()
+        this.spellsContainer.addChild(spell)
+        this.spells.push(spell)
+        this.entities[spell.id] = spell
+    }
+
+    createPlayer(player) {
+        this.entitiesContainer.addChild(player)
+        this.players.push(player)
+        this.entities[player.id] = player
+    }
+
+    createEntity(entity) {
+        this.entitiesContainer.addChild(entity)
+        if(entity.id) this.entities[entity.id] = entity
+    }
+    
+    removeEntity(entity) {
+        const spriteEntity = this.entities[entity.id]
+        this.entitiesToRemove.push(spriteEntity)
+    }
+    
+    removeSpell(spell) {
+        const spriteEntity = this.entities[spell.id]
+        this.spellsToRemove.push(spriteEntity)
     }
 
     gameMapCreate(body) {
@@ -476,11 +513,6 @@ class Game extends Component {
                 this.map = new Grid(body, { app: this.app, camera: this.camera, parent: this.mapContainer })
                 break
         }
-    }
-
-    gameMapUpdate(body) {
-        console.log('gameMapUpdate', body)
-        this.map.updateData(body)
     }
 
     gameStart(body) {
@@ -567,24 +599,6 @@ class Game extends Component {
         this.props.userEndGame(body.users.find(x => x.id === this.props.user.id))
 
         this.props.history.replace('/room')
-    }
-
-    createSpell(spell) {
-        this.spellsContainer.addChild(spell)
-        if(spell.id) this.entities[spell.id] = spell
-    }
-
-    createEntity(entity) {
-        this.entitiesContainer.addChild(entity)
-        if(entity.id) this.entities[entity.id] = entity
-    }
-    
-    removeEntity(entity) {
-        this.entitiesToRemove.push(entity)
-    }
-    
-    removeSpell(spell) {
-        this.spellsToRemove.push(spell)
     }
 
     handleMouseDown(event) {

@@ -6,7 +6,7 @@ export function createExplosion(spellData, game) {
     spell.anchor.set(.5, .5)
 
     let fullSize = 32
-    let dur = spellData.duration / 1000
+    let duration = spellData.duration / 1000
     let time = 0
     let exploded = false
 
@@ -29,7 +29,7 @@ export function createExplosion(spellData, game) {
 
     spell.update = (deltatime) => {
         time += deltatime
-        let t = time / dur
+        let t = time / duration
 
         if(t < 1) {
             spell.width = fullSize * t

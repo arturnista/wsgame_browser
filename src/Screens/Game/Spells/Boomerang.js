@@ -4,6 +4,7 @@ import vector from '../../../Utils/vector'
 export function createBoomerang(spellData) {
     const spell = new window.PIXI.Sprite( window.textures['boomerang.png'] )
     spell.anchor.set(.5, .5)
+    spell.id = spellData.id
 
     const dir = vector.normalize(spellData.velocity)
 
