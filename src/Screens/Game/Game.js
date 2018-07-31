@@ -56,6 +56,8 @@ class Game extends Component {
         this.handleKeyDown = this.handleKeyDown.bind(this)
         this.gameLoop = this.gameLoop.bind(this)
 
+        this.gameState = this.gameState.bind(this)
+
         this.gameSync = this.gameSync.bind(this)
         this.gameMapCreate = this.gameMapCreate.bind(this)
         this.gameMapUpdate = this.gameMapUpdate.bind(this)
@@ -74,6 +76,16 @@ class Game extends Component {
         this.status = 'move'
         this.cameraType = this.props.user.isObserver ? 'observer' : 'player'
 
+        this.players = []
+        this.spells = []
+        this.entities = {}
+        this.hudEntities = []
+        this.entitiesToRemove = []
+        this.spellsToRemove = []
+        this.map = {}
+        this.tick = 0
+        this.teleportationOrbId = ''
+
     }
 
     componentDidMount() {
@@ -85,6 +97,8 @@ class Game extends Component {
         if(this.gameDiv) {
             this.gameDiv.focus()
         }
+
+        window.socketio.on('game_state', this.gameState)
 
         window.socketio.on('sync', this.gameSync)
         window.socketio.on('map_create', this.gameMapCreate)
@@ -112,15 +126,6 @@ class Game extends Component {
         })
         document.getElementById("game-mount").appendChild(this.app.view)
 
-        this.players = []
-        this.spells = []
-        this.entities = {}
-        this.hudEntities = []
-        this.entitiesToRemove = []
-        this.spellsToRemove = []
-        this.map = {}
-        this.tick = 0
-
         // Load a texture
         this.handleLoad()
 
@@ -128,6 +133,8 @@ class Game extends Component {
 
     componentWillUnmount() {
         this.app.ticker.remove(this.gameLoop)
+        window.socketio.off('game_state', this.gameState)
+
         window.socketio.off('sync', this.gameSync)
         window.socketio.off('map_create', this.gameMapCreate)
         window.socketio.off('map_update', this.gameMapUpdate)
@@ -367,8 +374,14 @@ class Game extends Component {
         }
     }
 
+    gameState(body) {
+        console.log('gameState', body);
+        
+    }
+
     gameSync(body) {
         this.tick++
+        this.teleportationOrbId = ''
         for (let i = 0; i < body.spells.length; i++) {
 
             const spellData = body.spells[i]
@@ -406,6 +419,13 @@ class Game extends Component {
             spell.y = spellData.position.y
             spell.vx = spellData.velocity.x
             spell.vy = spellData.velocity.y
+
+            switch (spellData.type) {
+                case 'teleportation_orb':
+                    if(spellData.owner === this.props.user.player.id) this.teleportationOrbId = body.id
+                    break
+            }
+
 
             spell.lastTick = this.tick
 
@@ -629,6 +649,13 @@ class Game extends Component {
             case 'follower':
                 this.emitAction(spellName)
                 return
+            case 'teleportation_orb':
+                if(this.teleportationOrbId !== '') {
+                    this.emitAction(spellName)
+                    return
+                }
+                this.status = spellName
+                break
             default:
                 this.status = spellName
         }
@@ -648,6 +675,7 @@ class Game extends Component {
         switch (name) {
             case 'boomerang':
             case 'fireball':
+            case 'teleportation_orb':
             case 'blink':
                 this.spellPrediction.visible = true
                 let oneTimePred = new window.PIXI.Graphics()
