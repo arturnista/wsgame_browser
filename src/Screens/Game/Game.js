@@ -69,7 +69,6 @@ class Game extends Component {
         this.selectedSpellData = null
         this.gameIsRunning = false
         this.zoom = 1
-        this.zoomOption = 1
 
         this.player = null
         this.status = 'move'
@@ -88,19 +87,16 @@ class Game extends Component {
     }
 
     componentDidMount() {
-
         if(_.isEmpty(this.props.game)) {
             this.props.history.replace('/room')
+            return
         }
 
-        if(this.gameDiv) {
-            this.gameDiv.focus()
-        }
+        if(this.gameDiv) this.gameDiv.focus()
 
         window.socketio.on('game_state', this.gameState)
 
         window.socketio.on('map_create', this.gameMapCreate)
-        window.socketio.on('player_create', this.playerCreate)
         window.socketio.on('game_start', this.gameStart)
         window.socketio.on('game_will_end', this.gameWillEnd)
         window.socketio.on('game_end', this.gameEnd)
@@ -124,11 +120,10 @@ class Game extends Component {
 
         // Load a texture
         this.handleLoad()
-
     }
 
     componentWillUnmount() {
-        this.app.ticker.remove(this.gameLoop)
+        if(this.app) this.app.ticker.remove(this.gameLoop)
         window.socketio.off('game_state', this.gameState)
 
         window.socketio.off('map_create', this.gameMapCreate)
@@ -138,8 +133,6 @@ class Game extends Component {
     }
 
     handleLoad() {
-        if(_.isEmpty(this.props.user)) return
-
         this.camera = new window.PIXI.Container()
         this.camera.hitArea = new window.PIXI.Rectangle(0, 0, 1000, 1000)
         this.hud = new window.PIXI.Container()
@@ -243,7 +236,11 @@ class Game extends Component {
                 }
                 const knockbackValue = this.player.metadata.knockbackValue.toFixed(0)
                 if(this.knockbackText.text !== knockbackValue) this.knockbackText.text = knockbackValue
-
+                
+                this.player.metadata.spells.forEach(spell => {
+                    const icon = this.spellsIcons.find(x => x.id === spell.name)
+                    if(icon) icon.sync(spell)
+                })
             }
 
         } else {
@@ -367,8 +364,7 @@ class Game extends Component {
                 case 'teleportation_orb':
                     entityCreated = createTeleportationOrb(entityData)
                     this.createSpell(entityCreated)
-
-                    if(entityData.owner === this.player.id) this.teleportationOrbId = entityCreated.id
+                    if(!this.props.user.isObserver && entityData.owner === this.player.id) this.teleportationOrbId = entityCreated.id
 
                     break
                 case 'player':
@@ -403,7 +399,7 @@ class Game extends Component {
                     this.removeSpell(entityData)
                     break
                 case 'teleportation_orb':
-                    if(entityData.owner === this.player.id) this.teleportationOrbId = ''
+                    if(!this.props.user.isObserver && entityData.owner === this.player.id) this.teleportationOrbId = ''
                     this.removeSpell(entityData)
                     break
                 default:
@@ -444,6 +440,7 @@ class Game extends Component {
     }
 
     updateEntities(body) {
+
         for (let i = 0; i < body.spells.length; i++) {
 
             const spellData = body.spells[i]
@@ -473,6 +470,7 @@ class Game extends Component {
             player.vy = playerData.velocity.y
 
         }
+        
     }
 
     /* =================================

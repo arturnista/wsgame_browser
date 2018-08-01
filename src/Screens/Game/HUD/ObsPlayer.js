@@ -47,7 +47,7 @@ function ObsPlayer(index, playerData, hud, { spells }) {
 
     this.spellsIcons = []
     for (var i = 0; i < playerData.spells.length; i++) {
-        const spellData = spells.find(x => playerData.spells[i] === x.id)
+        const spellData = spells.find(x => playerData.spells[i].name === x.id)
         if(!spellData) continue
         const ic = new SpellIcon(i, spellData, this.hud, { noHotkey: true, yOffset: this.offset + iconPadding, size: 42 })
         this.spellsIcons.push( ic )

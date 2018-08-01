@@ -1,4 +1,5 @@
 import textureMap from '../textureMap'
+import moment from 'moment'
 
 export default
 function Icon(index, spellData, hud, { noHotkey, xOffset = 0, yOffset = 0, size = 50 } = { xOffset: 0, yOffset: 0, size: 50 }) {
@@ -77,6 +78,10 @@ function Icon(index, spellData, hud, { noHotkey, xOffset = 0, yOffset = 0, size 
     this.time.visible = false
     this.hotkey = iconHotkey
     this.cooldown = 0
+}
+
+Icon.prototype.sync = function(data) {
+    if(this.cooldown > 0 && data.cd === '') this.clearCooldown()
 }
 
 Icon.prototype.use = function () {
