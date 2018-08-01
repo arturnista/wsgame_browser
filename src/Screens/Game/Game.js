@@ -75,14 +75,16 @@ class Game extends Component {
         this.cameraType = this.props.user.isObserver ? 'observer' : 'player'
 
         this.players = []
-        this.spells = []
-        this.entities = {}
+        this.obsPlayers = []
+
         this.hudEntities = []
+        this.entities = {}
         this.entitiesToRemove = []
+        this.spells = []
         this.spellsToRemove = []
+
         this.map = {}
-        this.tick = 0
-        this.teleportationOrbId = ''
+        this.nextActionIsInstant = false
 
     }
 
@@ -103,9 +105,8 @@ class Game extends Component {
 
         const gameMountStyle = window.getComputedStyle(document.getElementById("game-mount-container"))
 
-        const screenHeight = parseInt(gameMountStyle.height) // * .8
-        const screenWidth = parseInt(gameMountStyle.width) // * .8
-        const screenRatio = 1.333333
+        const screenHeight = parseInt(gameMountStyle.height)
+        const screenWidth = parseInt(gameMountStyle.width)
 
         // Create a Pixi Application
         this.app = new window.PIXI.Application({
@@ -141,7 +142,8 @@ class Game extends Component {
         this.spellsContainer = new window.PIXI.Container()
         this.entitiesContainer = new window.PIXI.Container()
         
-        this.obsPlayers = []
+        this.spellPrediction = new window.PIXI.Container()
+        this.spellsContainer.addChild(this.spellPrediction)
         
         this.camera.addChild(this.mapContainer)
         this.camera.addChild(this.spellsContainer)
@@ -200,10 +202,10 @@ class Game extends Component {
 
         this.hud.addChild(this.startGameHud)
 
+        //Render the stage
         this.app.stage.addChild(this.camera)
         this.app.stage.addChild(this.hud)
 
-        //Render the stage
         this.app.renderer.render(this.app.stage)
         this.app.ticker.add(this.gameLoop)
 
@@ -364,8 +366,8 @@ class Game extends Component {
                 case 'teleportation_orb':
                     entityCreated = createTeleportationOrb(entityData)
                     this.createSpell(entityCreated)
-                    if(!this.props.user.isObserver && entityData.owner === this.player.id) this.teleportationOrbId = entityCreated.id
-
+                    
+                    if(!this.props.user.isObserver && entityData.owner === this.player.id) this.nextActionIsInstant = true
                     break
                 case 'player':
                     entityCreated = createPlayer(entityData, this)
@@ -399,7 +401,7 @@ class Game extends Component {
                     this.removeSpell(entityData)
                     break
                 case 'teleportation_orb':
-                    if(!this.props.user.isObserver && entityData.owner === this.player.id) this.teleportationOrbId = ''
+                    if(!this.props.user.isObserver && entityData.owner === this.player.id) this.nextActionIsInstant = false
                     this.removeSpell(entityData)
                     break
                 default:
@@ -663,18 +665,14 @@ class Game extends Component {
         if(this.props.user.isObserver) return
 
         const spellName = 'spell_' + name
+
+        if(this.nextActionIsInstant) return this.emitAction(spellName)
         switch (name) {
+            // Instant spells
             case 'reflect_shield':
             case 'follower':
                 this.emitAction(spellName)
                 return
-            case 'teleportation_orb':
-                if(this.teleportationOrbId !== '') {
-                    this.emitAction(spellName)
-                    return
-                }
-                this.status = spellName
-                break
             default:
                 this.status = spellName
         }
@@ -684,12 +682,7 @@ class Game extends Component {
     createSpellPrediction(name) {
         this.selectedSpellData = this.props.spells.find(x => x.id === name)
 
-        if(!this.spellPrediction) {
-            this.spellPrediction = new window.PIXI.Container()
-            this.spellsContainer.addChild(this.spellPrediction)
-        }
         this.spellPrediction.removeChild(this.spellPrediction.children[0])
-        this.spellPrediction.hasLine = false
 
         switch (name) {
             case 'boomerang':
@@ -714,6 +707,7 @@ class Game extends Component {
                 circlePred.lineStyle(2, 0x1976D2)
                 circlePred.drawCircle(0, 0, this.selectedSpellData.radius)
                 circlePred.endFill()
+                this.spellPrediction.hasLine = false
                 this.spellPrediction.addChild(circlePred)
                 break
         }
