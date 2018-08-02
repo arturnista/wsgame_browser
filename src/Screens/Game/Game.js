@@ -686,6 +686,7 @@ class Game extends Component {
             case 'reflect_shield':
             case 'follower':
             case 'repel':
+            case 'life_drain':
                 this.emitAction({ action: 'spell', spellName: name })
                 return
             default:

@@ -61,6 +61,7 @@ class Root extends Component {
         .add('teleportation_orb.png', '/img/game/teleportation_orb.png')
         .add('repel.png', '/img/game/repel.png')
         .add('poison_dagger.png', '/img/game/poison_dagger.png')
+        .add('life_drain.png', '/img/game/life_drain.png')
         .add('game_05.png', '/img/game/game_05.png')
         .add('game_07.png', '/img/game/game_07.png')
         .add('game_10.png', '/img/game/game_10.png')
