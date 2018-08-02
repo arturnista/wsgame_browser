@@ -25,6 +25,7 @@ import { createFollower } from './Spells/Follower'
 import { createExplosion } from './Spells/Explosion'
 import { createReflectShield } from './Spells/ReflectShield'
 import { createTeleportationOrb } from './Spells/TeleportationOrb'
+import { createPoisonDagger } from './Spells/PoisonDagger'
 
 import './Game.css'
 
@@ -363,6 +364,10 @@ class Game extends Component {
                     entityCreated = createFollower(entityData)
                     this.createSpell(entityCreated)
                     break
+                case 'poison_dagger':
+                    entityCreated = createPoisonDagger(entityData)
+                    this.createSpell(entityCreated)
+                    break
                 case 'teleportation_orb':
                     entityCreated = createTeleportationOrb(entityData)
                     this.createSpell(entityCreated)
@@ -397,6 +402,7 @@ class Game extends Component {
             switch (entityData.type) {
                 case 'fireball':
                 case 'boomerang':
+                case 'poison_dagger':
                 case 'follower':
                     this.removeSpell(entityData)
                     break
@@ -629,7 +635,7 @@ class Game extends Component {
             y: (yClick / this.zoom) + this.camera.pivot.y
         }
         if(event.button === 2) {
-            this.emitAction('move', pos)
+            this.emitAction({ action: 'move'}, pos)
         } else {
             this.emitAction(this.status, pos)
         }
@@ -674,18 +680,16 @@ class Game extends Component {
     useSpell(name) {
         if(this.props.user.isObserver) return
 
-        const spellName = 'spell_' + name
-        
-        if(this.nextActionIsInstant) return this.emitAction(spellName)
+        if(this.nextActionIsInstant) return this.emitAction({ action: 'spell', spellName: name })
         switch (name) {
             // Instant spells
             case 'reflect_shield':
             case 'follower':
             case 'repel':
-                this.emitAction(spellName)
+                this.emitAction({ action: 'spell', spellName: name })
                 return
             default:
-                this.status = spellName
+                this.status = { action: 'spell', spellName: name }
         }
         this.createSpellPrediction(name)
     }
@@ -698,6 +702,7 @@ class Game extends Component {
         switch (name) {
             case 'boomerang':
             case 'fireball':
+            case 'poison_dagger':
             case 'teleportation_orb':
             case 'blink':
                 this.spellPrediction.visible = true
@@ -759,7 +764,7 @@ class Game extends Component {
         this.spellPrediction.y = finishPos.y
     }
 
-    emitAction(action, mousePosition) {
+    emitAction({ action, spellName }, mousePosition) {
         if(this.props.user.isObserver) return
         if(!this.gameIsRunning) return
 
@@ -767,6 +772,7 @@ class Game extends Component {
         window.socketio.emit(`player_${action}`, {
             id: this.player.id,
             position: mousePosition,
+            spellName,
             direction: vector.direction(this.player.position, mousePosition),
         })
 
@@ -774,7 +780,7 @@ class Game extends Component {
     }
 
     resetAction() {
-        this.status = 'move'
+        this.status = { action: 'move' }
         if(this.spellPrediction) this.spellPrediction.visible = false
         this.selectedSpellData = null
     }

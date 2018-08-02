@@ -7,6 +7,7 @@ const textureMap = {
     'blink': 'blink.png',
     'teleportation_orb': 'teleportation_orb.png',
     'repel': 'repel.png',
+    'poison_dagger': 'poison_dagger.png',
 }
 
 export default textureMap
