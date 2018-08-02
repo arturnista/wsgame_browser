@@ -26,6 +26,7 @@ import { createExplosion } from './Spells/Explosion'
 import { createReflectShield } from './Spells/ReflectShield'
 import { createTeleportationOrb } from './Spells/TeleportationOrb'
 import { createPoisonDagger } from './Spells/PoisonDagger'
+import { createVoodooDoll } from './Spells/VoodooDoll'
 
 import './Game.css'
 
@@ -72,7 +73,7 @@ class Game extends Component {
         this.zoom = 1
 
         this.player = null
-        this.status = 'move'
+        this.status = { action: 'move' }
         this.cameraType = this.props.user.isObserver ? 'observer' : 'player'
 
         this.players = []
@@ -368,6 +369,10 @@ class Game extends Component {
                     entityCreated = createPoisonDagger(entityData)
                     this.createSpell(entityCreated)
                     break
+                case 'voodoo_doll':
+                    entityCreated = createVoodooDoll(entityData)
+                    this.createSpell(entityCreated)
+                    break
                 case 'teleportation_orb':
                     entityCreated = createTeleportationOrb(entityData)
                     this.createSpell(entityCreated)
@@ -404,6 +409,7 @@ class Game extends Component {
                 case 'boomerang':
                 case 'poison_dagger':
                 case 'follower':
+                case 'voodoo_doll':
                     this.removeSpell(entityData)
                     break
                 case 'teleportation_orb':
@@ -687,6 +693,7 @@ class Game extends Component {
             case 'follower':
             case 'repel':
             case 'life_drain':
+            case 'voodoo_doll':
                 this.emitAction({ action: 'spell', spellName: name })
                 return
             default:

@@ -9,6 +9,7 @@ const textureMap = {
     'repel': 'repel.png',
     'poison_dagger': 'poison_dagger.png',
     'life_drain': 'life_drain.png',
+    'voodoo_doll': 'voodoo_doll.png',
 }
 
 export default textureMap
