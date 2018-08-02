@@ -430,6 +430,16 @@ class Game extends Component {
                     const explosion = createExplosion(spellData, this)
                     this.createSpell(explosion)
                     break
+                case 'repel':
+                    let radius = new window.PIXI.Sprite( window.textures['explosion_radius.png'] )
+                    radius.anchor.set(.5, .5)
+                    radius.width = spellData.radius * 2
+                    radius.height = spellData.radius * 2
+                    radius.x = spellData.player.position.x
+                    radius.y = spellData.player.position.y
+                    this.createSpell(radius)
+                    setTimeout(() => this.removeSpell(radius), 1000)
+                    break
                 case 'reflect_shield':
                     const player = this.players.find(x => x.id === spellData.player.id)
                     const reflect = createReflectShield(spellData, this, player)
@@ -665,12 +675,13 @@ class Game extends Component {
         if(this.props.user.isObserver) return
 
         const spellName = 'spell_' + name
-
+        
         if(this.nextActionIsInstant) return this.emitAction(spellName)
         switch (name) {
             // Instant spells
             case 'reflect_shield':
             case 'follower':
+            case 'repel':
                 this.emitAction(spellName)
                 return
             default:

@@ -6,6 +6,7 @@ const textureMap = {
     'reflect_shield': 'reflect_shield.png',
     'blink': 'blink.png',
     'teleportation_orb': 'teleportation_orb.png',
+    'repel': 'repel.png',
 }
 
 export default textureMap
