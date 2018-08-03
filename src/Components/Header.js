@@ -10,7 +10,7 @@ class Header extends Component {
             <div className="header-container">
                 <Link to='/' className='header-title'>
                     <h1>NW GAME</h1>
-                    <small>v0.1.0</small>
+                    <small>pre v0.2.0</small>
                 </Link>
                 <Link to='/whatsnew' className='header-link'>
                     <p>Whats new?</p>

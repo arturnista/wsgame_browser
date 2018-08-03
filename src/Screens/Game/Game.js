@@ -86,7 +86,7 @@ class Game extends Component {
         this.spellsToRemove = []
 
         this.map = {}
-        this.nextActionIsInstant = false
+        this.teleportationOrbActive = false
 
     }
 
@@ -377,7 +377,7 @@ class Game extends Component {
                     entityCreated = createTeleportationOrb(entityData)
                     this.createSpell(entityCreated)
                     
-                    if(!this.props.user.isObserver && entityData.owner === this.player.id) this.nextActionIsInstant = true
+                    if(!this.props.user.isObserver && entityData.owner === this.player.id) this.teleportationOrbActive = true
                     break
                 case 'player':
                     entityCreated = createPlayer(entityData, this)
@@ -413,7 +413,7 @@ class Game extends Component {
                     this.removeSpell(entityData)
                     break
                 case 'teleportation_orb':
-                    if(!this.props.user.isObserver && entityData.owner === this.player.id) this.nextActionIsInstant = false
+                    if(!this.props.user.isObserver && entityData.owner === this.player.id) this.teleportationOrbActive = false
                     this.removeSpell(entityData)
                     break
                 default:
@@ -686,7 +686,6 @@ class Game extends Component {
     useSpell(name) {
         if(this.props.user.isObserver) return
 
-        if(this.nextActionIsInstant) return this.emitAction({ action: 'spell', spellName: name })
         switch (name) {
             // Instant spells
             case 'reflect_shield':
@@ -696,6 +695,10 @@ class Game extends Component {
             case 'voodoo_doll':
                 this.emitAction({ action: 'spell', spellName: name })
                 return
+            case 'teleportation_orb':
+                if(this.teleportationOrbActive) return this.emitAction({ action: 'spell', spellName: name })
+                this.status = { action: 'spell', spellName: name }
+                break
             default:
                 this.status = { action: 'spell', spellName: name }
         }
