@@ -27,6 +27,7 @@ import { createReflectShield } from './Spells/ReflectShield'
 import { createTeleportationOrb } from './Spells/TeleportationOrb'
 import { createPoisonDagger } from './Spells/PoisonDagger'
 import { createVoodooDoll } from './Spells/VoodooDoll'
+import { createPrison } from './Spells/Prison'
 
 import './Game.css'
 
@@ -373,6 +374,10 @@ class Game extends Component {
                     entityCreated = createVoodooDoll(entityData)
                     this.createSpell(entityCreated)
                     break
+                case 'prison':
+                    entityCreated = createPrison(entityData)
+                    this.createSpell(entityCreated)
+                    break
                 case 'teleportation_orb':
                     entityCreated = createTeleportationOrb(entityData)
                     this.createSpell(entityCreated)
@@ -410,6 +415,7 @@ class Game extends Component {
                 case 'poison_dagger':
                 case 'follower':
                 case 'voodoo_doll':
+                case 'prison':
                     this.removeSpell(entityData)
                     break
                 case 'teleportation_orb':
@@ -727,6 +733,7 @@ class Game extends Component {
                 this.spellPrediction.addChild(oneTimePred)
                 break
                 
+            case 'prison':
             case 'explosion':
                 this.spellPrediction.visible = true
                 let circlePred = new window.PIXI.Graphics()
