@@ -56,7 +56,7 @@ function ObsPlayer(index, playerData, hud, { spells }) {
 
 ObsPlayer.prototype.useSpell = function (spellName) {
     const spellIcon = this.spellsIcons.find(x => x.id === spellName)
-    spellIcon.use()
+    if(spellIcon) spellIcon.use()
 }
 
 ObsPlayer.prototype.sync = function (playerData) {
