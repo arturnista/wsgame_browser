@@ -250,7 +250,7 @@ class Game extends Component {
 
         } else {
             
-            for(const i in this.players) {
+            for(let i = 0; i < this.players.length; i++) {
                 const obsPlayer = this.obsPlayers.find(x => x.id === this.players[i].id)
                 obsPlayer.sync(this.players[i])
             }
@@ -553,7 +553,7 @@ class Game extends Component {
     gameStart(body) {
         console.log('gameStart', body)
         if(this.props.user.isObserver) {
-            for(const k in body.players) {
+            for(let k = 0; k < body.players.length; k++) {
                 const obsPlayer = new ObsPlayer(k, body.players[k], this.observersHud, { spells: this.props.spells })
                 this.obsPlayers.push(obsPlayer)
                 this.hudEntities.push(obsPlayer)
