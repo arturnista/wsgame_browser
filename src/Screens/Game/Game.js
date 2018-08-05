@@ -374,7 +374,7 @@ class Game extends Component {
                     this.createSpell(entityCreated)
                     break
                 case 'voodoo_doll':
-                    entityCreated = createVoodooDoll(entityData)
+                    entityCreated = createVoodooDoll(entityData, this.players.find(x => x.id === entityData.owner))
                     this.createSpell(entityCreated)
                     break
                 case 'prison':
@@ -655,7 +655,6 @@ class Game extends Component {
         if(event.button === 2) {
             this.emitAction({ action: 'move'}, pos)
         } else {        
-            console.log('down')    
             if(this.status.action === 'spell' && this.status.spellName === 'prison_drag') this.isDragging = true
             else this.emitAction(this.status, pos)
         }
