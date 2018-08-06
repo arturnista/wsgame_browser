@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { Input, Button } from '../../Components'
 import ReactMarkdown from 'react-markdown'
 import moment from 'moment'
-import articles from './articles'
+import { serverUrl } from '../../constants'
 import './WhatsNew.css'
 
 const mapStateToProps = (state) => ({
@@ -20,23 +20,45 @@ class WhatsNew extends Component {
         super(props)
 
         this.state = {
+            articles: [],
+            articleIndex: 0
         }
 
     }
 
+    componentDidMount() {
+        fetch(`${serverUrl}/articles`)
+        .then(res => res.json())
+        .then(articles => this.setState({ articles }))
+    }
+
     render() {
+
+        const currentArticle = this.state.articles[this.state.articleIndex]
 
         return (
             <div className="bg-container">
                 <div className='wn-container'>
                     <div className='wn-sidebar'>
                         <h2>Articles: </h2>
-                        { articles.map(a => <p className='wn-sidebar-item selected'>{moment(a.date).format('DD/MM/YY')} - {a.title}</p>) }
+                        { this.state.articles.map((a, i) => (
+                                <p className={`wn-sidebar-item ${this.state.articleIndex === i ? 'selected' : ''}`} 
+                                    onClick={() => this.setState({ articleIndex: i })}>
+                                    {moment(a.date).format('DD/MM/YY')} - {a.title}
+                                </p>
+                            ))
+                        }
                     </div>
-                    <div className='wn-news-content'>
-                        <h2 className='wn-news-title'><span className='wn-news-title-date'>{moment(articles[0].date).format('DD/MM/YY')}</span> {articles[0].title}</h2>
-                        <ReactMarkdown className='wn-news-article' source={articles[0].content} />
-                    </div>
+                    {
+                        currentArticle &&
+                        <div className='wn-news-content'>
+                            <h2 className='wn-news-title'>
+                                <span className='wn-news-title-date'>{moment(currentArticle.date).format('DD/MM/YY')}</span> 
+                                {currentArticle.title}
+                            </h2>
+                            <ReactMarkdown className='wn-news-article' source={currentArticle.content} />
+                        </div>
+                    }
                 </div>
             </div>
         )
