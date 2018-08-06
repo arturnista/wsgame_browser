@@ -56,6 +56,7 @@ class Game extends Component {
 
         this.handleLoad = this.handleLoad.bind(this)
         this.handleMouseDown = this.handleMouseDown.bind(this)
+        this.handleMouseUp = this.handleMouseUp.bind(this)
         this.handleMouseMove = this.handleMouseMove.bind(this)
         this.handleKeyDown = this.handleKeyDown.bind(this)
         this.gameLoop = this.gameLoop.bind(this)
@@ -85,6 +86,8 @@ class Game extends Component {
         this.entitiesToRemove = []
         this.spells = []
         this.spellsToRemove = []
+        this.initialDragPosition = {}
+        this.isDragging = false
 
         this.map = {}
         this.teleportationOrbActive = false
@@ -250,7 +253,7 @@ class Game extends Component {
 
         } else {
             
-            for(const i in this.players) {
+            for(let i = 0; i < this.players.length; i++) {
                 const obsPlayer = this.obsPlayers.find(x => x.id === this.players[i].id)
                 obsPlayer.sync(this.players[i])
             }
@@ -371,7 +374,7 @@ class Game extends Component {
                     this.createSpell(entityCreated)
                     break
                 case 'voodoo_doll':
-                    entityCreated = createVoodooDoll(entityData)
+                    entityCreated = createVoodooDoll(entityData, this.players.find(x => x.id === entityData.owner))
                     this.createSpell(entityCreated)
                     break
                 case 'prison':
@@ -553,7 +556,7 @@ class Game extends Component {
     gameStart(body) {
         console.log('gameStart', body)
         if(this.props.user.isObserver) {
-            for(const k in body.players) {
+            for(let k = 0; k < body.players.length; k++) {
                 const obsPlayer = new ObsPlayer(k, body.players[k], this.observersHud, { spells: this.props.spells })
                 this.obsPlayers.push(obsPlayer)
                 this.hudEntities.push(obsPlayer)
@@ -638,6 +641,7 @@ class Game extends Component {
 
     handleMouseDown(event) {
         if(this.props.user.isObserver) return
+        this.isDragging = false
         
         event.preventDefault()
         const xClick = event.clientX
@@ -646,12 +650,32 @@ class Game extends Component {
             x: (xClick / this.zoom) + this.camera.pivot.x,
             y: (yClick / this.zoom) + this.camera.pivot.y
         }
+
+        this.initialDragPosition = pos
         if(event.button === 2) {
             this.emitAction({ action: 'move'}, pos)
-        } else {
-            this.emitAction(this.status, pos)
+        } else {        
+            if(this.status.action === 'spell' && this.status.spellName === 'prison_drag') this.isDragging = true
+            else this.emitAction(this.status, pos)
         }
 
+    }
+
+    handleMouseUp(event) { 
+        
+        event.preventDefault()
+        if(!this.isDragging) return
+
+        const xClick = event.clientX
+        const yClick = event.clientY - 96
+        const pos = {
+            x: (xClick / this.zoom) + this.camera.pivot.x,
+            y: (yClick / this.zoom) + this.camera.pivot.y
+        }
+
+        if(event.button === 0) {
+            if(this.status.action === 'spell' && this.status.spellName === 'prison_drag') this.emitAction(this.status, this.initialDragPosition, pos)
+        }
     }
 
     handleMouseMove(event) {
@@ -734,12 +758,13 @@ class Game extends Component {
                 break
                 
             case 'prison':
+            case 'prison_drag':
             case 'explosion':
                 this.spellPrediction.visible = true
                 let circlePred = new window.PIXI.Graphics()
                 circlePred.beginFill(0xFAFAFA, .1)
                 circlePred.lineStyle(2, 0x1976D2)
-                circlePred.drawCircle(0, 0, this.selectedSpellData.radius)
+                circlePred.drawCircle(0, 0, this.selectedSpellData.radius || 50)
                 circlePred.endFill()
                 this.spellPrediction.hasLine = false
                 this.spellPrediction.addChild(circlePred)
@@ -782,7 +807,7 @@ class Game extends Component {
         this.spellPrediction.y = finishPos.y
     }
 
-    emitAction({ action, spellName }, mousePosition) {
+    emitAction({ action, spellName }, mousePosition, finalPosition) {
         if(this.props.user.isObserver) return
         if(!this.gameIsRunning) return
 
@@ -792,6 +817,7 @@ class Game extends Component {
             position: mousePosition,
             spellName,
             direction: vector.direction(this.player.position, mousePosition),
+            finalPosition
         })
 
         this.resetAction()
@@ -810,6 +836,7 @@ class Game extends Component {
                 <div id="game-mount" className="game" ref={r => this.gameDiv = r}
                     onMouseMove={this.handleMouseMove}
                     onMouseDown={this.handleMouseDown}
+                    onMouseUp={this.handleMouseUp}
                     onContextMenu={e => e.preventDefault()}
                     onKeyDown={this.handleKeyDown} tabIndex="1">
 

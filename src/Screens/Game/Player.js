@@ -1,6 +1,24 @@
 import _ from 'lodash'
 import vector from '../../Utils/vector'
 
+function createSlowEffect() {
+    
+    let images = [ 'slow_00.png', 'slow_01.png', 'slow_02.png', 'slow_03.png' ]
+    let textureArray = []
+    
+    for (let i=0; i < images.length; i++) {
+         let texture = window.PIXI.Texture.fromImage(images[i])
+         textureArray.push(texture)
+    }
+
+    let sprite = new window.PIXI.extras.AnimatedSprite(textureArray)
+    sprite.anchor.set(.5, .5)
+    sprite.animationSpeed = .3
+    sprite.play()
+
+    return sprite
+}
+
 export function createPlayer(playerData, game) {
     const player = new window.PIXI.Container()
     player.id = playerData.id
@@ -18,6 +36,9 @@ export function createPlayer(playerData, game) {
     playerSprite.tint = parseInt(playerData.color.replace('#', ''), 16)
     player.addChild(playerSprite)
 
+    let modifiersContainer = new window.PIXI.Container()
+    player.addChild(modifiersContainer)
+
     let lastTexture = ''
     let hor = 'right'
     let ver = 'down'
@@ -30,6 +51,14 @@ export function createPlayer(playerData, game) {
             lastTexture = textureName
             playerSprite.texture = window.textures[textureName]
         }
+
+        const hasSlow = player.metadata.modifiers.find(x => x === 'slow')
+        if(hasSlow) {
+            if(modifiersContainer.children.length === 0) modifiersContainer.addChild(createSlowEffect())
+        } else {
+            modifiersContainer.removeChild(modifiersContainer.children[0])
+        }
+        
     }
 
     return player

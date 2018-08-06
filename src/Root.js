@@ -64,6 +64,11 @@ class Root extends Component {
         .add('life_drain.png', '/img/game/life_drain.png')
         .add('voodoo_doll.png', '/img/game/voodoo_doll.png')
         .add('prison.png', '/img/game/prison.png')
+        .add('slow_00.png', '/img/game/slow_00.png')
+        .add('slow_01.png', '/img/game/slow_01.png')
+        .add('slow_02.png', '/img/game/slow_02.png')
+        .add('slow_03.png', '/img/game/slow_03.png')
+        
         .add('game_05.png', '/img/game/game_05.png')
         .add('game_07.png', '/img/game/game_07.png')
         .add('game_10.png', '/img/game/game_10.png')
