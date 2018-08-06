@@ -1,4 +1,5 @@
 const SET_ROOM = 'room/SET_ROOM'
+const LEAVE_ROOM = 'room/LEAVE_ROOM'
 const ADD_USER = 'room/ADD_USER'
 const REMOVE_USER = 'room/REMOVE_USER'
 const READY_USER = 'room/READY_USER'
@@ -11,6 +12,8 @@ const initialState = null
 
 export default function reducer(state = initialState, action = {}) {
     switch (action.type) {
+        case LEAVE_ROOM:
+            return initialState
         case SET_ROOM:
             return { ...action.payload }
         case ADD_USER:
@@ -66,6 +69,12 @@ export default function reducer(state = initialState, action = {}) {
             }
         default:
             return state
+    }
+}
+
+export function leaveRoom() {
+    return {
+        type: LEAVE_ROOM,
     }
 }
 

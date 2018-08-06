@@ -9,7 +9,7 @@ import { Router, Route } from 'react-router'
 import { App, Start, Room, Game, WhatsNew, LoadingScreen } from './Screens'
 import createBrowserHistory from 'history/createBrowserHistory'
 import createStore from './Redux/createStore'
-import { setRoom } from './Redux/room'
+import { leaveRoom, setRoom } from './Redux/room'
 import { defineUser } from './Redux/user'
 import './Root.css'
 
@@ -92,6 +92,7 @@ class Root extends Component {
 
             window.socketio.on('disconnect', () => {
                 console.log('SocketIO :: Disconnected')
+                this.store.dispatch( leaveRoom() )
             })
         })
     }

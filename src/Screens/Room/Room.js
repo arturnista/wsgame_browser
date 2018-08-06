@@ -98,12 +98,19 @@ class Room extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        if(_.isEmpty(nextProps.room)) {
+            this.props.history.replace('/')
+        }
+
         if(!_.isEmpty(nextProps.game)) {
             this.props.history.replace('/game')
         }
     }
 
     componentWillUnmount() {
+        window.socketio.emit('user_waiting', {})
+        this.setState({ status: 'waiting' })
+
         window.socketio.off('user_joined_room', this.handleAddUser)
         window.socketio.off('user_ready', this.handleReadyUser)
         window.socketio.off('user_waiting', this.handleWaitingUser)

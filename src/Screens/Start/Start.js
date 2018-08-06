@@ -34,6 +34,10 @@ class Start extends Component {
 
     componentDidMount() {
         this.handleRefresh()
+
+        if(!_.isEmpty(this.props.room)) {
+            this.props.history.replace('/room')
+        }
     }
 
     componentWillReceiveProps(nextProps) {
