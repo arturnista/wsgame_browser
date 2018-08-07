@@ -5,7 +5,8 @@ import './Header.css'
 class Header extends Component {
 
     render() {
-
+        if(this.props.location.pathname === '/game') return null
+        
         return (
             <div className="header-container">
                 <Link to='/' className='header-title'>
