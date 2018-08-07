@@ -1,0 +1,57 @@
+.br-grid {
+    padding: 1em;
+    display: grid;
+    grid-template-rows: auto;
+    grid-gap: 1em;
+}
+
+.br-form {
+    padding: .5em;
+    background-color: #fafafa;
+    display: flex;
+    flex-direction: column;
+}
+
+.br-textarea {
+    height: 20em;
+    flex: 1;
+    padding: 0;
+    margin: 2px;
+    resize: none;
+}
+
+.br-send-button {
+    width: 200px;
+    height: 3em;
+    margin-bottom: .5em;
+    align-self: center;
+}
+
+.br-preview {
+    background-color: #fafafa;
+    height: calc(50vh - 48px - .5em);
+}
+
+.br-markdown-preview {
+
+}
+
+.br-success {
+    cursor: pointer;
+    margin-top: .3em;
+    margin-bottom: .3em;
+    padding: 1em;
+    border-radius: 10px;
+    background-color: #A5D6A7;
+    color: #1B5E20;
+}
+
+.br-error {
+    cursor: pointer;
+    margin-top: .3em;
+    margin-bottom: .3em;
+    padding: 1em;
+    border-radius: 10px;
+    background-color: #E57373;
+    color: #B71C1C;
+}
