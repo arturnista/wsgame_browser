@@ -19,25 +19,24 @@ class BugReport extends Component {
         super(props)
 
         this.state = {
-            articles: [],
-            articleIndex: 0
+            content: ''
         }
 
     }
 
-    componentDidMount() {
-        fetch(`${serverUrl}/articles`)
-        .then(res => res.json())
-        .then(articles => this.setState({ articles }))
-    }
-
     render() {
-
-        const currentArticle = this.state.articles[this.state.articleIndex]
-
         return (
             <div className="bg-container">
-            
+                <div className="bugreport-grid">
+                    <div className="bugreport-form">
+                        <textarea className='bugreport-textarea'
+                            value={this.state.content} 
+                            onChange={e => this.setState({ content: e.target.value }) }/>
+                    </div>
+                    <div className="bugreport-preview">
+                        <ReactMarkdown source={this.state.content} />                    
+                    </div>
+                </div>
             </div>
         )
 
