@@ -5,6 +5,7 @@ import NotFound from './NotFound/NotFound'
 import Game from './Game/Game'
 import LoadingScreen from './App/LoadingScreen'
 import WhatsNew from './WhatsNew/WhatsNew'
+import BugReport from './BugReport/BugReport'
 
 export {
     App,
@@ -14,4 +15,5 @@ export {
     Game,
     LoadingScreen,
     WhatsNew,
+    BugReport
 }

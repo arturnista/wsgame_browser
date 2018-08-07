@@ -15,6 +15,9 @@ class Header extends Component {
                 <Link to='/whatsnew' className='header-link'>
                     <p>Whats new?</p>
                 </Link>
+                <Link to='/bugreport' className='header-link'>
+                    <p>Found a bug?</p>
+                </Link>
             </div>
         )
 

@@ -1,6 +1,6 @@
 {
-  "name": "wsgame_browser",
-  "version": "0.1.0",
+  "name": "NWGame [Browser]",
+  "version": "0.2.0",
   "private": true,
   "dependencies": {
     "history": "^4.7.2",
