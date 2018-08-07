@@ -645,7 +645,7 @@ class Game extends Component {
         
         event.preventDefault()
         const xClick = event.clientX
-        const yClick = event.clientY - 96
+        const yClick = event.clientY
         const pos = {
             x: (xClick / this.zoom) + this.camera.pivot.x,
             y: (yClick / this.zoom) + this.camera.pivot.y
@@ -667,7 +667,7 @@ class Game extends Component {
         if(!this.isDragging) return
 
         const xClick = event.clientX
-        const yClick = event.clientY - 96
+        const yClick = event.clientY
         const pos = {
             x: (xClick / this.zoom) + this.camera.pivot.x,
             y: (yClick / this.zoom) + this.camera.pivot.y
@@ -680,7 +680,7 @@ class Game extends Component {
 
     handleMouseMove(event) {
         const xClick = event.clientX
-        const yClick = event.clientY - 96
+        const yClick = event.clientY
         this.mousePosition =  {
             x: (xClick / this.zoom) + this.camera.pivot.x,
             y: (yClick / this.zoom) + this.camera.pivot.y

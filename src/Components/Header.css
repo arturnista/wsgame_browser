@@ -1,24 +1,28 @@
 .header-container {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr repeat(4, 10%);
     height: 96px;
-    background-color: #444;
-    justify-content: center;
+    background-color: #2f54a3;
     align-items: center;
 }
 
 .header-title {
+    padding-left: 1em;
     color: #FAFAFA;
     font-size: 1em;
     text-decoration: none;
-    display: flex;
 }
 
 .header-link {
-    margin-top: 1em;
     color: #FAFAFA;
     font-size: 1em;
     text-decoration: none;
-    align-self: flex-end;
-    margin-right: 2em;
+}
+
+.header-link:hover {
+    text-decoration: underline;
+}
+
+.header-link.active {
+    text-decoration: underline;
 }
