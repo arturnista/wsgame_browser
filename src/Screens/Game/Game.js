@@ -54,6 +54,11 @@ class Game extends Component {
 
         super(props)
 
+        this.state = {
+            ping: 0
+        }
+        this.ticks = 0
+
         this.handleLoad = this.handleLoad.bind(this)
         this.handleMouseDown = this.handleMouseDown.bind(this)
         this.handleMouseUp = this.handleMouseUp.bind(this)
@@ -347,6 +352,12 @@ class Game extends Component {
         if(body.spell_casted) this.spellCasted(body.spell_casted)
         if(body.map_update) this.map.updateData(body.map_update[0])
         this.updateEntities(body.entities)
+
+        this.ticks++
+        if(this.ticks >= 60) {
+            this.ticks = 0
+            this.setState({ ping: new Date() - new Date(body.sendTime) })
+        }
     }
 
     createEntities(entities) {
@@ -833,6 +844,7 @@ class Game extends Component {
 
         return (
             <div id="game-mount-container" className="game-container">
+                <p className="game-mount-ping">{this.state.ping}ms</p>
                 <div id="game-mount" className="game" ref={r => this.gameDiv = r}
                     onMouseMove={this.handleMouseMove}
                     onMouseDown={this.handleMouseDown}
