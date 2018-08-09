@@ -6,7 +6,7 @@ import { Input, Button } from '../../Components'
 import { serverUrl } from '../../constants'
 import { defineUser, selectSpell, deselectSpell } from '../../Redux/user'
 import { addSpells } from '../../Redux/spells'
-import { addUser, removeUser, readyUser, waitingUser, updateRoom, updateChat } from '../../Redux/room'
+import { addUser, removeUser, readyUser, waitingUser, updateRoom, updateChat, leaveRoom } from '../../Redux/room'
 import { startGame } from '../../Redux/game'
 import './Room.css'
 
@@ -29,6 +29,7 @@ const mapDispatchToProps = (dispatch) => ({
     removeUser: user => dispatch(removeUser(user)),
     readyUser: user => dispatch(readyUser(user)),
     waitingUser: user => dispatch(waitingUser(user)),
+    leaveRoom: () => dispatch(leaveRoom())
 })
 
 class Room extends Component {
@@ -52,6 +53,8 @@ class Room extends Component {
         this.handleReadyUser = this.handleReadyUser.bind(this)
         this.handleWaitingUser = this.handleWaitingUser.bind(this)
         this.handleRemoveUser = this.handleRemoveUser.bind(this)
+        this.handleLeaveRoom = this.handleLeaveRoom.bind(this)
+        this.handleKickPlayer = this.handleKickPlayer.bind(this)
 
         this.configSpells = {}
         this.state = {
@@ -139,7 +142,11 @@ class Room extends Component {
 
     handleRemoveUser(body) {
         console.log('handleRemoveUser', body)
-        this.props.removeUser(body)
+        if(body.id === this.props.user.id) {
+            this.props.leaveRoom()
+        } else {
+            this.props.removeUser(body)
+        }
     }
     
     handleSelectSpell(body) {
@@ -206,6 +213,15 @@ class Room extends Component {
         this.setState({ chatMessage: '' })
     }
 
+    handleLeaveRoom() {
+        window.socketio.emit('room_left', {})        
+    }
+
+    handleKickPlayer(userId) {
+        console.log(userId)
+        window.socketio.emit('room_kick_user', { userId })                
+    }
+
     renderSpell(spell) {
         const isSelected = this.props.user.spells.find(x => x === spell.id)
         const focus = this.state.selectedSpell.id === spell.id
@@ -252,6 +268,12 @@ class Room extends Component {
                 </div>
                 <p className={'room-user-name ' + (isOwner ? 'owner ' : ' ') + (isYou ? 'you' : '')}>{user.name}</p>
                 <p className={'room-user-status ' + user.status}>{user.status.toUpperCase()}</p>
+                {
+                    this.props.isOwner && this.props.user.id !== user.id &&
+                    <p className='room-user-kick' onClick={() => this.handleKickPlayer(user.id)}>
+                        Kick player
+                    </p>
+                }
             </div>
         )
     }
@@ -346,6 +368,8 @@ class Room extends Component {
                         </div>
                         <div className='room-users-container'>
                             <div className='room-users-container-header'>
+                                <Button label='Leave room' className='room-users-obs-button small'
+                                    onClick={this.handleLeaveRoom}/>
                                 {
                                     this.props.isOwner &&
                                     <Button label='Add bot' className='room-users-obs-button small'

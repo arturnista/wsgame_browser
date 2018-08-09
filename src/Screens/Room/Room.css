@@ -147,6 +147,12 @@
     color: #FAFAFA;
 }
 
+.room-user-kick {
+    font-weight: bold;
+    margin-left: 20px;
+    cursor: pointer;
+}
+
 .room-chat-container {
     display: flex;
     flex: 1;
