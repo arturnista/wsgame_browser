@@ -42,17 +42,15 @@
     overflow: auto;
 }
 
-.room-users-container-header {
-    display: flex;
-    flex-direction: row;
+.room-users-config-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     align-items: center;
-    justify-content: space-between;
-    /* justify-content: flex-end; */
-    background-color: #ccc;
-    min-height: 1.8em;
+    padding: 1em;
+    grid-row-gap: .5em;
 }
 
-.room-users-obs-text {
+.room-users-config-text {
     padding: 0;
     margin: 0;
     font-size: .9em;
@@ -60,13 +58,18 @@
     margin-right: .3em;
 }
 
-.room-users-obs-button {
+.room-users-config-button {
     width: 10rem;
     /* margin-right: .3rem; */
 }
 
-.room-users-obs-button.small {
+.room-users-config-button.small {
     width: 6rem;
+}
+
+.room-users-config-button.quit {
+    background-color: #C62828;
+    color: #fafafa;
 }
 
 .room-users-addbot-container {
@@ -159,6 +162,21 @@
     flex-direction: column;
     margin-top: .5em;
     background-color: #FAFAFA;
+}
+
+.room-chat-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px #333 solid;
+    margin-bottom: .3em;
+}
+
+.room-chat-header-item {
+    color: #888;
+    cursor: pointer;
+}
+.room-chat-header-item.active {
+    color: #212121;    
 }
 
 .room-chat-list-container {

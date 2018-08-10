@@ -53,11 +53,13 @@ class Room extends Component {
         this.handleReadyUser = this.handleReadyUser.bind(this)
         this.handleWaitingUser = this.handleWaitingUser.bind(this)
         this.handleRemoveUser = this.handleRemoveUser.bind(this)
+        this.handleDestroyRoom = this.handleDestroyRoom.bind(this)
         this.handleLeaveRoom = this.handleLeaveRoom.bind(this)
         this.handleKickPlayer = this.handleKickPlayer.bind(this)
 
         this.configSpells = {}
         this.state = {
+            menuSelected: 'chat',
             modalMapShowing: false,
             status: 'waiting',
             isObserver: props.user.isObserver || false,
@@ -217,6 +219,10 @@ class Room extends Component {
         window.socketio.emit('room_left', {})        
     }
 
+    handleDestroyRoom() {
+        window.socketio.emit('room_destroy', {})                
+    }
+
     handleKickPlayer(userId) {
         console.log(userId)
         window.socketio.emit('room_kick_user', { userId })                
@@ -367,29 +373,6 @@ class Room extends Component {
                             }
                         </div>
                         <div className='room-users-container'>
-                            <div className='room-users-container-header'>
-                                <Button label='Leave room' className='room-users-obs-button small'
-                                    onClick={this.handleLeaveRoom}/>
-                                {
-                                    this.props.isOwner &&
-                                    <Button label='Add bot' className='room-users-obs-button small'
-                                        onClick={() => this.setState({ botCount: this.state.botCount + 1})}/>
-                                }
-                                {
-                                    this.props.isOwner &&
-                                    <Button label='Remove bot' className='room-users-obs-button small'
-                                        onClick={() => this.setState({ botCount: this.state.botCount - 1})}/>
-                                }
-                                {
-                                    !this.state.isObserver ?
-                                    <Button label='Become observer' className='room-users-obs-button'
-                                        onClick={() => this.setState({ isObserver: true }, () => window.socketio.emit('user_become_observer', {}))}/>
-                                    :
-                                    <Button label='Become player' className='room-users-obs-button'
-                                        onClick={() => this.setState({ isObserver: false }, () => window.socketio.emit('user_become_player', {}))}/>
-                                }
-                                <p className='room-users-obs-text'>Observers: {this.props.room.observers.length}</p>
-                            </div>
                             {
                                 this.props.room.users.map(this.renderUser)
                             }
@@ -398,20 +381,67 @@ class Room extends Component {
                             }
                         </div>
                         <div className='room-chat-container'>
-                            <div className='room-chat-list-container'>
-                                {
-                                    this.props.room.chat.map(this.renderChatLine)
-                                }
+                            <div className='room-chat-header'>
+                                <h2 className={`room-chat-header-item ${this.state.menuSelected === 'chat' ? 'active' : ''} `}
+                                    onClick={() => this.setState({ menuSelected: 'chat' })}>
+                                    Chat
+                                </h2>
+                                <h2 className={`room-chat-header-item ${this.state.menuSelected === 'config' ? 'active' : ''} `}
+                                    onClick={() => this.setState({ menuSelected: 'config' })}>
+                                    Configuration
+                                </h2>
                             </div>
-                            <div className='room-chat-input-container'>
-                                <input className='room-chat-input'
-                                    onChange={e => this.setState({ chatMessage: e.target.value })}
-                                    value={this.state.chatMessage}
-                                    onKeyDown={e => e.key === 'Enter' && this.handleSubmitChatMessage()}/>
-                                <div className='room-chat-input-submit' onClick={this.handleSubmitChatMessage}>
-                                    <p className='room-chat-input-submit-label'>Submit</p>
+                            {
+                                this.state.menuSelected === 'chat' ? 
+                                [
+                                    (
+                                        <div className='room-chat-list-container' key='container'>
+                                            {
+                                                this.props.room.chat.map(this.renderChatLine)
+                                            }
+                                        </div>
+                                    ), (
+                                        <div className='room-chat-input-container' key='input'>
+                                            <input className='room-chat-input'
+                                                onChange={e => this.setState({ chatMessage: e.target.value })}
+                                                value={this.state.chatMessage}
+                                                onKeyDown={e => e.key === 'Enter' && this.handleSubmitChatMessage()}/>
+                                            <div className='room-chat-input-submit' onClick={this.handleSubmitChatMessage}>
+                                                <p className='room-chat-input-submit-label'>Submit</p>
+                                            </div>
+                                        </div>
+                                    )
+                                ]
+                                :
+                                <div className='room-users-config-container'>
+                                    <p className='room-users-config-text'>Observers: {this.props.room.observers.length}</p>
+                                    {
+                                        !this.state.isObserver ?
+                                        <Button label='Become observer' className='room-users-config-button'
+                                            onClick={() => this.setState({ isObserver: true }, () => window.socketio.emit('user_become_observer', {}))}/>
+                                        :
+                                        <Button label='Become player' className='room-users-config-button'
+                                            onClick={() => this.setState({ isObserver: false }, () => window.socketio.emit('user_become_player', {}))}/>
+                                    }
+                                    {
+                                        this.props.isOwner &&
+                                        <Button label='Add bot' className='room-users-config-button'
+                                            onClick={() => this.setState({ botCount: this.state.botCount + 1})}/>
+                                    }
+                                    {
+                                        this.props.isOwner &&
+                                        <Button label='Remove bot' className='room-users-config-button'
+                                            onClick={() => this.setState({ botCount: this.state.botCount - 1})}/>
+                                    }
+                                    <Button label='Leave room' className='room-users-config-button quit'
+                                        onClick={this.handleLeaveRoom}/>
+                                    {
+                                        this.props.isOwner &&
+                                        <Button label='Destroy room' className='room-users-config-button quit'
+                                            onClick={this.handleDestroyRoom}/>
+                                    }
                                 </div>
-                            </div>
+                            }
                         </div>
                     </div>
                     <div className='room-side-container'>
