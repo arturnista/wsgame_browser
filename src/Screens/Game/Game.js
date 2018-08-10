@@ -134,14 +134,27 @@ class Game extends Component {
         this.handleLoad()
     }
 
+    destroySprites(container) {
+        if(container.children.length > 0) {
+            for (let index = 0; index < container.children.length; index++) {
+                this.destroySprites(container.children[index])
+            }
+        }
+        if(container.destroy) container.destroy()
+    }
+
     componentWillUnmount() {
-        if(this.app) this.app.ticker.remove(this.gameLoop)
         window.socketio.off('game_state', this.gameState)
 
         window.socketio.off('map_create', this.gameMapCreate)
         window.socketio.off('game_start', this.gameStart)
         window.socketio.off('game_will_end', this.gameWillEnd)
         window.socketio.off('game_end', this.gameEnd)
+        
+        if(this.app) {
+            this.app.ticker.remove(this.gameLoop)
+            this.destroySprites(this.app.stage)
+        }
     }
 
     handleLoad() {
@@ -286,6 +299,7 @@ class Game extends Component {
             const entity = this.entitiesToRemove.pop()
             this.entitiesContainer.removeChild(entity)
             if(entity.id && this.entities[entity.id]) {
+                this.entities[entity.id].destroy()
                 delete this.entities[entity.id]
             }
         }
@@ -294,6 +308,7 @@ class Game extends Component {
             const entity = this.spellsToRemove.pop()
             this.spellsContainer.removeChild(entity)
             if(entity.id && this.entities[entity.id]) {
+                this.entities[entity.id].destroy()
                 delete this.entities[entity.id]
             }
         }
