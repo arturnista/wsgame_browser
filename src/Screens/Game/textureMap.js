@@ -12,6 +12,7 @@ const textureMap = {
     'voodoo_doll': 'voodoo_doll.png',
     'prison': 'prison.png',
     'prison_drag': 'prison.png',
+    'bubble': 'bubble.png',
 }
 
 export default textureMap

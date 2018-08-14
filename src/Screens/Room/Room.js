@@ -59,7 +59,7 @@ class Room extends Component {
 
         this.configSpells = {}
         this.state = {
-            menuSelected: 'chat',
+            menuSelected: 'config',
             modalMapShowing: false,
             status: 'waiting',
             isObserver: props.user.isObserver || false,

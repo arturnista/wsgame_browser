@@ -28,6 +28,7 @@ import { createTeleportationOrb } from './Spells/TeleportationOrb'
 import { createPoisonDagger } from './Spells/PoisonDagger'
 import { createVoodooDoll } from './Spells/VoodooDoll'
 import { createPrison } from './Spells/Prison'
+import { createBubble } from './Spells/Bubble'
 
 import './Game.css'
 
@@ -391,6 +392,10 @@ class Game extends Component {
                     entityCreated = createBoomerang(entityData)
                     this.createSpell(entityCreated)
                     break
+                case 'bubble':
+                    entityCreated = createBubble(entityData)
+                    this.createSpell(entityCreated)
+                    break
                 case 'follower':
                     entityCreated = createFollower(entityData)
                     this.createSpell(entityCreated)
@@ -410,7 +415,6 @@ class Game extends Component {
                 case 'teleportation_orb':
                     entityCreated = createTeleportationOrb(entityData)
                     this.createSpell(entityCreated)
-                    
                     if(!this.props.user.isObserver && entityData.owner === this.player.id) this.teleportationOrbActive = true
                     break
                 case 'player':
@@ -445,6 +449,7 @@ class Game extends Component {
                 case 'follower':
                 case 'voodoo_doll':
                 case 'prison':
+                case 'bubble':
                     this.removeSpell(entityData)
                     break
                 case 'teleportation_orb':
@@ -763,6 +768,7 @@ class Game extends Component {
 
     createSpellPrediction(name) {
         this.selectedSpellData = this.props.spells.find(x => x.id === name)
+        console.log(this.selectedSpellData)
 
         this.spellPrediction.removeChild(this.spellPrediction.children[0])
 
@@ -772,13 +778,14 @@ class Game extends Component {
             case 'poison_dagger':
             case 'teleportation_orb':
             case 'blink':
+            case 'bubble':
                 this.spellPrediction.visible = true
                 let oneTimePred = new window.PIXI.Graphics()
                 oneTimePred.beginFill(0xFAFAFA, .1)
                     .lineStyle(2, 0x1976D2)
                     .moveTo(this.player.position.x - this.mousePosition.x, this.player.position.y - this.mousePosition.y)
                     .lineTo(0, 0)
-                    .drawCircle(0, 0, 10)
+                    .drawCircle(0, 0, this.selectedSpellData.radius || 10)
                 this.spellPrediction.hasLine = true
                 this.spellPrediction.addChild(oneTimePred)
                 break
@@ -821,12 +828,13 @@ class Game extends Component {
                 y: this.player.position.y - finishPos.y
             }
             const dir = vector.direction(finishPos, this.player.position)
+            const radius = this.selectedSpellData.radius || 10
             this.spellPrediction.children[0].clear()
             this.spellPrediction.children[0].beginFill(0xFAFAFA, .1)
                     .lineStyle(2, 0x1976D2)
                     .moveTo(nPos.x, nPos.y)
-                    .lineTo(dir.x * 10, dir.y * 10)
-                    .drawCircle(0, 0, 10)
+                    .lineTo(dir.x * radius, dir.y * radius)
+                    .drawCircle(0, 0, radius)
         }
 
         this.spellPrediction.x = finishPos.x
