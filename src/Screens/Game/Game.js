@@ -29,6 +29,8 @@ import { createPoisonDagger } from './Spells/PoisonDagger'
 import { createVoodooDoll } from './Spells/VoodooDoll'
 import { createPrison } from './Spells/Prison'
 import { createBubble } from './Spells/Bubble'
+import { createLightningBolt } from './Spells/LightningBolt'
+import { createDefaultSprite } from './Spells/DefaultSprite'
 
 import './Game.css'
 
@@ -412,6 +414,10 @@ class Game extends Component {
                     entityCreated = createPrison(entityData)
                     this.createSpell(entityCreated)
                     break
+                case 'lightning_bolt':
+                    entityCreated = createLightningBolt(entityData)
+                    this.createSpell(entityCreated)
+                    break
                 case 'teleportation_orb':
                     entityCreated = createTeleportationOrb(entityData)
                     this.createSpell(entityCreated)
@@ -421,6 +427,10 @@ class Game extends Component {
                     entityCreated = createPlayer(entityData, this)
                     this.createPlayer(entityCreated)
                     if(entityData.userId === this.props.user.id) this.player = entityCreated
+                    break
+                default:
+                    entityCreated = createDefaultSprite(entityData)
+                    this.createSpell(entityCreated)
                     break
             }
 
@@ -450,6 +460,13 @@ class Game extends Component {
                 case 'voodoo_doll':
                 case 'prison':
                 case 'bubble':
+                    this.removeSpell(entityData)
+                    break
+                case 'lightning_bolt':
+                    const spellData = this.props.spells.find(x => x.id === entityData.type)
+                    const expEntity = this.entities[entityData.id].explode(entityData.position, spellData)
+                    this.createSpell(expEntity)
+                    setTimeout(() => this.removeSpell(expEntity), 1000)
                     this.removeSpell(entityData)
                     break
                 case 'teleportation_orb':
@@ -768,7 +785,6 @@ class Game extends Component {
 
     createSpellPrediction(name) {
         this.selectedSpellData = this.props.spells.find(x => x.id === name)
-        console.log(this.selectedSpellData)
 
         this.spellPrediction.removeChild(this.spellPrediction.children[0])
 
@@ -779,6 +795,7 @@ class Game extends Component {
             case 'teleportation_orb':
             case 'blink':
             case 'bubble':
+            case 'lightning_bolt':
                 this.spellPrediction.visible = true
                 let oneTimePred = new window.PIXI.Graphics()
                 oneTimePred.beginFill(0xFAFAFA, .1)
