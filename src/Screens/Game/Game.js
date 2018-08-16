@@ -415,7 +415,7 @@ class Game extends Component {
                     this.createSpell(entityCreated)
                     break
                 case 'lightning_bolt':
-                    entityCreated = createLightningBolt(entityData)
+                    entityCreated = createLightningBolt(entityData, this.entities[entityData.caster])
                     this.createSpell(entityCreated)
                     break
                 case 'teleportation_orb':
@@ -529,8 +529,12 @@ class Game extends Component {
 
             spell.id = spellData.id
             spell.metadata = { ...spellData }
-            spell.width = spellData.collider.size
-            spell.height = spellData.collider.size
+
+            if(!spell.blockSizeUpdate) {
+                spell.width = spellData.collider.size
+                spell.height = spellData.collider.size
+            }
+            
             spell.x = spellData.position.x
             spell.y = spellData.position.y
             spell.vx = spellData.velocity.x

@@ -1,12 +1,16 @@
 import _ from 'lodash'
 import vector from '../../../Utils/vector'
 
-export function createLightningBolt(spellData) {
+export function createLightningBolt(spellData, caster) {
 
-    const spell = new window.PIXI.Sprite( window.textures['lightning_bolt.png'] )
-    spell.anchor.set(.5, .5)
+    const spell = new window.PIXI.extras.TilingSprite( window.textures['lightning_bolt.png'], 30, spellData.collider.size )
+    spell.anchor.set(.5, 0)
 
     spell.id = spellData.id
+    spell.blockSizeUpdate = true
+
+    const casterOriginalPosition = { x: caster.position.x, y: caster.position.y }
+    let maxSize = false
 
     spell.update = (deltatime) => {
         const dir = vector.normalize(spell.metadata.velocity)
@@ -14,6 +18,11 @@ export function createLightningBolt(spellData) {
 
         spell.vx = spell.metadata.velocity.x
         spell.vy = spell.metadata.velocity.y
+        if(!maxSize) {
+            const dist = vector.distance(casterOriginalPosition, spell.position)
+            spell.height = dist
+            maxSize = dist > 300
+        }
     }
 
     spell.explode = (position, spellData) => {
