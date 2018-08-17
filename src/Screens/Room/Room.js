@@ -60,12 +60,13 @@ class Room extends Component {
         this.configSpells = {}
         this.state = {
             menuSelected: 'config',
+            spellTypeSelected: 'offensive',
             modalMapShowing: false,
             status: 'waiting',
             isObserver: props.user.isObserver || false,
             offensiveSpells: [],
             supportSpells: [],
-            selectedSpell: {},
+            selectedSpell: props.spells[1],
             chat: [],
             chatMessage: '',
             mapName: '',
@@ -110,6 +111,8 @@ class Room extends Component {
         if(!_.isEmpty(nextProps.game)) {
             this.props.history.replace('/game')
         }
+
+        if(_.isEmpty(this.state.selectedSpell)) this.setState({ selectedSpell: nextProps.spells[0] })
     }
 
     componentWillUnmount() {
@@ -168,6 +171,9 @@ class Room extends Component {
     handleNewChatMessage(body) {
         console.log('handleNewChatMessage', body)
         this.props.updateChat(body.chat)
+
+        const chatElement = document.getElementById("room-chat")
+        chatElement.scrollTop = chatElement.scrollHeight
     }
 
     handleWillStartGame(body) {
@@ -289,8 +295,8 @@ class Room extends Component {
             <div key={idx}
                 className={'room-user-container ready'}>
                 <div className='room-user-color' style={{ backgroundColor: '#FFCC00' }}></div>
-                <p className={'room-user-name bot'}>Bot Ulysses</p>
-                <p className={'room-user-status bot'} onClick={() => this.setState({ botCount: this.state.botCount - 1 })}>REMOVE BOT</p>
+                <p className={'room-user-name'}>Bot Ulysses</p>
+                <p className={'room-user-status'} onClick={() => this.setState({ botCount: this.state.botCount - 1 })}>REMOVE BOT</p>
             </div>
         )
     }
@@ -301,13 +307,11 @@ class Room extends Component {
 
         return (
             <div className={'room-chat-line-container ' + (isMine ? 'mine ' : ' ') }>
-                <div className='room-chat-line-content'>
-                    <div className='room-chat-line-header'>
-                        <p className='room-chat-line-user' style={{ color: user.color }}>{body.name}</p>
-                        <p className='room-chat-line-date'>{moment(body.createdAt).format('H:mm')}</p>
-                    </div>
-                    <p className='room-chat-line-message'>{body.message}</p>
+                <div className='room-chat-line-header'>
+                    <p className='room-chat-line-user' style={{ color: user.color }}>{body.name}</p>
+                    <p className='room-chat-line-date'>{moment(body.createdAt).format('H:mm')}</p>
                 </div>
+                <p className='room-chat-line-message'>{body.message}</p>
             </div>
         )
     }
@@ -348,144 +352,139 @@ class Room extends Component {
 
     render() {
         if(_.isEmpty(this.props.room)) return null
+        if(_.isEmpty(this.state.selectedSpell)) return null
 
         const toggleText = this.state.status === 'ready' ? 'Wait guys' : "Ok, I'm ready!"
 
         return (
-            <div className="room-container">
-                {/* <div className="room-info-container">
-                    <h2 className="room-name">{ this.props.room.roomJoined }</h2>
-                </div> */}
-                <div className="room-content-container">
-                    <div className='room-side-container'>
-                        <div className='room-buttons-container'>
-                            {
-                                !this.state.isObserver ?
-                                <Button label={toggleText} className={'room-button left ' + this.state.status}
-                                    onClick={this.handleToggleStatus}/>
-                                : <div className='room-button left'></div>
-                            }
-                            {
-                                this.props.isOwner ?
-                                <Button label='Start' className='room-button right'
-                                    onClick={() => this.setState({ modalMapShowing: true })}/>
-                                : <div className='room-button right'></div>
-                            }
-                        </div>
-                        <div className='room-users-container'>
-                            {
-                                this.props.room.users.map(this.renderUser)
-                            }
-                            {
-                                _.times(this.state.botCount, this.renderBot)
-                            }
-                        </div>
-                        <div className='room-chat-container'>
-                            <div className='room-chat-header'>
-                                <h2 className={`room-chat-header-item ${this.state.menuSelected === 'chat' ? 'active' : ''} `}
-                                    onClick={() => this.setState({ menuSelected: 'chat' })}>
-                                    Chat
-                                </h2>
-                                <h2 className={`room-chat-header-item ${this.state.menuSelected === 'config' ? 'active' : ''} `}
-                                    onClick={() => this.setState({ menuSelected: 'config' })}>
-                                    Configuration
-                                </h2>
-                            </div>
-                            {
-                                this.state.menuSelected === 'chat' ? 
-                                [
-                                    (
-                                        <div className='room-chat-list-container' key='container'>
-                                            {
-                                                this.props.room.chat.map(this.renderChatLine)
-                                            }
-                                        </div>
-                                    ), (
-                                        <div className='room-chat-input-container' key='input'>
-                                            <input className='room-chat-input'
-                                                onChange={e => this.setState({ chatMessage: e.target.value })}
-                                                value={this.state.chatMessage}
-                                                onKeyDown={e => e.key === 'Enter' && this.handleSubmitChatMessage()}/>
-                                            <div className='room-chat-input-submit' onClick={this.handleSubmitChatMessage}>
-                                                <p className='room-chat-input-submit-label'>Submit</p>
-                                            </div>
-                                        </div>
-                                    )
-                                ]
-                                :
-                                <div className='room-users-config-container'>
-                                    <p className='room-users-config-text'>Observers: {this.props.room.observers.length}</p>
-                                    {
-                                        !this.state.isObserver ?
-                                        <Button label='Become observer' className='room-users-config-button'
-                                            onClick={() => this.setState({ isObserver: true }, () => window.socketio.emit('user_become_observer', {}))}/>
-                                        :
-                                        <Button label='Become player' className='room-users-config-button'
-                                            onClick={() => this.setState({ isObserver: false }, () => window.socketio.emit('user_become_player', {}))}/>
-                                    }
-                                    {
-                                        this.props.isOwner &&
-                                        <Button label='Add bot' className='room-users-config-button'
-                                            onClick={() => this.setState({ botCount: this.state.botCount + 1})}/>
-                                    }
-                                    {
-                                        this.props.isOwner &&
-                                        <Button label='Remove bot' className='room-users-config-button'
-                                            onClick={() => this.setState({ botCount: this.state.botCount - 1})}/>
-                                    }
-                                    <Button label='Leave room' className='room-users-config-button quit'
-                                        onClick={this.handleLeaveRoom}/>
-                                    {
-                                        this.props.isOwner &&
-                                        <Button label='Destroy room' className='room-users-config-button quit'
-                                            onClick={this.handleDestroyRoom}/>
-                                    }
-                                </div>
-                            }
-                        </div>
+            <div className='bg-container room-grid'>
+                { this.state.modalMapShowing && this.renderMapModal() }
+                <div className='room-grid-item room-options-container'>
+                    {
+                        !this.state.isObserver ?
+                        <Button label={toggleText} className={'room-button ' + this.state.status}
+                            onClick={this.handleToggleStatus}/>
+                        : <div className='room-button'></div>
+                    }
+                    {
+                        this.props.isOwner ?
+                        <Button label='Start' className='room-button'
+                            onClick={() => this.setState({ modalMapShowing: true })}/>
+                        : <div className='room-button'></div>
+                    }
+                </div>
+                <div className='room-grid-item'>
+                    
+                </div>
+                <div className='room-grid-item'>
+                    {
+                        this.props.room.users.map(this.renderUser)
+                    }
+                    {
+                        _.times(this.state.botCount, this.renderBot)
+                    }
+                </div>
+                <div className='room-grid-item room-details-container'>
+                    <div className='room-details-header-container'>
+                        <img className='room-details-icon' src={`/img/game/${this.state.selectedSpell.id}.png`} />
+                        <p className='room-details-name'>{this.state.selectedSpell.name}</p>
                     </div>
-                    <div className='room-side-container'>
-                        {
-                            !_.isEmpty(this.state.selectedSpell) ?
-                            <div className='room-spell-desc-container'>
-                                <div className='room-spell-desc-icon-container'>
-                                    <img className='room-spell-desc-icon' src={`/img/game/${this.state.selectedSpell.id}.png`} />
-                                    {/* <div>
-                                        <p>{this.state.selectedSpell.cooldown / 1000} sec</p>
-                                        <p>{this.state.selectedSpell.knockbackIncrement}%</p>
-                                    </div> */}
+                    <div className='room-details-info-container'>
+                        <p className='room-details-description'>{this.state.selectedSpell.description}</p>
+                    </div>
+                    <div className='room-details-data-container'>
+                        <div className='room-details-data'></div>
+                        <div className='room-details-data'></div>
+                        <div className='room-details-data'></div>
+                        <div className='room-details-data'></div>
+                        <div className='room-details-data'></div>
+                        <div className='room-details-data'></div>
+                        <div className='room-details-data'></div>
+                        <div className='room-details-data'></div>
+                        <div className='room-details-data'></div>
+                        <div className='room-details-data'></div>
+                        <div className='room-details-data'></div>
+                        <div className='room-details-data'></div>
+                    </div>
+                </div>
+                <div className='room-grid-item multiple'>
+                    <div className='header'>
+                        <h2 className={`title ${this.state.menuSelected === 'chat' ? 'active' : ''} `}
+                            onClick={() => this.setState({ menuSelected: 'chat' })}>
+                            Chat
+                        </h2>
+                        <h2 className={`title ${this.state.menuSelected === 'config' ? 'active' : ''} `}
+                            onClick={() => this.setState({ menuSelected: 'config' })}>
+                            Configuration
+                        </h2>
+                    </div>
+                    {
+                        this.state.menuSelected === 'chat' ? 
+                            <div id="room-chat" className='room-chat-container'>
+                                <div className='room-chat-list-container'>
+                                    {
+                                        this.props.room.chat.map(this.renderChatLine)
+                                    }
                                 </div>
-                                <div className='room-spell-desc-info'>
-                                    <p className='room-spell-desc-name'>{this.state.selectedSpell.name}</p>
-                                    <p className='room-spell-desc-desc'>{this.state.selectedSpell.description}</p>
+                                <div className='room-chat-input-container'>
+                                    <input className='room-chat-input'
+                                        onChange={e => this.setState({ chatMessage: e.target.value })}
+                                        value={this.state.chatMessage}
+                                        onKeyDown={e => e.key === 'Enter' && this.handleSubmitChatMessage()}/>
+                                    <Button label='Submit' className='room-chat-submit'
+                                        onClick={this.handleSubmitChatMessage}/>
                                 </div>
                             </div>
                             :
-                            <div className='room-spell-desc-container'>
-                                <p>Click on an Spell Icon to select it.</p>
+                            <div className='room-users-config-container'>
+                                <p className='room-users-config-text'>Observers: {this.props.room.observers.length}</p>
+                                {
+                                    !this.state.isObserver ?
+                                    <Button label='Become observer' className='room-users-config-button'
+                                        onClick={() => this.setState({ isObserver: true }, () => window.socketio.emit('user_become_observer', {}))}/>
+                                    :
+                                    <Button label='Become player' className='room-users-config-button'
+                                        onClick={() => this.setState({ isObserver: false }, () => window.socketio.emit('user_become_player', {}))}/>
+                                }
+                                {
+                                    this.props.isOwner &&
+                                    <Button label='Add bot' className='room-users-config-button'
+                                        onClick={() => this.setState({ botCount: this.state.botCount + 1})}/>
+                                }
+                                {
+                                    this.props.isOwner &&
+                                    <Button label='Remove bot' className='room-users-config-button'
+                                        onClick={() => this.setState({ botCount: this.state.botCount - 1})}/>
+                                }
+                                <Button label='Leave room' className='room-users-config-button quit'
+                                    onClick={this.handleLeaveRoom}/>
+                                {
+                                    this.props.isOwner &&
+                                    <Button label='Destroy room' className='room-users-config-button quit'
+                                        onClick={this.handleDestroyRoom}/>
+                                }
                             </div>
-                        }
-                        <div className='room-spells-container'>
-                            <div className='room-spells-list-container'>
-                                <h2 className='room-spells-list-title'>Offensive spells</h2>
-                                <div className='room-spells-list'>
-                                    { this.state.offensiveSpells.map(this.renderSpell) }
-                                </div>
-                            </div>
-                            <div className='room-spells-list-container'>
-                                <h2 className='room-spells-list-title'>Support spells</h2>
-                                <div className='room-spells-list'>
-                                    { this.state.supportSpells.map(this.renderSpell) }
-                                </div>
-                            </div>
-                        </div>
+                    }
+                </div>
+                <div className='room-grid-item multiple'>
+                    <div className='header'>
+                        <h2 className={`title ${this.state.spellTypeSelected === 'offensive' ? 'active': ''} `}
+                            onClick={() => this.setState({ spellTypeSelected: 'offensive' })}>
+                            Offensive spells
+                        </h2>
+                        <h2 className={`title ${this.state.spellTypeSelected === 'support' ? 'active': ''} `}
+                            onClick={() => this.setState({ spellTypeSelected: 'support' })}>
+                            Support spells
+                        </h2>
+                    </div>
+                    <div className='room-spells-list'>
+                        { this.state.spellTypeSelected === 'offensive' ? this.state.offensiveSpells.map(this.renderSpell) : this.state.supportSpells.map(this.renderSpell) }
                     </div>
                 </div>
-                { this.renderMapModal() }
             </div>
         )
-
     }
+
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Room)
