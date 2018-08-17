@@ -71,6 +71,8 @@ class Root extends Component {
         .add('bubble_00.png', '/img/game/bubble_00.png')
         .add('bubble_01.png', '/img/game/bubble_01.png')
         .add('bubble_02.png', '/img/game/bubble_02.png')
+        .add('shotgun.png', '/img/game/shotgun.png')
+        .add('shotgun_projectile.png', '/img/game/shotgun_projectile.png')
         .add('slow_00.png', '/img/game/slow_00.png')
         .add('slow_01.png', '/img/game/slow_01.png')
         .add('slow_02.png', '/img/game/slow_02.png')
