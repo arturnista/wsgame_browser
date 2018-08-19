@@ -30,6 +30,7 @@ import { createVoodooDoll } from './Spells/VoodooDoll'
 import { createPrison } from './Spells/Prison'
 import { createBubble } from './Spells/Bubble'
 import { createLightningBolt } from './Spells/LightningBolt'
+import { createShotgun } from './Spells/Shotgun'
 import { createDefaultSprite } from './Spells/DefaultSprite'
 
 import './Game.css'
@@ -412,6 +413,10 @@ class Game extends Component {
                     break
                 case 'prison':
                     entityCreated = createPrison(entityData)
+                    this.createSpell(entityCreated)
+                    break
+                case 'shotgun':
+                    entityCreated = createShotgun(entityData)
                     this.createSpell(entityCreated)
                     break
                 case 'lightning_bolt':
@@ -800,6 +805,7 @@ class Game extends Component {
             case 'blink':
             case 'bubble':
             case 'lightning_bolt':
+            case 'shotgun':
                 this.spellPrediction.visible = true
                 let oneTimePred = new window.PIXI.Graphics()
                 oneTimePred.beginFill(0xFAFAFA, .1)

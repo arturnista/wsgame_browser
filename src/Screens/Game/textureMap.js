@@ -14,6 +14,7 @@ const textureMap = {
     'prison_drag': 'prison.png',
     'bubble': 'bubble.png',
     'lightning_bolt': 'lightning_bolt.png',
+    'shotgun': 'shotgun.png',
 }
 
 export default textureMap
