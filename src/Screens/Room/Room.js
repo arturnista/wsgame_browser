@@ -41,6 +41,7 @@ class Room extends Component {
         this.renderBot = this.renderBot.bind(this)
         this.renderChatLine = this.renderChatLine.bind(this)
         this.renderSpell = this.renderSpell.bind(this)
+        this.renderSelectedSpell = this.renderSelectedSpell.bind(this)
         this.handleSubmitChatMessage = this.handleSubmitChatMessage.bind(this)
         this.handleWillStartGame = this.handleWillStartGame.bind(this)
         this.handleStartGame = this.handleStartGame.bind(this)
@@ -112,7 +113,7 @@ class Room extends Component {
             this.props.history.replace('/game')
         }
 
-        if(_.isEmpty(this.state.selectedSpell)) this.setState({ selectedSpell: nextProps.spells[0] })
+        if(_.isEmpty(this.state.selectedSpell)) this.setState({ selectedSpell: nextProps.spells[1] })
     }
 
     componentWillUnmount() {
@@ -201,17 +202,19 @@ class Room extends Component {
         }
     }
 
-    handleToggleSpell(spell) {
-        this.setState({
-            selectedSpell: this.props.spells.find(x => spell.id === x.id)
-        })
-
-        const isSelected = this.props.user.spells.find(x => x === spell.id)
-        if(isSelected) {
-            window.socketio.emit('user_deselect_spell', { spellName: spell.id })
-        } else {
-            window.socketio.emit('user_select_spell', { spellName: spell.id })
+    handleToggleSpell(index) {
+        const currentSpellSelected = this.props.user.spells.length > index ? this.props.user.spells[index] : null
+        if(currentSpellSelected) {
+            window.socketio.emit('user_deselect_spell', { spellName: currentSpellSelected })
         }
+        if(currentSpellSelected !== this.state.selectedSpell.id) {
+            window.socketio.emit('user_select_spell', { spellName: this.state.selectedSpell.id })
+        }
+    }
+
+    handleFocusSpell(spell) {
+        const selectedSpell = this.props.spells.find(x => spell.id === x.id)
+        this.setState({ selectedSpell })
     }
 
     handleSubmitChatMessage() {
@@ -230,17 +233,32 @@ class Room extends Component {
     }
 
     handleKickPlayer(userId) {
-        console.log(userId)
         window.socketio.emit('room_kick_user', { userId })                
     }
 
     renderSpell(spell) {
         const isSelected = this.props.user.spells.find(x => x === spell.id)
         const focus = this.state.selectedSpell.id === spell.id
+        return (
+            <div key={spell.id} className={"room-spell-container " + (isSelected ? 'selected ' : ' ') + (focus? 'focus ' : ' ')}
+                onClick={() => this.handleFocusSpell(spell)}>
+                <p className="room-spell-name">{spell.name}</p>
+                <div className='room-spell-icon-container'>
+                    <img className="room-spell-icon" src={`/img/game/${spell.id}.png`}/>
+                </div>
+            </div>
+        )
+    }
 
+    renderSelectedSpell(index) {
+        const hasSpell = this.props.user.spells.length > index
+
+        let spellName = null
+        let spell = {}
+        let isSelected = null
+        let focus = null
         let hotkey = ''
-        const spellIndex = _.findIndex(this.props.user.spells, x => x === spell.id)
-        switch(spellIndex) {
+        switch(index) {
             case 0:
                 hotkey = 'Q'
                 break
@@ -251,20 +269,25 @@ class Room extends Component {
                 hotkey = 'E'
                 break
         }
+
+        if(hasSpell) {
+            spellName = this.props.user.spells[index]
+            spell = this.props.spells.find(x => x.id === spellName)
+            isSelected = this.props.user.spells.find(x => x === spell.id)
+        }
+
         return (
-            <div key={spell.name} className={"room-spell-container " + (isSelected ? 'selected ' : ' ') + (focus? 'focus ' : ' ')}
-                onClick={() => this.handleToggleSpell(spell)}>
-                <p className="room-spell-name">{spell.name}</p>
-                <div className='room-spell-icon-container'>
-                    <img className="room-spell-icon" src={`/img/game/${spell.id}.png`}/>
-                </div>
-                {
-                    isSelected && (
-                        <div className="room-spell-hotkey-container">
-                            <p className="room-spell-hotkey">{hotkey}</p>
-                        </div>
-                    )
+            <div key={spell.id} className={"room-spell-container small " + (isSelected ? 'selected ' : ' ')}
+                onClick={() => this.handleToggleSpell(index)}>
+                { hasSpell && <p className="room-spell-name">{spell.name}</p> }
+                { hasSpell && 
+                    <div className='room-spell-icon-container'>
+                        <img className="room-spell-icon" src={`/img/game/${spell.id}.png`}/>
+                    </div>
                 }
+                <div className="room-spell-hotkey-container">
+                    <p className="room-spell-hotkey">{hotkey}</p>
+                </div>
             </div>
         )
     }
@@ -353,12 +376,36 @@ class Room extends Component {
     render() {
         if(_.isEmpty(this.props.room)) return null
         if(_.isEmpty(this.state.selectedSpell)) return null
-
+        
         const toggleText = this.state.status === 'ready' ? 'Wait guys' : "Ok, I'm ready!"
 
+        const moreSpellData = Object.keys(this.state.selectedSpell).reduce((prev, curr) => {
+            let value = this.state.selectedSpell[curr]
+            switch (curr) {
+                case 'cooldown':
+                case 'baseDuration':
+                case 'duration':
+                    value = (value / 1000) + 's'
+                    break
+                case 'knockbackMultiplier':
+                    value = (value * 100) + ' %'
+                    break
+                case 'knockbackIncrement':
+                    value = Math.round((value - 1) * 100) + ' %'
+                    break
+                case 'description':
+                case 'id':
+                case 'name':
+                case 'type':
+                case 'effects':
+                case 'afterEffects':
+                case 'hitEffects':
+                    return prev
+            }
+            return [ ...prev, { key: curr, value } ]
+        }, [])
         return (
             <div className='bg-container room-grid'>
-                { this.state.modalMapShowing && this.renderMapModal() }
                 <div className='room-grid-item room-options-container'>
                     {
                         !this.state.isObserver ?
@@ -373,8 +420,10 @@ class Room extends Component {
                         : <div className='room-button'></div>
                     }
                 </div>
-                <div className='room-grid-item'>
-                    
+                <div className='room-grid-item room-selected-container'>
+                    {
+                        [0, 1, 2].map(this.renderSelectedSpell)
+                    }
                 </div>
                 <div className='room-grid-item'>
                     {
@@ -384,27 +433,19 @@ class Room extends Component {
                         _.times(this.state.botCount, this.renderBot)
                     }
                 </div>
-                <div className='room-grid-item room-details-container'>
-                    <div className='room-details-header-container'>
-                        <img className='room-details-icon' src={`/img/game/${this.state.selectedSpell.id}.png`} />
-                        <p className='room-details-name'>{this.state.selectedSpell.name}</p>
+                <div className='room-grid-item multiple'>
+                    <div className='header'>
+                        <h2 className={`title ${this.state.spellTypeSelected === 'offensive' ? 'active': ''} `}
+                            onClick={() => this.setState({ spellTypeSelected: 'offensive' })}>
+                            Offensive spells
+                        </h2>
+                        <h2 className={`title ${this.state.spellTypeSelected === 'support' ? 'active': ''} `}
+                            onClick={() => this.setState({ spellTypeSelected: 'support' })}>
+                            Support spells
+                        </h2>
                     </div>
-                    <div className='room-details-info-container'>
-                        <p className='room-details-description'>{this.state.selectedSpell.description}</p>
-                    </div>
-                    <div className='room-details-data-container'>
-                        <div className='room-details-data'></div>
-                        <div className='room-details-data'></div>
-                        <div className='room-details-data'></div>
-                        <div className='room-details-data'></div>
-                        <div className='room-details-data'></div>
-                        <div className='room-details-data'></div>
-                        <div className='room-details-data'></div>
-                        <div className='room-details-data'></div>
-                        <div className='room-details-data'></div>
-                        <div className='room-details-data'></div>
-                        <div className='room-details-data'></div>
-                        <div className='room-details-data'></div>
+                    <div className='room-spells-list content'>
+                        { this.state.spellTypeSelected === 'offensive' ? this.state.offensiveSpells.map(this.renderSpell) : this.state.supportSpells.map(this.renderSpell) }
                     </div>
                 </div>
                 <div className='room-grid-item multiple'>
@@ -420,7 +461,7 @@ class Room extends Component {
                     </div>
                     {
                         this.state.menuSelected === 'chat' ? 
-                            <div id="room-chat" className='room-chat-container'>
+                            <div id="room-chat" className='room-chat-container content'>
                                 <div className='room-chat-list-container'>
                                     {
                                         this.props.room.chat.map(this.renderChatLine)
@@ -436,7 +477,7 @@ class Room extends Component {
                                 </div>
                             </div>
                             :
-                            <div className='room-users-config-container'>
+                            <div className='room-users-config-container content'>
                                 <p className='room-users-config-text'>Observers: {this.props.room.observers.length}</p>
                                 {
                                     !this.state.isObserver ?
@@ -466,21 +507,26 @@ class Room extends Component {
                             </div>
                     }
                 </div>
-                <div className='room-grid-item multiple'>
-                    <div className='header'>
-                        <h2 className={`title ${this.state.spellTypeSelected === 'offensive' ? 'active': ''} `}
-                            onClick={() => this.setState({ spellTypeSelected: 'offensive' })}>
-                            Offensive spells
-                        </h2>
-                        <h2 className={`title ${this.state.spellTypeSelected === 'support' ? 'active': ''} `}
-                            onClick={() => this.setState({ spellTypeSelected: 'support' })}>
-                            Support spells
-                        </h2>
+                <div className='room-grid-item room-details-container'>
+                    <div className='room-details-header-container'>
+                        <img className='room-details-icon' src={`/img/game/${this.state.selectedSpell.id}.png`} />
+                        <p className='room-details-name'>{this.state.selectedSpell.name}</p>
                     </div>
-                    <div className='room-spells-list'>
-                        { this.state.spellTypeSelected === 'offensive' ? this.state.offensiveSpells.map(this.renderSpell) : this.state.supportSpells.map(this.renderSpell) }
+                    <div className='room-details-info-container'>
+                        <p className='room-details-description'>{this.state.selectedSpell.description}</p>
+                    </div>
+                    <div className='room-details-data-container'>
+                        {
+                            moreSpellData.map(({ key, value }) => (
+                                <div className='room-details-data' key={key}>
+                                    <img className='room-details-data-icon' src={`/img/icons/${key}.png`} alt={key} />
+                                    <p className='room-details-data-value'>{value}</p>
+                                </div>
+                            ))
+                        }
                     </div>
                 </div>
+                { this.state.modalMapShowing && this.renderMapModal() }
             </div>
         )
     }

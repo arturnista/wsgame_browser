@@ -2,11 +2,13 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 100px 1fr 1fr;
-    grid-gap: 1em;
+    grid-gap: .5em;
     padding: .5em;
 }
 
 .room-grid-item {
+    max-height: 100%;
+    overflow: auto;
     background-color: #FAFAFA;
 }
 
@@ -32,6 +34,11 @@
     color: #212121;
 }
 
+.room-grid-item .content {
+    max-height: 100%;
+    overflow: auto;
+}
+
 .room-options-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -53,11 +60,19 @@
     color: #fafafa;
 }
 
+.room-selected-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: .5em;
+    padding: 1em;
+}
+
 .room-spells-list {
     display: grid;
-    margin-top: 1em;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    justify-items: center;
+    padding: 1em;
+    grid-template-columns: 6em 6em 6em 6em;
+    justify-content: center;
+    grid-gap: .5em;
 }
 
 .room-spell-container {
@@ -69,7 +84,10 @@
     
     border: 1px solid #212121;
     height: 7em;
-    width: 6em;
+}
+.room-spell-container.small {
+    grid-template-rows: .8em 1fr;
+    height: 4em;
 }
 .room-spell-container.selected {
     background-color: #E65100;
@@ -277,12 +295,36 @@
 }
 
 .room-details-data {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
     border: 1px solid #212121;
+    background-color: #2f54a3;
+    max-height: 60px;
+}
+
+.room-details-data-icon {
+    width: 100%;
+    max-width: 32px;
+    height: auto;
+}
+
+.room-details-data-value {
+    margin-top: .5em;
+    font-size: .9em;
+    color: #FAFAFA;
 }
 
 .room-chat-container {
     display: grid;
     grid-template-rows: 1fr auto;
+}
+
+.room-chat-list-container {
+    max-height: 100%;
+    overflow: auto;
 }
 
 .room-chat-line-container {
@@ -294,10 +336,10 @@
     grid-template-rows: 1em 1fr;
     grid-gap: .3em;
 
-    background-color: #FFCC00;
+    background-color: rgba(255, 204, 0, .5);
 }
 .room-chat-line-container.mine {
-    background-color: #2E7D32;
+    background-color: rgba(46, 125, 50, .5);
     color: #FAFAFA;
 }
 
