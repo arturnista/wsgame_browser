@@ -110,6 +110,7 @@ Icon.prototype.clearCooldown = function () {
 Icon.prototype.update = function (deltatime) {
     if(this.cooldown > 0) {
         this.cooldown -= deltatime
+        if(this.cooldown < 0) return
         const text = this.cooldown.toFixed(1)
         if(text !== this.lastText) {
             this.time.text = text

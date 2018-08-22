@@ -492,7 +492,7 @@ class Game extends Component {
             
             if(this.props.user.isObserver) {
                 const obsPlayer = this.obsPlayers.find(x => x.id === spellData.player.id)
-                obsPlayer.useSpell(spellData.spellName)
+                obsPlayer.useSpell(spellData.spellName, spellData.cooldown)
             } else if(spellData.player.id === this.player.id) {
                 const spellIcon = this.spellsIcons.find(x => x.id === spellData.spellName)
                 if(spellIcon) spellIcon.use(spellData.cooldown)
