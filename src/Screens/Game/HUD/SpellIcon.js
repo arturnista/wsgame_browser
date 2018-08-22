@@ -81,11 +81,11 @@ function Icon(index, spellData, hud, { noHotkey, xOffset = 0, yOffset = 0, size 
 }
 
 Icon.prototype.sync = function(data) {
-    if(this.cooldown > 0 && data.cd === '') this.clearCooldown()
+    if(data.cd === '' && this.cooldown > 0) this.clearCooldown()
 }
 
-Icon.prototype.use = function () {
-    this.cooldown = this.spellData.cooldown / 1000
+Icon.prototype.use = function (cooldown) {
+    this.cooldown = cooldown / 1000
     this.time.text = this.cooldown.toFixed(1)
     this.time.visible = true
 

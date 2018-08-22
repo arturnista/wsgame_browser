@@ -495,7 +495,7 @@ class Game extends Component {
                 obsPlayer.useSpell(spellData.spellName)
             } else if(spellData.player.id === this.player.id) {
                 const spellIcon = this.spellsIcons.find(x => x.id === spellData.spellName)
-                if(spellIcon) spellIcon.use()
+                if(spellIcon) spellIcon.use(spellData.cooldown)
             }
 
             let spell = null
