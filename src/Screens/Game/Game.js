@@ -196,17 +196,17 @@ class Game extends Component {
             this.lifeRectangle.endFill()
             this.hud.addChild(this.lifeRectangle)
 
-            this.knockbackText = new window.PIXI.Text('', { fontFamily: 'Arial', fontSize: 20, fill: parseInt(this.props.user.color.replace('#', ''), 16), align: 'center', strokeThickness: 1 })
+            this.knockbackText = new window.PIXI.Text('Knockback', { fontFamily: 'Arial', fontSize: 21, fill: 0xFAFAFA, align: 'center', strokeThickness: 2 })
             this.knockbackText.x = this.app.renderer.screen.width / 2
-            this.knockbackText.anchor.set(.5, 0)
+            this.knockbackText.anchor.set(.5, 0.1)
             this.hud.addChild(this.knockbackText)
 
             this.spellsIcons = []
             const off = (this.props.user.spells.length * 55 - 5) / 2
             for (var i = 0; i < this.props.user.spells.length; i++) {
-                const spellData = this.props.spells.find(x => this.props.user.spells[i] === x.id)
+                const spellData = this.props.spells.find(x => this.props.user.spells[i].id === x.id)
                 if(!spellData) continue
-                const ic = new SpellIcon(i, spellData, this.hud, { xOffset: this.app.renderer.screen.width / 2 - off, yOffset: 23 })
+                const ic = new SpellIcon(this.props.user.spells[i].position, spellData, this.hud, { xOffset: this.app.renderer.screen.width / 2 - off, yOffset: 23 })
                 this.spellsIcons.push( ic )
                 this.hudEntities.push( ic )
             }
@@ -748,25 +748,17 @@ class Game extends Component {
     handleKeyDown(e) {
         if(this.props.user.isObserver) return
         const keyPressed = e.key.toLowerCase()
-        switch (keyPressed) {
-            case 'q':
-                if(this.props.user.spells.length <= 0) return
-                this.useSpell(this.props.user.spells[0])
-                break
-            case 'w':
-                if(this.props.user.spells.length <= 1) return
-                this.useSpell(this.props.user.spells[1])
-                break
-            case 'e':
-                if(this.props.user.spells.length <= 2) return
-                this.useSpell(this.props.user.spells[2])
-                break
-            case 's':
-                this.resetAction()
-                break
-            case 'escape':
-                this.resetAction()
-                break
+        
+        this.props.user.spells.forEach(spell => {
+            if(keyPressed === spell.hotkey) {
+                this.useSpell(spell.id)
+            }
+        })
+
+        if(keyPressed === 's') {
+            this.resetAction()
+        } else if(keyPressed === 'escape') {
+            this.resetAction()
         }
     }
 

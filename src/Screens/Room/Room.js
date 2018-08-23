@@ -18,8 +18,8 @@ const mapStateToProps = (state) => ({
     isOwner: state.room ? state.room.owner === state.user.id : false,
 })
 const mapDispatchToProps = (dispatch) => ({
-    selectSpell: spell => dispatch(selectSpell(spell)),
-    deselectSpell: spell => dispatch(deselectSpell(spell)),
+    selectSpell: (spell, index) => dispatch(selectSpell(spell, index)),
+    deselectSpell: (spell, index) => dispatch(deselectSpell(spell, index)),
     updateChat: spell => dispatch(updateChat(spell)),
     addSpells: spells => dispatch(addSpells(spells)),
     defineUser: data => dispatch(defineUser(data)),
@@ -46,8 +46,6 @@ class Room extends Component {
         this.handleWillStartGame = this.handleWillStartGame.bind(this)
         this.handleStartGame = this.handleStartGame.bind(this)
         this.handleToggleStatus = this.handleToggleStatus.bind(this)
-        this.handleSelectSpell = this.handleSelectSpell.bind(this)
-        this.handleDeselectSpell = this.handleDeselectSpell.bind(this)
         this.handleNewChatMessage = this.handleNewChatMessage.bind(this)
         this.handleUpdateRoom = this.handleUpdateRoom.bind(this)
         this.handleAddUser = this.handleAddUser.bind(this)
@@ -94,8 +92,6 @@ class Room extends Component {
         window.socketio.on('user_left_room', this.handleRemoveUser)
         window.socketio.on('room_update', this.handleUpdateRoom)
         window.socketio.on('room_chat_new_message', this.handleNewChatMessage)
-        window.socketio.on('user_selected_spell', this.handleSelectSpell)
-        window.socketio.on('user_deselected_spell', this.handleDeselectSpell)
 
         window.socketio.on('game_will_start', this.handleWillStartGame)
 
@@ -126,8 +122,6 @@ class Room extends Component {
         window.socketio.off('user_left_room', this.handleRemoveUser)
         window.socketio.off('room_update', this.handleUpdateRoom)
         window.socketio.off('room_chat_new_message', this.handleNewChatMessage)
-        window.socketio.off('user_selected_spell', this.handleSelectSpell)
-        window.socketio.off('user_deselected_spell', this.handleDeselectSpell)
         window.socketio.off('game_will_start', this.handleWillStartGame)
     }
 
@@ -152,20 +146,6 @@ class Room extends Component {
             this.props.leaveRoom()
         } else {
             this.props.removeUser(body)
-        }
-    }
-    
-    handleSelectSpell(body) {
-        console.log('handleSelectSpell', body)
-        if(body.user === this.props.user.id) {
-            this.props.selectSpell(body.spellName)
-        }
-    }
-
-    handleDeselectSpell(body) {
-        console.log('handleDeselectSpell', body)
-        if(body.user === this.props.user.id) {
-            this.props.deselectSpell(body.spellName)
         }
     }
 
@@ -203,12 +183,33 @@ class Room extends Component {
     }
 
     handleToggleSpell(index) {
-        const currentSpellSelected = this.props.user.spells.length > index ? this.props.user.spells[index] : null
-        if(currentSpellSelected) {
-            window.socketio.emit('user_deselect_spell', { spellName: currentSpellSelected })
+        const selectSpell = () => {
+            if(currentSpellSelected !== this.state.selectedSpell.id) {
+                window.socketio.emit('user_select_spell', { spellName: this.state.selectedSpell.id }, (body) => {
+                    if(body.status === 200) this.props.selectSpell(this.state.selectedSpell.id, index)
+                })
+            }
         }
-        if(currentSpellSelected !== this.state.selectedSpell.id) {
-            window.socketio.emit('user_select_spell', { spellName: this.state.selectedSpell.id })
+        const currentSpellSelected = this.props.user.spells.find(x => x.position === index)
+        if(currentSpellSelected) {
+            window.socketio.emit('user_deselect_spell', { spellName: currentSpellSelected.id }, (body) => {
+                if(body.status === 200) this.props.deselectSpell(currentSpellSelected.id, index)
+                selectSpell()
+            })
+        } else {
+            selectSpell()
+        }
+    }   
+
+    handleDeselectSpell(index, e) {
+        e.preventDefault()
+        
+        const currentSpellSelected = this.props.user.spells.find(x => x.position === index)
+        if(currentSpellSelected) {
+            window.socketio.emit('user_deselect_spell', { spellName: currentSpellSelected.id }, (body) => {
+                if(body.status === 200) this.props.deselectSpell(currentSpellSelected.id, index)
+                selectSpell()
+            })
         }
     }
 
@@ -237,7 +238,7 @@ class Room extends Component {
     }
 
     renderSpell(spell) {
-        const isSelected = this.props.user.spells.find(x => x === spell.id)
+        const isSelected = this.props.user.spells.find(x => x.id === spell.id)
         const focus = this.state.selectedSpell.id === spell.id
         return (
             <div key={spell.id} className={"room-spell-container " + (isSelected ? 'selected ' : ' ') + (focus? 'focus ' : ' ')}
@@ -251,42 +252,25 @@ class Room extends Component {
     }
 
     renderSelectedSpell(index) {
-        const hasSpell = this.props.user.spells.length > index
+        const currentSpell = this.props.user.spells.find(x => x.position === index)
 
-        let spellName = null
         let spell = {}
-        let isSelected = null
-        let focus = null
-        let hotkey = ''
-        switch(index) {
-            case 0:
-                hotkey = 'Q'
-                break
-            case 1:
-                hotkey = 'W'
-                break
-            case 2:
-                hotkey = 'E'
-                break
-        }
-
-        if(hasSpell) {
-            spellName = this.props.user.spells[index]
-            spell = this.props.spells.find(x => x.id === spellName)
-            isSelected = this.props.user.spells.find(x => x === spell.id)
+        if(currentSpell) {
+            spell = this.props.spells.find(x => x.id === currentSpell.id)
         }
 
         return (
-            <div key={spell.id} className={"room-spell-container small " + (isSelected ? 'selected ' : ' ')}
-                onClick={() => this.handleToggleSpell(index)}>
-                { hasSpell && <p className="room-spell-name">{spell.name}</p> }
-                { hasSpell && 
+            <div key={index} className={"room-spell-container small " + (currentSpell ? 'selected ' : ' ')}
+                onClick={(e) => this.handleToggleSpell(index, e)}
+                onContextMenu={(e) => this.handleDeselectSpell(index, e)} >
+                { currentSpell && <p className="room-spell-name">{spell.name}</p> }
+                { currentSpell && 
                     <div className='room-spell-icon-container'>
                         <img className="room-spell-icon" src={`/img/game/${spell.id}.png`}/>
                     </div>
                 }
                 <div className="room-spell-hotkey-container">
-                    <p className="room-spell-hotkey">{hotkey}</p>
+                    <p className="room-spell-hotkey">{currentSpell ? currentSpell.hotkey.toUpperCase() : ''}</p>
                 </div>
             </div>
         )

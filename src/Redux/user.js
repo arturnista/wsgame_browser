@@ -16,7 +16,6 @@ export default function reducer(state = initialState, action = {}) {
         case USER_END_GAME:
             return {
                 ...state,
-                spells: action.payload.user.spells,
                 isObserver: action.payload.user.isObserver
             }
         case SELECT_SPELL:
@@ -24,13 +23,17 @@ export default function reducer(state = initialState, action = {}) {
                 ...state,
                 spells: [
                     ...state.spells,
-                    action.payload
+                    {
+                        hotkey: action.payload.index === 0 ? 'q' : action.payload.index === 1 ? 'w' : 'e',
+                        position: action.payload.index,
+                        id: action.payload.spellData,
+                    }
                 ]
             }
         case DESELECT_SPELL:
             return {
                 ...state,
-                spells: state.spells.filter(x => x !== action.payload)
+                spells: state.spells.filter(x => x.id !== action.payload.spellData)
             }
         default:
             return state
@@ -51,17 +54,23 @@ export function userEndGame(user) {
     }
 }
 
-export function selectSpell(spellData) {
+export function selectSpell(spellData, index) {
     return {
         type: SELECT_SPELL,
-        payload: spellData
+        payload: {
+            spellData,
+            index
+        }
     }
 }
 
-export function deselectSpell(spellData) {
+export function deselectSpell(spellData, index) {
     return {
         type: DESELECT_SPELL,
-        payload: spellData
+        payload: {
+            spellData,
+            index
+        }
     }
 }
 
