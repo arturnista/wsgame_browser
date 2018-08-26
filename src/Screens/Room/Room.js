@@ -58,6 +58,15 @@ class Room extends Component {
         this.handleLeaveRoom = this.handleLeaveRoom.bind(this)
         this.handleKickPlayer = this.handleKickPlayer.bind(this)
 
+        window.socketio.on('user_joined_room', this.handleAddUser)
+        window.socketio.on('user_ready', this.handleReadyUser)
+        window.socketio.on('user_waiting', this.handleWaitingUser)
+        window.socketio.on('user_left_room', this.handleRemoveUser)
+        window.socketio.on('room_update', this.handleUpdateRoom)
+        window.socketio.on('room_chat_new_message', this.handleNewChatMessage)
+
+        window.socketio.on('game_will_start', this.handleWillStartGame)
+
         this.configSpells = {}
         this.state = {
             menuSelected: 'config',
@@ -87,15 +96,6 @@ class Room extends Component {
             this.setState({ offensiveSpells, supportSpells })
             this.props.addSpells(spellsArr)
         })
-
-        window.socketio.on('user_joined_room', this.handleAddUser)
-        window.socketio.on('user_ready', this.handleReadyUser)
-        window.socketio.on('user_waiting', this.handleWaitingUser)
-        window.socketio.on('user_left_room', this.handleRemoveUser)
-        window.socketio.on('room_update', this.handleUpdateRoom)
-        window.socketio.on('room_chat_new_message', this.handleNewChatMessage)
-
-        window.socketio.on('game_will_start', this.handleWillStartGame)
 
         if(_.isEmpty(this.props.room)) {
             this.props.history.replace('/')
