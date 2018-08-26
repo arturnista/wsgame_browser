@@ -10,6 +10,8 @@ import { addUser, removeUser, readyUser, waitingUser, updateRoom, updateChat, le
 import { startGame } from '../../Redux/game'
 import './Room.css'
 
+const HOTKEYS_CONFIG = [ { position: 0, hotkey: 'q' }, { position: 1, hotkey: 'w' }, { position: 2, hotkey: 'e' } ]
+
 const mapStateToProps = (state) => ({
     game: state.game,
     room: state.room,
@@ -18,7 +20,7 @@ const mapStateToProps = (state) => ({
     isOwner: state.room ? state.room.owner === state.user.id : false,
 })
 const mapDispatchToProps = (dispatch) => ({
-    selectSpell: (spell, index) => dispatch(selectSpell(spell, index)),
+    selectSpell: (spell, index) => dispatch(selectSpell(spell, index, HOTKEYS_CONFIG)),
     deselectSpell: (spell, index) => dispatch(deselectSpell(spell, index)),
     updateChat: spell => dispatch(updateChat(spell)),
     addSpells: spells => dispatch(addSpells(spells)),
@@ -208,7 +210,6 @@ class Room extends Component {
         if(currentSpellSelected) {
             window.socketio.emit('user_deselect_spell', { spellName: currentSpellSelected.id }, (body) => {
                 if(body.status === 200) this.props.deselectSpell(currentSpellSelected.id, index)
-                selectSpell()
             })
         }
     }
@@ -258,6 +259,7 @@ class Room extends Component {
         if(currentSpell) {
             spell = this.props.spells.find(x => x.id === currentSpell.id)
         }
+        const hotkey = currentSpell ? currentSpell.hotkey : HOTKEYS_CONFIG.find(x => x.position === index).hotkey
 
         return (
             <div key={index} className={"room-spell-container small " + (currentSpell ? 'selected ' : ' ')}
@@ -270,7 +272,7 @@ class Room extends Component {
                     </div>
                 }
                 <div className="room-spell-hotkey-container">
-                    <p className="room-spell-hotkey">{currentSpell ? currentSpell.hotkey.toUpperCase() : ''}</p>
+                    <p className="room-spell-hotkey">{hotkey.toUpperCase()}</p>
                 </div>
             </div>
         )
@@ -367,6 +369,7 @@ class Room extends Component {
             let value = this.state.selectedSpell[curr]
             switch (curr) {
                 case 'cooldown':
+                case 'incrementalCooldown':
                 case 'baseDuration':
                 case 'duration':
                     value = (value / 1000) + 's'
@@ -405,6 +408,9 @@ class Room extends Component {
                     }
                 </div>
                 <div className='room-grid-item room-selected-container'>
+                    <p className='room-selected-help'>Press on a spell to focus it</p>
+                    <p className='room-selected-help'>Left click to select the focus spell</p>
+                    <p className='room-selected-help'>Right click to deselect</p>
                     {
                         [0, 1, 2].map(this.renderSelectedSpell)
                     }

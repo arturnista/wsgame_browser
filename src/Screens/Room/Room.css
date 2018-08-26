@@ -6,6 +6,13 @@
     padding: .5em;
 }
 
+@media (max-width: 550px) {
+    .room-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: 100px 100px 1fr 1fr 1fr 1fr;
+    }
+}
+
 .room-grid-item {
     max-height: 100%;
     overflow: auto;
@@ -14,7 +21,7 @@
 
 .room-grid-item.multiple {
     display: grid;
-    grid-template-rows: 1.6em 1fr;
+    grid-template-rows: auto 1fr;
 }
 
 .room-grid-item .header {
@@ -63,8 +70,13 @@
 .room-selected-container {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: .8em auto;
     grid-gap: .5em;
     padding: 1em;
+}
+
+.room-selected-help {
+    font-size: .6em;
 }
 
 .room-spells-list {
@@ -73,6 +85,12 @@
     grid-template-columns: 6em 6em 6em 6em;
     justify-content: center;
     grid-gap: .5em;
+}
+
+@media (max-width: 800px) and (min-width: 550px) {
+    .room-spells-list {
+        grid-template-columns: 6em 6em;
+    }
 }
 
 .room-spell-container {
@@ -87,7 +105,7 @@
 }
 .room-spell-container.small {
     grid-template-rows: .8em 1fr;
-    height: 4em;
+    height: 100%;
 }
 .room-spell-container.selected {
     background-color: #E65100;

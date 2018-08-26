@@ -24,7 +24,7 @@ export default function reducer(state = initialState, action = {}) {
                 spells: [
                     ...state.spells,
                     {
-                        hotkey: action.payload.index === 0 ? 'q' : action.payload.index === 1 ? 'w' : 'e',
+                        hotkey: action.payload.hotkey,
                         position: action.payload.index,
                         id: action.payload.spellData,
                     }
@@ -54,12 +54,13 @@ export function userEndGame(user) {
     }
 }
 
-export function selectSpell(spellData, index) {
+export function selectSpell(spellData, index, hotkeysConfig) {
     return {
         type: SELECT_SPELL,
         payload: {
             spellData,
-            index
+            index,
+            hotkey: hotkeysConfig.find(x => x.position === index).hotkey
         }
     }
 }
