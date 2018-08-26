@@ -67,6 +67,7 @@ class Game extends Component {
         this.handleMouseDown = this.handleMouseDown.bind(this)
         this.handleMouseUp = this.handleMouseUp.bind(this)
         this.handleMouseMove = this.handleMouseMove.bind(this)
+        this.handleContextMenu = this.handleContextMenu.bind(this)
         this.handleKeyDown = this.handleKeyDown.bind(this)
         this.gameLoop = this.gameLoop.bind(this)
 
@@ -101,6 +102,18 @@ class Game extends Component {
         this.map = {}
         this.teleportationOrbActive = false
 
+        window.socketio.on('game_state', this.gameState)
+        window.socketio.on('map_create', this.gameMapCreate)
+        window.socketio.on('game_start', this.gameStart)
+        window.socketio.on('game_will_end', this.gameWillEnd)
+        window.socketio.on('game_end', this.gameEnd)
+
+        document.addEventListener('mousemove', this.handleMouseMove)
+        document.addEventListener('mousedown', this.handleMouseDown)
+        document.addEventListener('mouseup', this.handleMouseUp)
+        document.addEventListener('contextmenu', this.handleContextMenu)
+        document.addEventListener('keydown', this.handleKeyDown)
+
     }
 
     componentDidMount() {
@@ -110,13 +123,6 @@ class Game extends Component {
         }
 
         if(this.gameDiv) this.gameDiv.focus()
-
-        window.socketio.on('game_state', this.gameState)
-
-        window.socketio.on('map_create', this.gameMapCreate)
-        window.socketio.on('game_start', this.gameStart)
-        window.socketio.on('game_will_end', this.gameWillEnd)
-        window.socketio.on('game_end', this.gameEnd)
 
         const gameMountStyle = window.getComputedStyle(document.getElementById("game-mount-container"))
 
@@ -149,11 +155,16 @@ class Game extends Component {
 
     componentWillUnmount() {
         window.socketio.off('game_state', this.gameState)
-
         window.socketio.off('map_create', this.gameMapCreate)
         window.socketio.off('game_start', this.gameStart)
         window.socketio.off('game_will_end', this.gameWillEnd)
         window.socketio.off('game_end', this.gameEnd)
+
+        document.removeEventListener('mousemove', this.handleMouseMove)
+        document.removeEventListener('mousedown', this.handleMouseDown)
+        document.removeEventListener('mouseup', this.handleMouseUp)
+        document.removeEventListener('contextmenu', this.handleContextMenu)
+        document.removeEventListener('keydown', this.handleKeyDown)
         
         if(this.app) {
             this.app.ticker.remove(this.gameLoop)
@@ -762,6 +773,10 @@ class Game extends Component {
         }
     }
 
+    handleContextMenu(e) {
+        e.preventDefault()
+    }
+
     useSpell(name) {
         if(this.props.user.isObserver) return
 
@@ -887,13 +902,7 @@ class Game extends Component {
         return (
             <div id="game-mount-container" className="game-container">
                 <p className="game-mount-ping">{this.state.ping}ms</p>
-                <div id="game-mount" className="game" ref={r => this.gameDiv = r}
-                    onMouseMove={this.handleMouseMove}
-                    onMouseDown={this.handleMouseDown}
-                    onMouseUp={this.handleMouseUp}
-                    onContextMenu={e => e.preventDefault()}
-                    onKeyDown={this.handleKeyDown} tabIndex="1">
-
+                <div id="game-mount" className="game" ref={r => this.gameDiv = r}>
                 </div>
             </div>
         )
