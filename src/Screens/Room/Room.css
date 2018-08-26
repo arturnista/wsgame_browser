@@ -80,11 +80,9 @@
 }
 
 .room-spells-list {
-    display: grid;
-    padding: 1em;
-    grid-template-columns: 6em 6em 6em 6em;
-    justify-content: center;
-    grid-gap: .5em;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
 }
 
 @media (max-width: 800px) and (min-width: 550px) {
@@ -102,10 +100,13 @@
     
     border: 1px solid #212121;
     height: 7em;
+    width: 6em;
+    margin: .3em;
 }
 .room-spell-container.small {
     grid-template-rows: .8em 1fr;
     height: 100%;
+    width: 100%;
 }
 .room-spell-container.selected {
     background-color: #E65100;
