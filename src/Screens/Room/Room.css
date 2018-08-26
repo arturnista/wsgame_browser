@@ -216,7 +216,7 @@
 
 .room-user-container {
     display: grid;
-    grid-template-columns: 2em 1fr auto;
+    grid-template-columns: 2em 1fr auto auto;
     align-items: center;
     padding: .5em;
     height: 3em;

@@ -305,7 +305,7 @@ class Room extends Component {
                 className={'room-user-container ready'}>
                 <div className='room-user-color' style={{ backgroundColor: '#FFCC00' }}></div>
                 <p className={'room-user-name'}>Bot Ulysses</p>
-                <p className={'room-user-status'} onClick={() => this.setState({ botCount: this.state.botCount - 1 })}>REMOVE BOT</p>
+                <p className={'room-user-kick'} onClick={() => this.setState({ botCount: this.state.botCount - 1 })}>Remove</p>
             </div>
         )
     }
