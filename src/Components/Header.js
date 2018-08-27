@@ -11,7 +11,7 @@ class Header extends Component {
             <div className="header-container">
                 <Link to='/' className='header-title'>
                     <h1>NW GAME</h1>
-                    <small>v0.3.1</small>
+                    <small>v0.4.0</small>
                 </Link>
                 <Link to='/' className={`header-link ${ this.props.location.pathname === '/' ? 'active' : ''} `}>
                     <p>Home</p>
