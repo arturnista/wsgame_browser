@@ -11,6 +11,7 @@ import createBrowserHistory from 'history/createBrowserHistory'
 import createStore from './Redux/createStore'
 import { leaveRoom, setRoom } from './Redux/room'
 import { defineUser } from './Redux/user'
+import { addPreferences } from './Redux/preferences'
 import './Root.css'
 
 window.PIXI = PIXI
@@ -31,6 +32,13 @@ class Root extends Component {
     }
 
     componentDidMount() {
+        const prefSaved = localStorage.getItem('preferences')
+        console.log(typeof prefSaved, prefSaved)
+        
+        const preferences = prefSaved ? JSON.parse( prefSaved ) : {}
+        // const preferences = {}
+        this.store.dispatch(addPreferences(preferences))
+        
         window.PIXI.loader
         .add('/img/tileset.json')
         .add('/img/WSSprites.json')

@@ -2,18 +2,20 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Input, Button } from '../../Components'
 import { serverUrl } from '../../constants'
-import { updateHotkey } from '../../Redux/preferences'
+import { addPreferences, updateHotkey } from '../../Redux/preferences'
 import _ from 'lodash'
 import moment from 'moment'
 import './Start.css'
 
 const mapStateToProps = (state) => ({
+    preferences: state.preferences,
     user: state.user,
     room: state.room,
     preferences: state.preferences,
 })
 const mapDispatchToProps = (dispatch) => ({
-    updateHotkey: (data) => dispatch(updateHotkey(data))
+    updateHotkey: data => dispatch(updateHotkey(data)),
+    addPreferences: data => dispatch(addPreferences(data))
 })
 
 class Start extends Component {
@@ -21,9 +23,7 @@ class Start extends Component {
     constructor(props) {
         super(props)
 
-        const name = localStorage.getItem('name')
         this.state = {
-            userName: name || 'Good user name',
             roomName: '',
             rooms: [],
             hotkeyPosition: -1
@@ -74,17 +74,21 @@ class Start extends Component {
     }
 
     _handleJoinRoom(name) {
-        localStorage.setItem('name', this.state.userName)
-
+        if(this.props.preferences.name === '') {
+            alert('User name required!')
+            return
+        }
         this.setState({ roomJoinedIsOwner: false })
-        window.socketio.emit('room_join', { name, userName: this.state.userName })
+        window.socketio.emit('room_join', { name, userName: this.props.preferences.name })
     }
 
     _handleCreateRoom() {
-        localStorage.setItem('name', this.state.userName)
-
+        if(this.props.preferences.name === '') {
+            alert('User name required!')
+            return
+        }
         this.setState({ roomJoinedIsOwner: true })
-        window.socketio.emit('room_create', { name: this.state.roomName, userName: this.state.userName })
+        window.socketio.emit('room_create', { name: this.state.roomName, userName: this.props.preferences.name })
     }
 
     renderRoomLine(room) {
@@ -129,8 +133,8 @@ class Start extends Component {
                         <h2 className="start-room-conf-title">User configuration</h2>
                         <Input label='Name' className='start-input-username'
                             placeholder='Robson'
-                            value={this.state.userName}
-                            onChange={x => this.setState({ userName: x })}
+                            value={this.props.preferences.name}
+                            onChange={x => this.props.addPreferences({ name: x })}
                         />
                         <h3 className="start-hotkey-spells-title">Hotkeys configuration</h3>
                         <div className='start-hotkey-spells-container'>

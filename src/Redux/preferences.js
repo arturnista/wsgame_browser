@@ -9,7 +9,10 @@ const initialState = {
 export default function reducer(state = initialState, action = {}) {
     switch (action.type) {
         case ADD_PREFERENCES:
-            return { ...action.payload }
+            return {
+                ...state,
+                ...action.payload
+            }
         case UPDATE_HOTKEY:
             return {
                 ...state,
@@ -23,7 +26,7 @@ export default function reducer(state = initialState, action = {}) {
     }
 }
 
-export function addPreference(data) {
+export function addPreferences(data) {
     return {
         type: ADD_PREFERENCES,
         payload: { ...data }
