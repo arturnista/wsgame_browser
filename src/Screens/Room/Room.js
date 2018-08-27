@@ -10,17 +10,16 @@ import { addUser, removeUser, readyUser, waitingUser, updateRoom, updateChat, le
 import { startGame } from '../../Redux/game'
 import './Room.css'
 
-const HOTKEYS_CONFIG = [ { position: 0, hotkey: 'q' }, { position: 1, hotkey: 'w' }, { position: 2, hotkey: 'e' } ]
-
 const mapStateToProps = (state) => ({
     game: state.game,
     room: state.room,
     user: state.user,
     spells: state.spells,
+    preferences: state.preferences,
     isOwner: state.room ? state.room.owner === state.user.id : false,
 })
 const mapDispatchToProps = (dispatch) => ({
-    selectSpell: (spell, index) => dispatch(selectSpell(spell, index, HOTKEYS_CONFIG)),
+    selectSpell: (spell, index, hotkeyPrefs) => dispatch(selectSpell(spell, index, hotkeyPrefs)),
     deselectSpell: (spell, index) => dispatch(deselectSpell(spell, index)),
     updateChat: spell => dispatch(updateChat(spell)),
     addSpells: spells => dispatch(addSpells(spells)),
@@ -188,7 +187,7 @@ class Room extends Component {
         const selectSpell = () => {
             if(currentSpellSelected !== this.state.selectedSpell.id) {
                 window.socketio.emit('user_select_spell', { spellName: this.state.selectedSpell.id }, (body) => {
-                    if(body.status === 200) this.props.selectSpell(this.state.selectedSpell.id, index)
+                    if(body.status === 200) this.props.selectSpell(this.state.selectedSpell.id, index, this.props.preferences.hotkeys)
                 })
             }
         }
@@ -259,7 +258,7 @@ class Room extends Component {
         if(currentSpell) {
             spell = this.props.spells.find(x => x.id === currentSpell.id)
         }
-        const hotkey = currentSpell ? currentSpell.hotkey : HOTKEYS_CONFIG.find(x => x.position === index).hotkey
+        const hotkey = currentSpell ? currentSpell.hotkey : this.props.preferences.hotkeys.find(x => x.position === index).hotkey
 
         return (
             <div key={index} className={"room-spell-container small " + (currentSpell ? 'selected ' : ' ')}

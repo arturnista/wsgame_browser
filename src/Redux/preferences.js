@@ -1,0 +1,42 @@
+const ADD_PREFERENCES = 'preferences/ADD_PREFERENCES'
+const UPDATE_HOTKEY = 'preferences/UPDATE_HOTKEY'
+
+const initialState = {
+    name: '',
+    hotkeys: [ { position: 0, hotkey: 'q' }, { position: 1, hotkey: 'w' }, { position: 2, hotkey: 'e' } ]
+}
+
+export default function reducer(state = initialState, action = {}) {
+    switch (action.type) {
+        case ADD_PREFERENCES:
+            return { ...action.payload }
+        case UPDATE_HOTKEY:
+            return {
+                ...state,
+                hotkeys: state.hotkeys.map(hot => {
+                    if(hot.position !== action.payload.position) return hot
+                    return { ...action.payload }
+                })
+            }
+        default:
+            return state
+    }
+}
+
+export function addPreference(data) {
+    return {
+        type: ADD_PREFERENCES,
+        payload: { ...data }
+    }
+}
+
+export function updateHotkey({ position, hotkey }) {
+    return {
+        type: UPDATE_HOTKEY,
+        payload: {
+            position,
+            hotkey
+        }
+    }
+}
+

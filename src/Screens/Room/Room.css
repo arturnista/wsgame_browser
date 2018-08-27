@@ -107,6 +107,7 @@
     grid-template-rows: .8em 1fr;
     height: 100%;
     width: 100%;
+    margin: 0;
 }
 .room-spell-container.selected {
     background-color: #E65100;

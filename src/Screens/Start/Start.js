@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Input, Button } from '../../Components'
 import { serverUrl } from '../../constants'
+import { updateHotkey } from '../../Redux/preferences'
 import _ from 'lodash'
 import moment from 'moment'
 import './Start.css'
@@ -9,9 +10,10 @@ import './Start.css'
 const mapStateToProps = (state) => ({
     user: state.user,
     room: state.room,
+    preferences: state.preferences,
 })
 const mapDispatchToProps = (dispatch) => ({
-
+    updateHotkey: (data) => dispatch(updateHotkey(data))
 })
 
 class Start extends Component {
@@ -23,7 +25,8 @@ class Start extends Component {
         this.state = {
             userName: name || 'Good user name',
             roomName: '',
-            rooms: []
+            rooms: [],
+            hotkeyPosition: -1
         }
 
         this._handleCreateRoom = this._handleCreateRoom.bind(this)
@@ -34,6 +37,22 @@ class Start extends Component {
 
     componentDidMount() {
         this.handleRefresh()
+
+        document.addEventListener('keydown', (event) => {
+            if(this.state.hotkeyPosition === -1) return
+            if(event.code === 'Escape') return this.setState({ hotkeyPosition: -1 })
+
+            const hotkey = event.key.toLowerCase()
+            const letterHotkey = /^[a-zA-Z]$/g
+            if(letterHotkey.test(hotkey)) {
+                this.props.updateHotkey({
+                    position: this.state.hotkeyPosition,
+                    hotkey
+                })
+            }
+
+            return this.setState({ hotkeyPosition: -1 })
+        })
 
         if(!_.isEmpty(this.props.room)) {
             this.props.history.replace('/room')
@@ -113,6 +132,19 @@ class Start extends Component {
                             value={this.state.userName}
                             onChange={x => this.setState({ userName: x })}
                         />
+                        <h3 className="start-hotkey-spells-title">Hotkeys configuration</h3>
+                        <div className='start-hotkey-spells-container'>
+                            {
+                                [0, 1, 2].map(index => (
+                                    <div className={`start-hotkey-container ${this.state.hotkeyPosition === index ? 'selected' : ''} `} key={index}
+                                        onClick={e => this.setState({ hotkeyPosition: index })}>
+                                        <p className='start-hotkey-spell'>
+                                            {this.props.preferences.hotkeys.find(x => x.position === index).hotkey.toUpperCase()}
+                                        </p>
+                                    </div>
+                                ))
+                            }
+                        </div>
                     </div>
                     <div className="start-room-conf-container">
                         <h2 className="start-room-conf-title">Room configuration</h2>
