@@ -68,7 +68,7 @@ class Room extends Component {
 
         this.configSpells = {}
         this.state = {
-            chatNotRead: this.props.room.chat.length,
+            chatNotRead: this.props.room && this.props.room.chat.length,
             menuSelected: 'config',
             spellTypeSelected: 'offensive',
             modalMapShowing: false,
