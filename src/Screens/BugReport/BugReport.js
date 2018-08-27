@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Input, Button } from '../../Components'
+import { Input, Button, Spinner } from '../../Components'
 import ReactMarkdown from 'react-markdown'
 import moment from 'moment'
 import { serverUrl } from '../../constants'
@@ -21,6 +21,7 @@ class BugReport extends Component {
         this.handleCreate = this.handleCreate.bind(this)
 
         this.state = {
+            isLoading: false,
             content: '',
             error: '',
             success: '',
@@ -33,6 +34,8 @@ class BugReport extends Component {
             this.setState({ error: 'Please, enter a bug description' })
             return
         }
+
+        this.setState({ isLoading: true })
 
         fetch(`${serverUrl}/bugreports`, {
             method: 'POST',
@@ -48,8 +51,8 @@ class BugReport extends Component {
             }
             return res
         })
-        .then(res => this.setState({ success: 'Bug reported with success!', error: '', content: '' }))
-        .catch(err => this.setState({ error: 'Error on bug report.' }))
+        .then(res => this.setState({ isLoading: false, success: 'Bug reported with success!', error: '', content: '' }))
+        .catch(err => this.setState({ isLoading: false, error: 'Error on bug report.' }))
     }
 
     render() {
@@ -78,9 +81,12 @@ class BugReport extends Component {
                             value={this.state.content}
                             onChange={e => this.setState({ content: e.target.value })}
                         />
-                        <Button className='br-send-button'
-                            label='Send'
-                            onClick={this.handleCreate}/>
+                        {
+                            this.state.isLoading ? <Spinner /> :
+                            <Button className='br-send-button'
+                                label='Send'
+                                onClick={this.handleCreate}/>
+                        }
                     </div>
                 </div>
             </div>

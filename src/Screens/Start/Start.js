@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { Input, Button } from '../../Components'
 import { serverUrl } from '../../constants'
 import { addPreferences, updateHotkey } from '../../Redux/preferences'
+import { name as nameGenerator } from '../../Utils/generator'
 import _ from 'lodash'
 import moment from 'moment'
 import './Start.css'
@@ -24,7 +25,7 @@ class Start extends Component {
         super(props)
 
         this.state = {
-            roomName: '',
+            roomName: nameGenerator(),
             rooms: [],
             hotkeyPosition: -1
         }
@@ -127,6 +128,22 @@ class Start extends Component {
                     <div className='start-rooms-list'>
                         { this.state.rooms.map(this.renderRoomLine) }
                     </div>
+                    <div className="start-room-conf-container">
+                        <h2 className="start-room-conf-title">Room configuration</h2>
+                        <Input label='Room name' className='start-room-conf-input-roomname'
+                            placeholder="Robson's room"
+                            value={this.state.roomName}
+                            onChange={x => this.setState({ roomName: x })}
+                        />
+                        <div className="start-room-conf-buttons">
+                            <Button label='Create' className='start-button left'
+                                onClick={this._handleCreateRoom}
+                            />
+                            <Button label='Enter' className='start-button enter right'
+                                onClick={() => this._handleJoinRoom(this.state.roomName)}
+                            />
+                        </div>
+                    </div>
                 </div>
                 <div className='start-side-container'>
                     <div className="start-user-container">
@@ -148,22 +165,6 @@ class Start extends Component {
                                     </div>
                                 ))
                             }
-                        </div>
-                    </div>
-                    <div className="start-room-conf-container">
-                        <h2 className="start-room-conf-title">Room configuration</h2>
-                        <Input label='Room name' className='start-room-conf-input-roomname'
-                            placeholder="Robson's room"
-                            value={this.state.roomName}
-                            onChange={x => this.setState({ roomName: x })}
-                        />
-                        <div className="start-room-conf-buttons">
-                            <Button label='Create' className='start-button left'
-                                onClick={this._handleCreateRoom}
-                            />
-                            <Button label='Enter' className='start-button right'
-                                onClick={() => this._handleJoinRoom(this.state.roomName)}
-                            />
                         </div>
                     </div>
                 </div>

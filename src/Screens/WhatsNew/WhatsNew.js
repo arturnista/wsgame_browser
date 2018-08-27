@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Input, Button } from '../../Components'
+import { Input, Button, Spinner } from '../../Components'
 import ReactMarkdown from 'react-markdown'
 import moment from 'moment'
 import { serverUrl } from '../../constants'
@@ -20,6 +20,7 @@ class WhatsNew extends Component {
         super(props)
 
         this.state = {
+            isLoading: true,
             articles: [],
             articleIndex: 0
         }
@@ -29,7 +30,7 @@ class WhatsNew extends Component {
     componentDidMount() {
         fetch(`${serverUrl}/articles`)
         .then(res => res.json())
-        .then(articles => this.setState({ articles }))
+        .then(articles => this.setState({ isLoading: false, articles }))
     }
 
     render() {
@@ -38,28 +39,31 @@ class WhatsNew extends Component {
 
         return (
             <div className="bg-container">
-                <div className='wn-container'>
-                    <div className='wn-sidebar'>
-                        <h2>Articles: </h2>
-                        { this.state.articles.map((a, i) => (
-                                <p className={`wn-sidebar-item ${this.state.articleIndex === i ? 'selected' : ''}`} 
-                                    onClick={() => this.setState({ articleIndex: i })}>
-                                    {moment(a.date).format('DD/MM/YY')} - {a.title}
-                                </p>
-                            ))
-                        }
+                {
+                    this.state.isLoading ? <Spinner /> :
+                    <div className='wn-container'>
+                            <div className='wn-sidebar'>
+                                <h2>Articles: </h2>
+                                { this.state.articles.map((a, i) => (
+                                        <p className={`wn-sidebar-item ${this.state.articleIndex === i ? 'selected' : ''}`} 
+                                            onClick={() => this.setState({ articleIndex: i })}>
+                                            {moment(a.date).format('DD/MM/YY')} - {a.title}
+                                        </p>
+                                    ))
+                                }
+                            </div>
+                            {
+                                currentArticle &&
+                                <div className='wn-news-content'>
+                                    <h2 className='wn-news-title'>
+                                        <span className='wn-news-title-date'>{moment(currentArticle.date).format('DD/MM/YY')}</span> 
+                                        {currentArticle.title}
+                                    </h2>
+                                    <ReactMarkdown className='wn-news-article' source={currentArticle.content} />
+                                </div>
+                            }
                     </div>
-                    {
-                        currentArticle &&
-                        <div className='wn-news-content'>
-                            <h2 className='wn-news-title'>
-                                <span className='wn-news-title-date'>{moment(currentArticle.date).format('DD/MM/YY')}</span> 
-                                {currentArticle.title}
-                            </h2>
-                            <ReactMarkdown className='wn-news-article' source={currentArticle.content} />
-                        </div>
-                    }
-                </div>
+                }
             </div>
         )
 

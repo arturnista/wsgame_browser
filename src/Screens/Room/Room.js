@@ -68,6 +68,7 @@ class Room extends Component {
 
         this.configSpells = {}
         this.state = {
+            chatNotRead: this.props.room.chat.length,
             menuSelected: 'config',
             spellTypeSelected: 'offensive',
             modalMapShowing: false,
@@ -154,8 +155,12 @@ class Room extends Component {
         console.log('handleNewChatMessage', body)
         this.props.updateChat(body.chat)
 
-        const chatElement = document.getElementById("room-chat")
-        chatElement.scrollTop = chatElement.scrollHeight
+        if(this.state.menuSelected !== 'chat') {
+            this.setState({ chatNotRead: this.state.chatNotRead + 1 })
+        } else {
+            const chatElement = document.getElementById("room-chat")
+            chatElement.scrollTop = chatElement.scrollHeight
+        }
     }
 
     handleWillStartGame(body) {
@@ -440,8 +445,8 @@ class Room extends Component {
                 <div className='room-grid-item multiple'>
                     <div className='header'>
                         <h2 className={`title ${this.state.menuSelected === 'chat' ? 'active' : ''} `}
-                            onClick={() => this.setState({ menuSelected: 'chat' })}>
-                            Chat
+                            onClick={() => this.setState({ menuSelected: 'chat', chatNotRead: 0 })}>
+                            Chat{this.state.chatNotRead > 0 && <span className='room-chat-message-not-read'>{this.state.chatNotRead}</span>}
                         </h2>
                         <h2 className={`title ${this.state.menuSelected === 'config' ? 'active' : ''} `}
                             onClick={() => this.setState({ menuSelected: 'config' })}>

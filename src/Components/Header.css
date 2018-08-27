@@ -1,6 +1,6 @@
 .header-container {
     display: grid;
-    grid-template-columns: 1fr repeat(4, 10%);
+    grid-template-columns: 2fr repeat(4, 1fr);
     height: 96px;
     background-color: #2f54a3;
     align-items: center;
