@@ -316,7 +316,8 @@ class Room extends Component {
 
     renderChatLine(body) {
         const isMine = body.id === this.props.user.id
-        const user = this.props.room.users.find(x => x.id === body.id)
+        let user = this.props.room.users.find(x => x.id === body.id)
+        if(!user) user = this.props.room.observers.find(x => x.id === body.id)
 
         return (
             <div className={'room-chat-line-container ' + (isMine ? 'mine ' : ' ') }>
