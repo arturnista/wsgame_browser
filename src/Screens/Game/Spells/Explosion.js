@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import uuid from 'uuid'
 import vector from '../../../Utils/vector'
+import { explosion } from './utils'
 
 export function createExplosion(spellData, game) {
     const spell = new window.PIXI.Sprite( window.textures['bomb.png'] )
@@ -40,8 +41,7 @@ export function createExplosion(spellData, game) {
             if(!exploded) {
 
                 for (let index = 0; index < 35; index++) {
-                    const exp = new window.PIXI.Sprite( window.textures['explosion.png'] )
-                    exp.anchor.set(.5, .5)
+                    const exp = explosion({autoplay: false})
                     exp.width = 32
                     exp.height = 32
                     const offset = index / 35 * spellData.radius
@@ -50,7 +50,8 @@ export function createExplosion(spellData, game) {
                     
                     setTimeout(() => {
                         game.createSpell(exp)
-                        setTimeout(() => game.removeSpell(exp), Math.random() * 600)
+                        exp.play()
+                        setTimeout(() => game.removeSpell(exp), 1000)
                     }, Math.random() * 600)
                 }
                 spell.texture = window.textures['explosion.png']

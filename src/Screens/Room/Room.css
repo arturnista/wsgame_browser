@@ -101,7 +101,9 @@
     border: 1px solid #212121;
     height: 7em;
     width: 6em;
-    margin: .3em;
+    margin: calc(.3em + 1px);
+
+    transition: 300ms all;
 }
 .room-spell-container.small {
     grid-template-rows: .8em 1fr;
@@ -115,6 +117,17 @@
 .room-spell-container.focus {
     text-decoration: underline;
     border: 2px solid #212121;
+    margin: .3em;
+}
+
+.room-spell-container:hover {
+    background-color: #ddd;
+}
+.room-spell-container.small:hover {
+    background-color: rgba(230, 81, 0, .3);
+}
+.room-spell-container.small.selected:hover {
+    border: 1px solid rgb(255, 28, 28);
 }
 
 .room-spell-name {
