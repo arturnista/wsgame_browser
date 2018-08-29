@@ -449,9 +449,11 @@ class Game extends Component {
                     if(!this.props.user.isObserver && entityData.owner === this.player.id) this.teleportationOrbActive = true
                     break
                 case 'player':
-                    entityCreated = createPlayer(entityData, this)
+                    const isYou = entityData.userId === this.props.user.id
+                    entityCreated = createPlayer(entityData, isYou, this)
+
+                    if(isYou) this.player = entityCreated
                     this.createPlayer(entityCreated)
-                    if(entityData.userId === this.props.user.id) this.player = entityCreated
                     break
                 default:
                     entityCreated = createDefaultSprite(entityData)

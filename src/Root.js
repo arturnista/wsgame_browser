@@ -51,6 +51,10 @@ class Root extends Component {
         .add('grid_toRevive.png', '/img/map/grid_toRevive.png')
         .add('wall.png', '/img/game/wall.png')
 
+        .add('player_indicator_00.png', '/img/game/player_indicator_00.png')
+        .add('player_indicator_01.png', '/img/game/player_indicator_01.png')
+        .add('player_indicator_02.png', '/img/game/player_indicator_02.png')
+
         .add('spell_explosion_00.png', '/img/game/spell_explosion_00.png')
         .add('spell_explosion_01.png', '/img/game/spell_explosion_01.png')
         .add('spell_explosion_02.png', '/img/game/spell_explosion_02.png')
