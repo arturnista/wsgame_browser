@@ -127,7 +127,7 @@
     background-color: rgba(230, 81, 0, .3);
 }
 .room-spell-container.small.selected:hover {
-    border: 1px solid rgb(255, 28, 28);
+    background-color: rgba(255, 28, 28, .5);
 }
 
 .room-spell-name {

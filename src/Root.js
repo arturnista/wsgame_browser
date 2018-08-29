@@ -61,6 +61,7 @@ class Root extends Component {
         .add('spell_explosion_07.png', '/img/game/spell_explosion_07.png')
         .add('spell_explosion_08.png', '/img/game/spell_explosion_08.png')
         .add('spell_explosion_09.png', '/img/game/spell_explosion_09.png')
+
         .add('spell_v1_explosion_00.png', '/img/game/spell_v1_explosion_00.png')
         .add('spell_v1_explosion_01.png', '/img/game/spell_v1_explosion_01.png')
         .add('spell_v1_explosion_02.png', '/img/game/spell_v1_explosion_02.png')
@@ -71,6 +72,7 @@ class Root extends Component {
         .add('spell_v1_explosion_07.png', '/img/game/spell_v1_explosion_07.png')
         .add('spell_v1_explosion_08.png', '/img/game/spell_v1_explosion_08.png')
         .add('spell_v1_explosion_09.png', '/img/game/spell_v1_explosion_09.png')
+
         .add('blink.png', '/img/game/blink.png')
         .add('boomerang.png', '/img/game/boomerang.png')
         .add('bomb.png', '/img/game/bomb.png')
@@ -101,6 +103,8 @@ class Root extends Component {
         .add('lightning_bolt.png', '/img/game/lightning_bolt.png')
         .add('lightning_bolt_explosion_00.png', '/img/game/lightning_bolt_explosion_00.png')
         .add('lightning_bolt_explosion_01.png', '/img/game/lightning_bolt_explosion_01.png')
+        .add('lightning_bolt_explosion_02.png', '/img/game/lightning_bolt_explosion_02.png')
+        .add('lightning_bolt_explosion_03.png', '/img/game/lightning_bolt_explosion_03.png')
         .add('bubble.png', '/img/game/bubble.png')
         .add('bubble_00.png', '/img/game/bubble_00.png')
         .add('bubble_01.png', '/img/game/bubble_01.png')
