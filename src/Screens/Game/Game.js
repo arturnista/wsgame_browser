@@ -217,7 +217,7 @@ class Game extends Component {
             for (var i = 0; i < this.props.user.spells.length; i++) {
                 const spellData = this.props.spells.find(x => this.props.user.spells[i].id === x.id)
                 if(!spellData) continue
-                const ic = new SpellIcon(this.props.user.spells[i].position, spellData, this.hud, { xOffset: this.app.renderer.screen.width / 2 - off, yOffset: 23 })
+                const ic = new SpellIcon(this.props.user.spells[i].position, spellData, this.hud, { xOffset: this.app.renderer.screen.width / 2 - off, yOffset: 23, hotkey: this.props.user.spells[i].hotkey })
                 this.spellsIcons.push( ic )
                 this.hudEntities.push( ic )
             }

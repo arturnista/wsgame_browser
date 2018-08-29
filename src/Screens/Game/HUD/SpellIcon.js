@@ -2,7 +2,7 @@ import textureMap from '../textureMap'
 import moment from 'moment'
 
 export default
-function Icon(index, spellData, hud, { noHotkey, xOffset = 0, yOffset = 0, size = 50 } = { xOffset: 0, yOffset: 0, size: 50 }) {
+function Icon(index, spellData, hud, { hotkey, xOffset = 0, yOffset = 0, size = 50 } = { xOffset: 0, yOffset: 0, size: 50 }) {
     this.index = index
     this.size = size
 
@@ -23,22 +23,7 @@ function Icon(index, spellData, hud, { noHotkey, xOffset = 0, yOffset = 0, size 
     this.id = spellData.id
 
     const texture = textureMap[spellData.id]
-    let hotkey = ''
-    if(!noHotkey) {
-        switch (index) {
-            case 0:
-                hotkey = 'Q'
-                break
-            case 1:
-                hotkey = 'W'
-                break
-            case 2:
-                hotkey = 'E'
-                break
-            default:
-                hotkey = '?'
-        }
-    }
+    let hotkeyStr = hotkey ? hotkey.toUpperCase() : ''
 
     const xAmount = (this.size + padding) * index
 
@@ -61,7 +46,7 @@ function Icon(index, spellData, hud, { noHotkey, xOffset = 0, yOffset = 0, size 
     iconTime.anchor.set(1, 1)
     this.spellIconContainer.addChild(iconTime)
 
-    const iconHotkey = new window.PIXI.Text(hotkey, { fontFamily: 'Arial', fontSize: 15, fill: 0xFAFAFA, align: 'center' })
+    const iconHotkey = new window.PIXI.Text(hotkeyStr, { fontFamily: 'Arial', fontSize: 15, fill: 0xFAFAFA, align: 'center' })
     iconHotkey.x = iconSize + diff
     iconHotkey.y = 0
     iconHotkey.anchor.set(1, 0)

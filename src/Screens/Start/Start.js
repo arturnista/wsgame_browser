@@ -44,15 +44,20 @@ class Start extends Component {
             if(event.code === 'Escape') return this.setState({ hotkeyPosition: -1 })
 
             const hotkey = event.key.toLowerCase()
-            const letterHotkey = /^[a-zA-Z]$/g
-            if(letterHotkey.test(hotkey)) {
-                this.props.updateHotkey({
-                    position: this.state.hotkeyPosition,
-                    hotkey
-                })
+            const letterHotkey = /^[a-zA-Z0-9]$/g
+            if(!letterHotkey.test(hotkey)) return this.setState({ hotkeyPosition: -1 })
+
+            if(this.props.preferences.hotkeys.find(x => x.hotkey === hotkey && x.position !== this.state.hotkeyPosition) != null) {
+                alert(`There's already a key defined to ${hotkey.toUpperCase()}!`)
+                return this.setState({ hotkeyPosition: -1 })
             }
 
-            return this.setState({ hotkeyPosition: -1 })
+            this.props.updateHotkey({
+                position: this.state.hotkeyPosition,
+                hotkey
+            })
+
+            this.setState({ hotkeyPosition: -1 })
         })
 
         if(!_.isEmpty(this.props.room)) {
