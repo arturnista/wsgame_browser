@@ -19,7 +19,27 @@ function createSlowEffect() {
     return sprite
 }
 
-export function createPlayer(playerData, game) {
+function createIndicator() {
+    
+    let images = [ 'player_indicator_00.png', 'player_indicator_01.png', 'player_indicator_02.png', 'player_indicator_01.png' ]
+    let textureArray = []
+    
+    for (let i=0; i < images.length; i++) {
+         let texture = window.PIXI.Texture.fromImage(images[i])
+         textureArray.push(texture)
+    }
+
+    let sprite = new window.PIXI.extras.AnimatedSprite(textureArray)
+    sprite.anchor.set(.5, 1)
+    sprite.animationSpeed = .1
+    sprite.width = 45
+    sprite.height = 45
+    sprite.play()
+
+    return sprite
+}
+
+export function createPlayer(playerData, isYou, game) {
     const player = new window.PIXI.Container()
     player.id = playerData.id
 
@@ -59,6 +79,16 @@ export function createPlayer(playerData, game) {
             modifiersContainer.removeChild(modifiersContainer.children[0])
         }
         
+    }
+
+    if(isYou) {
+        const indicator = createIndicator()
+        indicator.y = -13
+        player.addChild(indicator)
+        setTimeout(() => {
+            player.removeChild(indicator)
+            indicator.destroy()
+        }, 3000)
     }
 
     return player

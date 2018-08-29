@@ -19,6 +19,8 @@ import Grid from './Maps/Grid'
 
 import { createPlayer } from './Player'
 
+import { explosion, spellExplosion, spellExplosionVar } from './Spells/utils'
+
 import { createFireball } from './Spells/Fireball'
 import { createBoomerang } from './Spells/Boomerang'
 import { createFollower } from './Spells/Follower'
@@ -396,13 +398,16 @@ class Game extends Component {
         for (let i = 0; i < entities.length; i++) {
             const entityData = entities[i]
             let entityCreated = null
+            let explosionType = null
 
             switch (entityData.type) {
                 case 'fireball':
+                    explosionType = 'fire'
                     entityCreated = createFireball(entityData)
                     this.createSpell(entityCreated)
                     break
                 case 'boomerang':
+                    explosionType = 'variation'
                     entityCreated = createBoomerang(entityData)
                     this.createSpell(entityCreated)
                     break
@@ -411,10 +416,12 @@ class Game extends Component {
                     this.createSpell(entityCreated)
                     break
                 case 'follower':
+                    explosionType = 'normal'
                     entityCreated = createFollower(entityData)
                     this.createSpell(entityCreated)
                     break
                 case 'poison_dagger':
+                    explosionType = 'variation'
                     entityCreated = createPoisonDagger(entityData)
                     this.createSpell(entityCreated)
                     break
@@ -427,6 +434,7 @@ class Game extends Component {
                     this.createSpell(entityCreated)
                     break
                 case 'shotgun':
+                    explosionType = 'normal'
                     entityCreated = createShotgun(entityData)
                     this.createSpell(entityCreated)
                     break
@@ -435,14 +443,17 @@ class Game extends Component {
                     this.createSpell(entityCreated)
                     break
                 case 'teleportation_orb':
+                    explosionType = 'variation'
                     entityCreated = createTeleportationOrb(entityData)
                     this.createSpell(entityCreated)
                     if(!this.props.user.isObserver && entityData.owner === this.player.id) this.teleportationOrbActive = true
                     break
                 case 'player':
-                    entityCreated = createPlayer(entityData, this)
+                    const isYou = entityData.userId === this.props.user.id
+                    entityCreated = createPlayer(entityData, isYou, this)
+
+                    if(isYou) this.player = entityCreated
                     this.createPlayer(entityCreated)
-                    if(entityData.userId === this.props.user.id) this.player = entityCreated
                     break
                 default:
                     entityCreated = createDefaultSprite(entityData)
@@ -458,6 +469,22 @@ class Game extends Component {
                 entityCreated.vy = entityData.velocity.y
 
                 entityCreated.metadata = { ...entityData }
+
+                if(explosionType && !entityCreated.explode) {
+                    entityCreated.explode = (position) => {
+                        let exp = null
+                        if(explosionType === 'normal') exp = spellExplosion()
+                        else if(explosionType === 'variation') exp = spellExplosionVar()
+                        else if(explosionType === 'fire') exp = explosion()
+                        
+                        exp.x = position.x
+                        exp.y = position.y
+                        exp.height = 42
+                        exp.width = 42
+
+                        return exp
+                    }
+                }
             }
         }
     }
@@ -468,21 +495,26 @@ class Game extends Component {
         for (let i = 0; i < entities.length; i++) {
             const entityData = entities[i]
 
+            const spellData = this.props.spells.find(x => x.id === entityData.type)
+
+            const spell = this.entities[entityData.id]
+            if(spell.explode && entityData.cause === 'hit_player' || entityData.cause === 'hit_obstacle') {
+                const fireballExplosionEntity = spell.explode(entityData.position, spellData)
+                this.createSpell(fireballExplosionEntity)
+                setTimeout(() => this.removeSpell(fireballExplosionEntity), 1000)
+                this.removeSpell(entityData)
+            }
+
             switch (entityData.type) {
-                case 'fireball':
                 case 'boomerang':
                 case 'poison_dagger':
                 case 'follower':
                 case 'voodoo_doll':
+                case 'shotgun':
                 case 'prison':
                 case 'bubble':
-                    this.removeSpell(entityData)
-                    break
+                case 'fireball':
                 case 'lightning_bolt':
-                    const spellData = this.props.spells.find(x => x.id === entityData.type)
-                    const expEntity = this.entities[entityData.id].explode(entityData.position, spellData)
-                    this.createSpell(expEntity)
-                    setTimeout(() => this.removeSpell(expEntity), 1000)
                     this.removeSpell(entityData)
                     break
                 case 'teleportation_orb':

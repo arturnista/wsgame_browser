@@ -26,7 +26,7 @@ export function createLightningBolt(spellData, caster) {
     }
 
     spell.explode = (position, spellData) => {
-        let images = [ 'lightning_bolt_explosion_00.png', 'lightning_bolt_explosion_01.png' ]
+        let images = [ 'lightning_bolt_explosion_00.png', 'lightning_bolt_explosion_01.png', 'lightning_bolt_explosion_02.png', 'lightning_bolt_explosion_03.png' ]
         let textureArray = []
 
         for (let i=0; i < images.length; i++) {
@@ -36,7 +36,7 @@ export function createLightningBolt(spellData, caster) {
 
         const spellExplosion = new window.PIXI.extras.AnimatedSprite(textureArray)
         spellExplosion.anchor.set(.5, .5)
-        spellExplosion.animationSpeed = .5
+        spellExplosion.animationSpeed = .3
         spellExplosion.play()
 
         spellExplosion.x = position.x

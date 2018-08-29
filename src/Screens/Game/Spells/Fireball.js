@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import vector from '../../../Utils/vector'
+import { explosion } from './utils'
 
 export function createFireball(spellData) {
     const spell = new window.PIXI.Sprite( window.textures['fireball.png'] )
