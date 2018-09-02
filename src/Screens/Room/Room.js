@@ -4,7 +4,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import { Input, Button } from '../../Components'
 import { serverUrl } from '../../constants'
-import { defineUser, selectSpell, deselectSpell } from '../../Redux/user'
+import { selectSpell, deselectSpell } from '../../Redux/user'
 import { addSpells } from '../../Redux/spells'
 import { addUser, removeUser, readyUser, waitingUser, updateRoom, updateChat, leaveRoom } from '../../Redux/room'
 import { startGame } from '../../Redux/game'
@@ -17,13 +17,13 @@ const mapStateToProps = (state) => ({
     spells: state.spells,
     preferences: state.preferences,
     isOwner: state.room ? state.room.owner === state.user.id : false,
+    isObserver: state.room ? state.room.observers.find(x => x.id === state.user.id) != null : false,
 })
 const mapDispatchToProps = (dispatch) => ({
     selectSpell: (spell, index, hotkeyPrefs) => dispatch(selectSpell(spell, index, hotkeyPrefs)),
     deselectSpell: (spell, index) => dispatch(deselectSpell(spell, index)),
     updateChat: spell => dispatch(updateChat(spell)),
     addSpells: spells => dispatch(addSpells(spells)),
-    defineUser: data => dispatch(defineUser(data)),
     startGame: data => dispatch(startGame(data)),
     updateRoom: room => dispatch(updateRoom(room)),
     addUser: user => dispatch(addUser(user)),
@@ -73,7 +73,6 @@ class Room extends Component {
             spellTypeSelected: 'offensive',
             modalMapShowing: false,
             status: 'waiting',
-            isObserver: props.user.isObserver || false,
             offensiveSpells: [],
             supportSpells: [],
             selectedSpell: props.spells[1],
@@ -165,7 +164,6 @@ class Room extends Component {
 
     handleWillStartGame(body) {
         console.log('game_will_start', body)
-        this.props.defineUser({ isObserver: this.state.isObserver })
         this.props.startGame(body)
     }
 
@@ -179,6 +177,7 @@ class Room extends Component {
     }
 
     handleToggleStatus() {
+            console.log(this.props.user.spells)
         if(this.state.status === 'waiting') {
             window.socketio.emit('user_ready', {})
             this.setState({ status: 'ready' })
@@ -400,7 +399,7 @@ class Room extends Component {
             <div className='bg-container room-grid'>
                 <div className='room-grid-item room-options-container'>
                     {
-                        !this.state.isObserver ?
+                        !this.props.isObserver ?
                         <Button label={toggleText} className={'room-button ' + this.state.status}
                             onClick={this.handleToggleStatus}/>
                         : <div className='room-button'></div>
@@ -475,7 +474,7 @@ class Room extends Component {
                             <div className='room-users-config-container content'>
                                 <p className='room-users-config-text'>Observers: {this.props.room.observers.length}</p>
                                 {
-                                    !this.state.isObserver ?
+                                    !this.props.isObserver ?
                                     <Button label='Become observer' className='room-users-config-button'
                                         onClick={() => this.setState({ isObserver: true }, () => window.socketio.emit('user_become_observer', {}))}/>
                                     :

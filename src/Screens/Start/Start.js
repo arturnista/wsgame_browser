@@ -39,8 +39,8 @@ class Start extends Component {
         }
     }
 
-    componentWillReceiveProps(nextProps) {
-        if(!_.isEmpty(nextProps.room)) {
+    componentDidUpdate(prevProps) {
+        if(!_.isEmpty(this.props.room)) {
             this.props.history.replace('/room')
         }
     }
@@ -55,12 +55,12 @@ class Start extends Component {
 
     _handleJoinRoom(name) {
         this.setState({ roomJoinedIsOwner: false })
-        window.socketio.emit('room_join', { userName: this.props.preferences.name, name })
+        window.socketio.emit('room_join', { name })
     }
 
     _handleCreateRoom() {
         this.setState({ roomJoinedIsOwner: true })
-        window.socketio.emit('room_create', { userName: this.props.preferences.name, name: this.state.roomName })
+        window.socketio.emit('room_create', { name: this.state.roomName })
     }
 
     renderRoomLine(room) {

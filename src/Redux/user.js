@@ -11,12 +11,8 @@ export default function reducer(state = initialState, action = {}) {
             return {
                 ...state,
                 ...action.payload,
-                // spells: []
-            }
-        case USER_END_GAME:
-            return {
-                ...state,
-                isObserver: action.payload.user.isObserver
+                spells: [],
+                isObserver: false
             }
         case SELECT_SPELL:
             return {
@@ -44,13 +40,6 @@ export function defineUser(userData) {
     return {
         type: DEFINE_USER,
         payload: userData
-    }
-}
-
-export function userEndGame(user) {
-    return {
-        type: USER_END_GAME,
-        payload: { user: user || {} }
     }
 }
 

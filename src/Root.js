@@ -123,21 +123,16 @@ class Root extends Component {
                 ...PIXI.loader.resources['/img/WSSprites.json'].textures,
                 ..._.mapValues(PIXI.loader.resources, x => x.texture),
             }
-            User.start(() => this.setState({ isLoading: false }))
         })
 
         window.socketio.on('connect', (socket) => {
             console.log('SocketIO :: Connected')
 
-            window.socketio.on('myuser_info', (body) => {
-                console.log('myuser_info', body)
-                this.store.dispatch( defineUser(body) )
-            })
+            User.start(() => this.setState({ isLoading: false }))
 
             window.socketio.on('myuser_joined_room', (body) => {
                 console.log('myuser_joined_room', body)
                 this.store.dispatch( setRoom({ room: body.room, user: body.user }) )
-                this.store.dispatch( defineUser(body.user) )
             })
 
             window.socketio.on('disconnect', () => {

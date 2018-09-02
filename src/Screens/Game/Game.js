@@ -6,7 +6,6 @@ import { Input, Button } from '../../Components'
 import vector from '../../Utils/vector'
 import { resetRoom } from '../../Redux/room'
 import { stopGame } from '../../Redux/game'
-import { userEndGame } from '../../Redux/user'
 import SpellIcon from './HUD/SpellIcon'
 import ObsPlayer from './HUD/ObsPlayer'
 import textureMap from './textureMap'
@@ -47,11 +46,11 @@ const mapStateToProps = (state) => ({
     user: state.user,
     room: state.room,
     spells: state.spells,
+    isObserver: state.room.observers.find(x => x.id === state.user.id) != null
 })
 const mapDispatchToProps = (dispatch) => ({
     stopGame: () => dispatch(stopGame()),
     resetRoom: (users) => dispatch(resetRoom(users)),
-    userEndGame: (user) => dispatch(userEndGame(user))
 })
 
 class Game extends Component {
@@ -88,7 +87,7 @@ class Game extends Component {
 
         this.player = null
         this.status = { action: 'move' }
-        this.cameraType = this.props.user.isObserver ? 'observer' : 'player'
+        this.cameraType = this.props.isObserver ? 'observer' : 'player'
 
         this.players = []
         this.obsPlayers = []
@@ -190,7 +189,7 @@ class Game extends Component {
         this.camera.addChild(this.spellsContainer)
         this.camera.addChild(this.entitiesContainer)
         
-        if(this.props.user.isObserver) {
+        if(this.props.isObserver) {
 
             this.observersHud = new window.PIXI.Container()
             this.hud.addChild(this.observersHud)
@@ -267,7 +266,7 @@ class Game extends Component {
             return
         }
         
-        if(!this.props.user.isObserver) {
+        if(!this.props.isObserver) {
 
             if(this.player) {
                 if(this.player.metadata.status !== 'alive') this.cameraType = 'observer'
@@ -446,7 +445,7 @@ class Game extends Component {
                     explosionType = 'variation'
                     entityCreated = createTeleportationOrb(entityData)
                     this.createSpell(entityCreated)
-                    if(!this.props.user.isObserver && entityData.owner === this.player.id) this.teleportationOrbActive = true
+                    if(!this.props.isObserver && entityData.owner === this.player.id) this.teleportationOrbActive = true
                     break
                 case 'player':
                     const isYou = entityData.userId === this.props.user.id
@@ -518,7 +517,7 @@ class Game extends Component {
                     this.removeSpell(entityData)
                     break
                 case 'teleportation_orb':
-                    if(!this.props.user.isObserver && entityData.owner === this.player.id) this.teleportationOrbActive = false
+                    if(!this.props.isObserver && entityData.owner === this.player.id) this.teleportationOrbActive = false
                     this.removeSpell(entityData)
                     break
                 default:
@@ -533,7 +532,7 @@ class Game extends Component {
         for (let i = 0; i < spells.length; i++) {
             const spellData = spells[i]
             
-            if(this.props.user.isObserver) {
+            if(this.props.isObserver) {
                 const obsPlayer = this.obsPlayers.find(x => x.id === spellData.player.id)
                 obsPlayer.useSpell(spellData.spellName, spellData.cooldown)
             } else if(spellData.player.id === this.player.id) {
@@ -655,7 +654,7 @@ class Game extends Component {
 
     gameStart(body) {
         console.log('gameStart', body)
-        if(this.props.user.isObserver) {
+        if(this.props.isObserver) {
             for(let k = 0; k < body.players.length; k++) {
                 const obsPlayer = new ObsPlayer(k, body.players[k], this.observersHud, { spells: this.props.spells })
                 this.obsPlayers.push(obsPlayer)
@@ -691,7 +690,7 @@ class Game extends Component {
             winnerText.y = 250
             this.hud.addChild(winnerText)
 
-            if(!this.props.user.isObserver) {
+            if(!this.props.isObserver) {
                 
                 if(body.winner.userId === this.props.user.id) {
 
@@ -734,13 +733,12 @@ class Game extends Component {
         console.log('gameEnd', body)
         this.props.stopGame()
         this.props.resetRoom(body.users)
-        this.props.userEndGame(body.users.find(x => x.id === this.props.user.id))
 
         this.props.history.replace('/room')
     }
 
     handleMouseDown(event) {
-        if(this.props.user.isObserver) return
+        if(this.props.isObserver) return
         this.isDragging = false
         
         event.preventDefault()
@@ -789,7 +787,7 @@ class Game extends Component {
     }
 
     handleKeyDown(e) {
-        if(this.props.user.isObserver) return
+        if(this.props.isObserver) return
         const keyPressed = e.key.toLowerCase()
         
         this.props.user.spells.forEach(spell => {
@@ -811,7 +809,7 @@ class Game extends Component {
     }
 
     useSpell(name) {
-        if(this.props.user.isObserver) return
+        if(this.props.isObserver) return
 
         switch (name) {
             // Instant spells
@@ -909,7 +907,7 @@ class Game extends Component {
     }
 
     emitAction({ action, spellName }, mousePosition, finalPosition) {
-        if(this.props.user.isObserver) return
+        if(this.props.isObserver) return
         if(!this.gameIsRunning) return
 
         if(!mousePosition) mousePosition = { x: 0, y: 0 }
