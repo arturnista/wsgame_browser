@@ -263,7 +263,7 @@ class Room extends Component {
         if(currentSpell) {
             spell = this.props.spells.find(x => x.id === currentSpell.id)
         }
-        const hotkey = currentSpell ? currentSpell.hotkey : this.props.preferences.hotkeys.find(x => x.position === index).hotkey
+        const hotkey = currentSpell ? currentSpell.hotkey : this.props.preferences.hotkeys[index]
 
         return (
             <div key={index} className={"room-spell-container small " + (currentSpell ? 'selected ' : ' ')}

@@ -22,6 +22,9 @@ class Header extends Component {
                 <Link to='/bugreport' className={`header-link ${ this.props.location.pathname === '/bugreport' ? 'active' : ''} `}>
                     <p>Found a bug?</p>
                 </Link>
+                <Link to='/login' className={`header-link ${ this.props.location.pathname === '/login' ? 'active' : ''} `}>
+                    <p>Login</p>
+                </Link>
             </div>
         )
 

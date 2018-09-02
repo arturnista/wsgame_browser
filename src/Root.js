@@ -6,12 +6,12 @@ import * as PIXI from 'pixi.js'
 
 import { Header } from './Components'
 import { Router, Route } from 'react-router'
-import { App, Start, Room, Game, WhatsNew, LoadingScreen, BugReport } from './Screens'
+import { Login, App, Start, Room, Game, WhatsNew, LoadingScreen, BugReport } from './Screens'
 import createBrowserHistory from 'history/createBrowserHistory'
 import createStore from './Redux/createStore'
 import { leaveRoom, setRoom } from './Redux/room'
 import { defineUser } from './Redux/user'
-import { addPreferences } from './Redux/preferences'
+import User from './Entities/User'
 import './Root.css'
 
 window.PIXI = PIXI
@@ -25,6 +25,7 @@ class Root extends Component {
 
         const { store } = createStore()
         this.store = store
+        User.config(store)
 
         this.state = {
             isLoading: true
@@ -32,13 +33,6 @@ class Root extends Component {
     }
 
     componentDidMount() {
-        const prefSaved = localStorage.getItem('preferences')
-        console.log(typeof prefSaved, prefSaved)
-        
-        const preferences = prefSaved ? JSON.parse( prefSaved ) : {}
-        // const preferences = {}
-        this.store.dispatch(addPreferences(preferences))
-        
         window.PIXI.loader
         .add('/img/tileset.json')
         .add('/img/WSSprites.json')
@@ -129,7 +123,7 @@ class Root extends Component {
                 ...PIXI.loader.resources['/img/WSSprites.json'].textures,
                 ..._.mapValues(PIXI.loader.resources, x => x.texture),
             }
-            this.setState({ isLoading: false })
+            User.start(() => this.setState({ isLoading: false }))
         })
 
         window.socketio.on('connect', (socket) => {
@@ -162,6 +156,7 @@ class Root extends Component {
                     <div className="root-container">
                         <Route path="/" component={Header} />
                         <Route exact path="/" component={Start} />
+                        <Route exact path="/login" component={Login} />
                         <Route exact path="/room" component={Room} />
                         <Route exact path="/game" component={Game} />
                         <Route exact path="/whatsnew" component={WhatsNew} />

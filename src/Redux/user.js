@@ -60,7 +60,7 @@ export function selectSpell(spellData, index, hotkeysConfig) {
         payload: {
             spellData,
             index,
-            hotkey: hotkeysConfig.find(x => x.position === index).hotkey
+            hotkey: hotkeysConfig[index]
         }
     }
 }

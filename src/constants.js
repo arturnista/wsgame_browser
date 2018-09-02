@@ -1,5 +1,13 @@
 export const serverUrl = 'http://localhost:5002'
-// export const serverUrl = 'http://18.231.33.111'
+
+export const firebaseConfig = {
+    apiKey: "AIzaSyC9uLZiDzv4hTMTCUl3_GvZQs5lmg6_YQ4",
+    authDomain: "dev-nwgame.firebaseapp.com",
+    databaseURL: "https://dev-nwgame.firebaseio.com",
+    projectId: "dev-nwgame",
+    storageBucket: "dev-nwgame.appspot.com",
+    messagingSenderId: "186091883358"
+  }
 
 export const winStrings = [
     'GGWP GO NEXT',

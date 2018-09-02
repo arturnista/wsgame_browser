@@ -2,21 +2,17 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Input, Button } from '../../Components'
 import { serverUrl } from '../../constants'
-import { addPreferences, updateHotkey } from '../../Redux/preferences'
 import { name as nameGenerator } from '../../Utils/generator'
 import _ from 'lodash'
 import moment from 'moment'
 import './Start.css'
 
 const mapStateToProps = (state) => ({
-    preferences: state.preferences,
-    user: state.user,
     room: state.room,
     preferences: state.preferences,
 })
 const mapDispatchToProps = (dispatch) => ({
-    updateHotkey: data => dispatch(updateHotkey(data)),
-    addPreferences: data => dispatch(addPreferences(data))
+
 })
 
 class Start extends Component {
@@ -27,7 +23,6 @@ class Start extends Component {
         this.state = {
             roomName: nameGenerator(),
             rooms: [],
-            hotkeyPosition: -1
         }
 
         this._handleCreateRoom = this._handleCreateRoom.bind(this)
@@ -38,27 +33,6 @@ class Start extends Component {
 
     componentDidMount() {
         this.handleRefresh()
-
-        document.addEventListener('keydown', (event) => {
-            if(this.state.hotkeyPosition === -1) return
-            if(event.code === 'Escape') return this.setState({ hotkeyPosition: -1 })
-
-            const hotkey = event.key.toLowerCase()
-            const letterHotkey = /^[a-zA-Z0-9]$/g
-            if(!letterHotkey.test(hotkey)) return this.setState({ hotkeyPosition: -1 })
-
-            if(this.props.preferences.hotkeys.find(x => x.hotkey === hotkey && x.position !== this.state.hotkeyPosition) != null) {
-                alert(`There's already a key defined to ${hotkey.toUpperCase()}!`)
-                return this.setState({ hotkeyPosition: -1 })
-            }
-
-            this.props.updateHotkey({
-                position: this.state.hotkeyPosition,
-                hotkey
-            })
-
-            this.setState({ hotkeyPosition: -1 })
-        })
 
         if(!_.isEmpty(this.props.room)) {
             this.props.history.replace('/room')
@@ -80,21 +54,13 @@ class Start extends Component {
     }
 
     _handleJoinRoom(name) {
-        if(this.props.preferences.name === '') {
-            alert('User name required!')
-            return
-        }
         this.setState({ roomJoinedIsOwner: false })
-        window.socketio.emit('room_join', { name, userName: this.props.preferences.name })
+        window.socketio.emit('room_join', { userName: this.props.preferences.name, name })
     }
 
     _handleCreateRoom() {
-        if(this.props.preferences.name === '') {
-            alert('User name required!')
-            return
-        }
         this.setState({ roomJoinedIsOwner: true })
-        window.socketio.emit('room_create', { name: this.state.roomName, userName: this.props.preferences.name })
+        window.socketio.emit('room_create', { userName: this.props.preferences.name, name: this.state.roomName })
     }
 
     renderRoomLine(room) {
@@ -121,7 +87,7 @@ class Start extends Component {
     }
 
     render() {
-
+        
         return (
             <div className="start-container">
                 <div className='start-side-container'>
@@ -147,29 +113,6 @@ class Start extends Component {
                             <Button label='Enter' className='start-button enter right'
                                 onClick={() => this._handleJoinRoom(this.state.roomName)}
                             />
-                        </div>
-                    </div>
-                </div>
-                <div className='start-side-container'>
-                    <div className="start-user-container">
-                        <h2 className="start-room-conf-title">User configuration</h2>
-                        <Input label='Name' className='start-input-username'
-                            placeholder='Robson'
-                            value={this.props.preferences.name}
-                            onChange={x => this.props.addPreferences({ name: x })}
-                        />
-                        <h3 className="start-hotkey-spells-title">Hotkeys configuration</h3>
-                        <div className='start-hotkey-spells-container'>
-                            {
-                                [0, 1, 2].map(index => (
-                                    <div className={`start-hotkey-container ${this.state.hotkeyPosition === index ? 'selected' : ''} `} key={index}
-                                        onClick={e => this.setState({ hotkeyPosition: index })}>
-                                        <p className='start-hotkey-spell'>
-                                            {this.props.preferences.hotkeys.find(x => x.position === index).hotkey.toUpperCase()}
-                                        </p>
-                                    </div>
-                                ))
-                            }
                         </div>
                     </div>
                 </div>

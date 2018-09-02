@@ -1,5 +1,6 @@
 import App from './App/App'
 import Start from './Start/Start'
+import Login from './Login/Login'
 import Room from './Room/Room'
 import NotFound from './NotFound/NotFound'
 import Game from './Game/Game'
@@ -10,6 +11,7 @@ import BugReport from './BugReport/BugReport'
 export {
     App,
     Start,
+    Login,
     Room,
     NotFound,
     Game,

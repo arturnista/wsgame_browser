@@ -3,7 +3,8 @@ const UPDATE_HOTKEY = 'preferences/UPDATE_HOTKEY'
 
 const initialState = {
     name: '',
-    hotkeys: [ { position: 0, hotkey: 'q' }, { position: 1, hotkey: 'w' }, { position: 2, hotkey: 'e' } ]
+    spells: [],
+    hotkeys: [ 'q', 'w', 'e' ]
 }
 
 export default function reducer(state = initialState, action = {}) {

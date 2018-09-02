@@ -793,6 +793,7 @@ class Game extends Component {
         const keyPressed = e.key.toLowerCase()
         
         this.props.user.spells.forEach(spell => {
+            console.log(spell, keyPressed)
             if(keyPressed === spell.hotkey) {
                 this.useSpell(spell.id)
             }
