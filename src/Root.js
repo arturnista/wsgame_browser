@@ -2,17 +2,21 @@ import React, { Component } from 'react'
 import { Provider } from 'react-redux'
 import moment from 'moment'
 import _ from 'lodash'
+import Rodal from 'rodal'
 import * as PIXI from 'pixi.js'
 
-import { Header } from './Components'
+import { Header, Login as LoginComponent } from './Components'
 import { Router, Route } from 'react-router'
-import { Login, App, Start, Room, Game, WhatsNew, LoadingScreen, BugReport } from './Screens'
+import { App, Start, Room, Game, WhatsNew, LoadingScreen, BugReport } from './Screens'
 import createBrowserHistory from 'history/createBrowserHistory'
 import createStore from './Redux/createStore'
 import { leaveRoom, setRoom } from './Redux/room'
 import { defineUser } from './Redux/user'
+import firebase from './Utils/firebase'
 import User from './Entities/User'
+
 import './Root.css'
+import 'rodal/lib/rodal.css'
 
 window.PIXI = PIXI
 
@@ -28,7 +32,8 @@ class Root extends Component {
         User.config(store)
 
         this.state = {
-            isLoading: true
+            isLoading: true,
+            loginModal: false
         }
     }
 
@@ -128,7 +133,10 @@ class Root extends Component {
         window.socketio.on('connect', (socket) => {
             console.log('SocketIO :: Connected')
 
-            User.start(() => this.setState({ isLoading: false }))
+            User.start(data => {
+                if(data.result) this.setState({ isLoading: false })
+                else this.setState({ loginModal: true, isLoading: false })
+            })
 
             window.socketio.on('myuser_joined_room', (body) => {
                 console.log('myuser_joined_room', body)
@@ -149,13 +157,21 @@ class Root extends Component {
             <Provider store={this.store}>
                 <Router history={history}>
                     <div className="root-container">
-                        <Route path="/" component={Header} />
+                        <Route path="/" render={props => <Header {...props} onLogin={() => this.setState({ loginModal: true })}/>} />
                         <Route exact path="/" component={Start} />
-                        <Route exact path="/login" component={Login} />
                         <Route exact path="/room" component={Room} />
                         <Route exact path="/game" component={Game} />
                         <Route exact path="/whatsnew" component={WhatsNew} />
                         <Route exact path="/bugreport" component={BugReport} />
+
+                        <Rodal visible={this.state.loginModal} onClose={() => this.setState({ loginModal: false })} height={600}>
+                            <LoginComponent 
+                                onPlayAsGuest={() => this.setState({ loginModal: false })}
+                                onSignIn={() => {
+                                    User.updateName(firebase.auth().currentUser)
+                                    this.setState({ loginModal: false })
+                                }} />
+                        </Rodal>
                     </div>
                 </Router>
             </Provider>

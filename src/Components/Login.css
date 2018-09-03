@@ -1,0 +1,24 @@
+.login-container {
+    background-color: #FFF;
+    padding: .3em;
+}
+
+.login-text {
+    margin: .5em;
+    display: block;
+    text-align: center;
+}
+
+.login-text.guest {
+    cursor: pointer;
+    text-decoration: underline;    
+    color: #555;
+    transition: 300ms all;
+}
+.login-text.guest:hover {
+    color: #212121;
+}
+
+.mdl-card.mdl-shadow--2dp {
+    box-shadow: none;
+}

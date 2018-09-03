@@ -1,6 +1,14 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
 import './Header.css'
+
+const mapStateToProps = (state) => ({
+    user: state.user
+})
+const mapDispatchToProps = (dispatch) => ({
+
+})
 
 class Header extends Component {
 
@@ -22,13 +30,20 @@ class Header extends Component {
                 <Link to='/bugreport' className={`header-link ${ this.props.location.pathname === '/bugreport' ? 'active' : ''} `}>
                     <p>Found a bug?</p>
                 </Link>
-                <Link to='/login' className={`header-link ${ this.props.location.pathname === '/login' ? 'active' : ''} `}>
-                    <p>Login</p>
-                </Link>
+                {
+                    this.props.user.type === 'guest' ?
+                        <div to='/login' onClick={this.props.onLogin} className='header-link'>
+                            <p>Login</p>
+                        </div>
+                    :
+                        <Link to='/profile' className={`header-link ${ this.props.location.pathname === '/profile' ? 'active' : ''} `}>
+                            <p>Profile</p>
+                        </Link>
+                }
             </div>
         )
 
     }
 }
 
-export default Header
+export default connect(mapStateToProps, mapDispatchToProps)(Header)
