@@ -1,7 +1,6 @@
 import firebase from '../Utils/firebase'
 import { serverUrl } from '../constants'
-import { defineUser, selectSpell } from '../Redux/user'
-import { addPreferences } from '../Redux/preferences'
+import { defineUser, addUserPreferences, selectSpell } from '../Redux/user'
 
 class User {
 
@@ -24,15 +23,16 @@ class User {
             fetch(`${serverUrl}/users/${user.uid}`)
             .then(res => res.json())
             .then(result => {
-                this.store.dispatch(addPreferences({
-                    name: result.config.name,
-                    hotkeys: result.config.hotkeys,
-                    spells: result.config.spells
-                }))
-
                 window.socketio.emit('user_define', { id: user.uid }, (userData) => {
                     this.store.dispatch(defineUser(userData))
-                    userData.config.spells.forEach((spellName, i) => this.store.dispatch(selectSpell(spellName, i, userData.config.hotkeys)))
+                    this.store.dispatch(addUserPreferences({
+                        name: result.config.name,
+                        hotkeys: result.config.hotkeys,
+                        spells: result.config.spells
+                    }))
+
+                    userData.config.spells.forEach((spell) => this.store.dispatch(selectSpell(spell.id, spell.position, userData.config.hotkeys)))
+                    
                     callback()
                 })
             })

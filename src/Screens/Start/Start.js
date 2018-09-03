@@ -9,7 +9,6 @@ import './Start.css'
 
 const mapStateToProps = (state) => ({
     room: state.room,
-    preferences: state.preferences,
 })
 const mapDispatchToProps = (dispatch) => ({
 

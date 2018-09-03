@@ -46,7 +46,7 @@ const mapStateToProps = (state) => ({
     user: state.user,
     room: state.room,
     spells: state.spells,
-    isObserver: state.room.observers.find(x => x.id === state.user.id) != null
+    isObserver: state.room ? state.room.observers.find(x => x.id === state.user.id) != null : false
 })
 const mapDispatchToProps = (dispatch) => ({
     stopGame: () => dispatch(stopGame()),

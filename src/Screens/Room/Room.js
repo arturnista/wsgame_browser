@@ -14,8 +14,8 @@ const mapStateToProps = (state) => ({
     game: state.game,
     room: state.room,
     user: state.user,
+    preferences: state.user.preferences,
     spells: state.spells,
-    preferences: state.preferences,
     isOwner: state.room ? state.room.owner === state.user.id : false,
     isObserver: state.room ? state.room.observers.find(x => x.id === state.user.id) != null : false,
 })
@@ -190,7 +190,7 @@ class Room extends Component {
     handleToggleSpell(index) {
         const selectSpell = () => {
             if(currentSpellSelected !== this.state.selectedSpell.id) {
-                window.socketio.emit('user_select_spell', { spellName: this.state.selectedSpell.id }, (body) => {
+                window.socketio.emit('user_select_spell', { spellName: this.state.selectedSpell.id, position: index }, (body) => {
                     if(body.status === 200) this.props.selectSpell(this.state.selectedSpell.id, index, this.props.preferences.hotkeys)
                 })
             }

@@ -1,4 +1,5 @@
 const DEFINE_USER = 'user/DEFINE_USER'
+const ADD_PREFERENCES = 'user/ADD_PREFERENCES'
 const USER_END_GAME = 'user/USER_END_GAME'
 const SELECT_SPELL = 'user/SELECT_SPELL'
 const DESELECT_SPELL = 'user/DESELECT_SPELL'
@@ -11,8 +12,15 @@ export default function reducer(state = initialState, action = {}) {
             return {
                 ...state,
                 ...action.payload,
-                spells: [],
-                isObserver: false
+                spells: []
+            }
+        case ADD_PREFERENCES:
+            return {
+                ...state,
+                preferences: {
+                    ...state.preferences,
+                    ...action.payload,
+                }
             }
         case SELECT_SPELL:
             return {
@@ -40,6 +48,13 @@ export function defineUser(userData) {
     return {
         type: DEFINE_USER,
         payload: userData
+    }
+}
+
+export function addUserPreferences(prefs) {
+    return {
+        type: ADD_PREFERENCES,
+        payload: prefs
     }
 }
 
