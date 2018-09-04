@@ -103,6 +103,11 @@ class Game extends Component {
         this.map = {}
         this.teleportationOrbActive = false
 
+        if(!window.socketio) {
+            props.history.replace('/room')
+            return
+        }
+
         window.socketio.on('game_state', this.gameState)
         window.socketio.on('map_create', this.gameMapCreate)
         window.socketio.on('game_start', this.gameStart)
@@ -118,7 +123,7 @@ class Game extends Component {
     }
 
     componentDidMount() {
-        if(_.isEmpty(this.props.game)) {
+        if(!window.socketio) {
             this.props.history.replace('/room')
             return
         }
@@ -155,11 +160,13 @@ class Game extends Component {
     }
 
     componentWillUnmount() {
-        window.socketio.off('game_state', this.gameState)
-        window.socketio.off('map_create', this.gameMapCreate)
-        window.socketio.off('game_start', this.gameStart)
-        window.socketio.off('game_will_end', this.gameWillEnd)
-        window.socketio.off('game_end', this.gameEnd)
+        if(window.socketio) {
+            window.socketio.off('game_state', this.gameState)
+            window.socketio.off('map_create', this.gameMapCreate)
+            window.socketio.off('game_start', this.gameStart)
+            window.socketio.off('game_will_end', this.gameWillEnd)
+            window.socketio.off('game_end', this.gameEnd)
+        }
 
         document.removeEventListener('mousemove', this.handleMouseMove)
         document.removeEventListener('mousedown', this.handleMouseDown)

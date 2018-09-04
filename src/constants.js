@@ -1,4 +1,5 @@
-export const serverUrl = 'http://localhost:5002'
+export const serverUrl = 'http://localhost:5000'
+export const createRoomUrl = port => `http://localhost:${port}`
 
 export const firebaseConfig = {
     apiKey: "AIzaSyC9uLZiDzv4hTMTCUl3_GvZQs5lmg6_YQ4",

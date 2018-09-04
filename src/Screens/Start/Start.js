@@ -1,17 +1,21 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Input, Button } from '../../Components'
-import { serverUrl } from '../../constants'
+import { serverUrl, createRoomUrl } from '../../constants'
 import { name as nameGenerator } from '../../Utils/generator'
+import { leaveRoom, setRoom } from '../../Redux/room'
 import _ from 'lodash'
 import moment from 'moment'
 import './Start.css'
+import io from 'socket.io-client'
 
 const mapStateToProps = (state) => ({
     room: state.room,
+    user: state.user,
 })
 const mapDispatchToProps = (dispatch) => ({
-
+    leaveRoom: (data) => dispatch(leaveRoom(data)),
+    setRoom: (data) => dispatch(setRoom(data)),
 })
 
 class Start extends Component {
@@ -52,14 +56,46 @@ class Start extends Component {
         })
     }
 
-    _handleJoinRoom(name) {
-        this.setState({ roomJoinedIsOwner: false })
-        window.socketio.emit('room_join', { name })
+    _handleJoinRoom(room) {
+        this.socketConnect(room)
     }
 
     _handleCreateRoom() {
-        this.setState({ roomJoinedIsOwner: true })
-        window.socketio.emit('room_create', { name: this.state.roomName })
+        fetch(`${serverUrl}/rooms`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name: this.state.roomName })
+        })
+        .then(res => {
+            if(res.ok) return res.json()
+            throw res
+        })
+        .then(res => {
+            this.socketConnect(res)
+        })
+    }
+
+    socketConnect(room) {
+        console.log(this.props.user)
+        const roomUrl = createRoomUrl(room.port)
+        window.socketio = io(roomUrl, { query: `user_id=${this.props.user.id}` })
+
+        window.socketio.on('connect', (socket) => {
+            console.log('SocketIO :: Connected')
+
+            window.socketio.on('myuser_joined_room', (body) => {
+                console.log('myuser_joined_room', body)
+                this.props.setRoom({ room: body.room, user: body.user })
+            })
+
+            window.socketio.on('disconnect', () => {
+                console.log('SocketIO :: Disconnected')
+                this.props.leaveRoom()
+            })
+        })
     }
 
     renderRoomLine(room) {
@@ -77,7 +113,7 @@ class Start extends Component {
                 </div>
                 <div className='start-room-action-container'>
                     <Button label='Join' className='start-room-button-enter'
-                        onClick={() => this._handleJoinRoom(room.name)}
+                        onClick={() => this._handleJoinRoom(room)}
                     />
                 </div>
             </div>

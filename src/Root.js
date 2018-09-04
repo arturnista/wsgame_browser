@@ -10,7 +10,6 @@ import { Router, Route } from 'react-router'
 import { App, Start, Profile, Room, Game, WhatsNew, LoadingScreen, BugReport } from './Screens'
 import createBrowserHistory from 'history/createBrowserHistory'
 import createStore from './Redux/createStore'
-import { leaveRoom, setRoom } from './Redux/room'
 import { defineUser } from './Redux/user'
 import firebase from './Utils/firebase'
 import User from './Entities/User'
@@ -128,24 +127,10 @@ class Root extends Component {
                 ...PIXI.loader.resources['/img/WSSprites.json'].textures,
                 ..._.mapValues(PIXI.loader.resources, x => x.texture),
             }
-        })
-
-        window.socketio.on('connect', (socket) => {
-            console.log('SocketIO :: Connected')
 
             User.start(data => {
                 if(data.login) this.setState({ isLoading: false })
                 else this.setState({ loginModal: true, isLoading: false })
-            })
-
-            window.socketio.on('myuser_joined_room', (body) => {
-                console.log('myuser_joined_room', body)
-                this.store.dispatch( setRoom({ room: body.room, user: body.user }) )
-            })
-
-            window.socketio.on('disconnect', () => {
-                console.log('SocketIO :: Disconnected')
-                this.store.dispatch( leaveRoom() )
             })
         })
     }

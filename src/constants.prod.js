@@ -1,4 +1,5 @@
-export const serverUrl = window.location.origin
+export const serverUrl = 'http://nwgame.pro'
+export const createRoomUrl = port => `http://nwgame.pro:${port}`
 
 export const firebaseConfig = {
     apiKey: "AIzaSyAGtltdTXQHwpBSq_LbWfSKk08CAN-GKv4",

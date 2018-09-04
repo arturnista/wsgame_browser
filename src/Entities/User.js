@@ -1,3 +1,4 @@
+import uuid from 'uuid'
 import firebase from '../Utils/firebase'
 import { serverUrl } from '../constants'
 import { defineUser, addUserPreferences, selectSpell } from '../Redux/user'
@@ -6,6 +7,7 @@ class User {
 
     constructor() {
         this.store = null
+        this.id = 0
     }
 
     config(store) {
@@ -17,9 +19,15 @@ class User {
         firebase.auth()
         .onAuthStateChanged((user) => {
             if(!user) {
-                window.socketio.emit('user_guest', {}, result => {
-                    return this.defineUser({ ...result, type: 'guest'}, callback)
-                })
+                this.defineUser({
+                    id: uuid.v4(),
+                    type: 'normal',
+                    preferences: {
+                    name: 'Guest Player',
+                        spells: [],
+                        hotkeys: ['q', 'w', 'e']
+                    }
+                }, callback)
                 return
             }
 
@@ -38,18 +46,11 @@ class User {
 
                 })
             }
-            
+
             fetch(`${serverUrl}/users/${user.uid}`)
             .then(res => res.json())
             .then(result => {
-                window.socketio.emit('user_define', { id: user.uid }, result => {
-                    if(result.error) {
-                        return new Promise((resolve, reject) => {
-                            setTimeout(() => this.start(callback).then(resolve, reject), 500)
-                        })
-                    }
-                    return this.defineUser({ ...result, type: 'normal'}, callback)
-                })
+                this.defineUser({ ...result, type: 'normal'}, callback)
             })
             .catch(e => {
                 callback({ error: 'NOT_FOUND' })

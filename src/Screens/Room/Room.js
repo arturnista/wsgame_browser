@@ -56,6 +56,10 @@ class Room extends Component {
         this.handleDestroyRoom = this.handleDestroyRoom.bind(this)
         this.handleLeaveRoom = this.handleLeaveRoom.bind(this)
         this.handleKickPlayer = this.handleKickPlayer.bind(this)
+        if(!window.socketio) {
+            this.props.history.replace('/')
+            return
+        }
 
         window.socketio.on('user_joined_room', this.handleAddUser)
         window.socketio.on('user_ready', this.handleReadyUser)
@@ -85,6 +89,11 @@ class Room extends Component {
     }
 
     componentDidMount() {
+        if(!window.socketio) {
+            this.props.history.replace('/')
+            return
+        }
+
         fetch(`${serverUrl}/spells`)
         .then(spells => spells.json())
         .then(spells => {
@@ -95,10 +104,6 @@ class Room extends Component {
             this.setState({ offensiveSpells, supportSpells })
             this.props.addSpells(spellsArr)
         })
-
-        if(_.isEmpty(this.props.room)) {
-            this.props.history.replace('/')
-        }
     }
 
     componentWillReceiveProps(nextProps) {
@@ -114,16 +119,18 @@ class Room extends Component {
     }
 
     componentWillUnmount() {
-        window.socketio.emit('user_waiting', {})
-        this.setState({ status: 'waiting' })
+        if(window.socketio) {
+            window.socketio.emit('user_waiting', {})
+            this.setState({ status: 'waiting' })
 
-        window.socketio.off('user_joined_room', this.handleAddUser)
-        window.socketio.off('user_ready', this.handleReadyUser)
-        window.socketio.off('user_waiting', this.handleWaitingUser)
-        window.socketio.off('user_left_room', this.handleRemoveUser)
-        window.socketio.off('room_update', this.handleUpdateRoom)
-        window.socketio.off('room_chat_new_message', this.handleNewChatMessage)
-        window.socketio.off('game_will_start', this.handleWillStartGame)
+            window.socketio.off('user_joined_room', this.handleAddUser)
+            window.socketio.off('user_ready', this.handleReadyUser)
+            window.socketio.off('user_waiting', this.handleWaitingUser)
+            window.socketio.off('user_left_room', this.handleRemoveUser)
+            window.socketio.off('room_update', this.handleUpdateRoom)
+            window.socketio.off('room_chat_new_message', this.handleNewChatMessage)
+            window.socketio.off('game_will_start', this.handleWillStartGame)
+        }
     }
 
     handleAddUser(body) {
@@ -144,7 +151,7 @@ class Room extends Component {
     handleRemoveUser(body) {
         console.log('handleRemoveUser', body)
         if(body.id === this.props.user.id) {
-            this.props.leaveRoom()
+            window.socketio.disconnect()
         } else {
             this.props.removeUser(body)
         }
@@ -177,7 +184,6 @@ class Room extends Component {
     }
 
     handleToggleStatus() {
-            console.log(this.props.user.spells)
         if(this.state.status === 'waiting') {
             window.socketio.emit('user_ready', {})
             this.setState({ status: 'ready' })
@@ -230,7 +236,7 @@ class Room extends Component {
     }
 
     handleLeaveRoom() {
-        window.socketio.emit('room_left', {})        
+        window.socketio.disconnect()        
     }
 
     handleDestroyRoom() {
