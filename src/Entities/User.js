@@ -27,14 +27,14 @@ class User {
                 this.listenerOnline = true
                 firebase.firestore().collection('/users').doc(user.uid)
                 .onSnapshot((doc) => {
-
                     const userData = doc.data()
-                    if(this.store.getState().user) {
-                        this.store.dispatch(addUserPreferences({
-                            name: userData.config.name,
-                            hotkeys: userData.config.hotkeys
-                        }))
-                    }
+                    
+                    if(!this.store.getState().user) return
+                    
+                    this.store.dispatch(addUserPreferences({
+                        name: userData.preferences.name,
+                        hotkeys: userData.preferences.hotkeys
+                    }))
 
                 })
             }
@@ -61,28 +61,23 @@ class User {
         
         this.store.dispatch(defineUser(userData))
         this.store.dispatch(addUserPreferences({
-            name: userData.config.name,
-            hotkeys: userData.config.hotkeys,
-            spells: userData.config.spells
+            name: userData.preferences.name,
+            hotkeys: userData.preferences.hotkeys
         }))
 
-        userData.config.spells.forEach((spell) => this.store.dispatch(selectSpell(spell.id, spell.position, userData.config.hotkeys)))
+        userData.preferences.spells.forEach((spell) => this.store.dispatch(selectSpell(spell.id, spell.position, userData.preferences.hotkeys)))
         
-        if(callback) callback({ result: false })
+        if(callback) callback({ login: userData.type === 'normal' })
     }
 
-    update(data) {
-
-    }
-
-    updateName(userData) {
-        fetch(`${serverUrl}/users/${userData.uid}/config`, {
+    updatePreferences(id, data) {
+        return fetch(`${serverUrl}/users/${id}/preferences`, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ name: userData.displayName })
+            body: JSON.stringify(data)
         })
     }
 

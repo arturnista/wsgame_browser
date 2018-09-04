@@ -7,7 +7,7 @@ import * as PIXI from 'pixi.js'
 
 import { Header, Login as LoginComponent } from './Components'
 import { Router, Route } from 'react-router'
-import { App, Start, Room, Game, WhatsNew, LoadingScreen, BugReport } from './Screens'
+import { App, Start, Profile, Room, Game, WhatsNew, LoadingScreen, BugReport } from './Screens'
 import createBrowserHistory from 'history/createBrowserHistory'
 import createStore from './Redux/createStore'
 import { leaveRoom, setRoom } from './Redux/room'
@@ -134,7 +134,7 @@ class Root extends Component {
             console.log('SocketIO :: Connected')
 
             User.start(data => {
-                if(data.result) this.setState({ isLoading: false })
+                if(data.login) this.setState({ isLoading: false })
                 else this.setState({ loginModal: true, isLoading: false })
             })
 
@@ -161,16 +161,14 @@ class Root extends Component {
                         <Route exact path="/" component={Start} />
                         <Route exact path="/room" component={Room} />
                         <Route exact path="/game" component={Game} />
+                        <Route exact path="/profile" component={Profile} />
                         <Route exact path="/whatsnew" component={WhatsNew} />
                         <Route exact path="/bugreport" component={BugReport} />
 
                         <Rodal visible={this.state.loginModal} onClose={() => this.setState({ loginModal: false })} height={600}>
                             <LoginComponent 
                                 onPlayAsGuest={() => this.setState({ loginModal: false })}
-                                onSignIn={() => {
-                                    User.updateName(firebase.auth().currentUser)
-                                    this.setState({ loginModal: false })
-                                }} />
+                                onSignIn={() => this.setState({ loginModal: false })} />
                         </Rodal>
                     </div>
                 </Router>

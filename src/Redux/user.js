@@ -15,13 +15,19 @@ export default function reducer(state = initialState, action = {}) {
                 spells: []
             }
         case ADD_PREFERENCES:
-            return {
+            let newPreference = {
                 ...state,
                 preferences: {
                     ...state.preferences,
                     ...action.payload,
                 }
             }
+
+            if(action.payload.hotkeys) {
+                newPreference.spells = state.spells.map(spell => ({ ...spell, hotkey: action.payload.hotkeys[spell.position] }))
+            }
+
+            return newPreference
         case SELECT_SPELL:
             return {
                 ...state,
