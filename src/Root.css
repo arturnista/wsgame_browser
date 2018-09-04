@@ -14,3 +14,20 @@
 
     margin: .3rem;
 }
+
+.rodal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.rodal .rodal-dialog {
+    height: auto !important;
+    width: auto !important;
+    padding: 1em;
+    position: relative;
+    top: inherit;
+    bottom: inherit;
+    right: inherit;
+    left: inherit;
+}

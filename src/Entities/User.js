@@ -18,10 +18,12 @@ class User {
     start(callback) {
         firebase.auth()
         .onAuthStateChanged((user) => {
+            console.log(user);
+            
             if(!user) {
                 this.defineUser({
                     id: uuid.v4(),
-                    type: 'normal',
+                    type: 'guest',
                     preferences: {
                     name: 'Guest Player',
                         spells: [],

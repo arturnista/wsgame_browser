@@ -150,7 +150,8 @@ class Root extends Component {
                         <Route exact path="/whatsnew" component={WhatsNew} />
                         <Route exact path="/bugreport" component={BugReport} />
 
-                        <Rodal visible={this.state.loginModal} onClose={() => this.setState({ loginModal: false })} height={600}>
+                        <Rodal visible={this.state.loginModal} onClose={() => this.setState({ loginModal: false })}
+                            closeOnEsc={true}>
                             <LoginComponent 
                                 onPlayAsGuest={() => this.setState({ loginModal: false })}
                                 onSignIn={() => this.setState({ loginModal: false })} />

@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Input, Button } from '../../Components'
+import Rodal from 'rodal'
+import { Input, Button, Spinner } from '../../Components'
 import { serverUrl, createRoomUrl } from '../../constants'
 import { name as nameGenerator } from '../../Utils/generator'
 import { leaveRoom, setRoom } from '../../Redux/room'
@@ -24,6 +25,7 @@ class Start extends Component {
         super(props)
 
         this.state = {
+            isLoading: false,
             roomName: nameGenerator(),
             rooms: [],
         }
@@ -57,10 +59,12 @@ class Start extends Component {
     }
 
     _handleJoinRoom(room) {
+        this.setState({ isLoading: true })
         this.socketConnect(room)
     }
 
     _handleCreateRoom() {
+        this.setState({ isLoading: true })
         fetch(`${serverUrl}/rooms`, {
             method: 'POST',
             headers: {
@@ -94,6 +98,7 @@ class Start extends Component {
             window.socketio.on('disconnect', () => {
                 console.log('SocketIO :: Disconnected')
                 this.props.leaveRoom()
+                this.setState({ isLoading: false })
             })
         })
     }
@@ -124,7 +129,7 @@ class Start extends Component {
     render() {
         
         return (
-            <div className="start-container">
+            <div className="bg-container start-container">
                 <div className='start-side-container'>
                     <h2 className="start-room-conf-title start-rooms-list-title">Rooms</h2>
                     <div className='start-rooms-list-refresh-container'
@@ -151,6 +156,11 @@ class Start extends Component {
                         </div>
                     </div>
                 </div>
+                <Rodal visible={this.state.isLoading}
+                    showCloseButton={false}
+                    closeMaskOnClick={false}>
+                    <Spinner />
+                </Rodal>
             </div>
         )
 
