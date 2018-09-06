@@ -15,9 +15,14 @@
 .profile-container .button {
     margin-top: 1em;
     height: 3em;
-    width: 200px;
+    width: 100%;
 
     justify-self: center;
+}
+
+.profile-container .button.logout {
+    background-color: firebrick;
+    color: #fafafa;
 }
 
 .profile-hotkey-container {
@@ -38,6 +43,9 @@
 }
 .profile-hotkey:hover {
     border: 1px solid skyblue;
+    -moz-box-shadow: inset 0 0 3px skyblue;
+    -webkit-box-shadow: inset 0 0 3px skyblue;
+    box-shadow: inset 0 0 3px skyblue;
 }
 
 .profile-hotkey.selected {
@@ -50,12 +58,14 @@
 }
 @keyframes selected-anim {
     from {
-        outline: 1px solid skyblue;
-        outline-offset: -1px;
+        -moz-box-shadow:    inset 0 0 3px skyblue;
+        -webkit-box-shadow: inset 0 0 3px skyblue;
+        box-shadow:         inset 0 0 3px skyblue;
     }
     to {
-        outline: 0.3em solid skyblue;
-        outline-offset: -0.3em;
+        -moz-box-shadow:    inset 0 0 30px skyblue;
+        -webkit-box-shadow: inset 0 0 30px skyblue;
+        box-shadow:         inset 0 0 30px skyblue;
     }
 }
 

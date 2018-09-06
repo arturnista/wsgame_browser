@@ -20,7 +20,9 @@ class Profile extends Component {
         super(props)
 
         this.handleSave = this.handleSave.bind(this)
+        this.handleLogout = this.handleLogout.bind(this)
         this.handleSelectHotkey = this.handleSelectHotkey.bind(this)
+
         this.state = {
             isLoading: false,
             hotkeySelected: -1,
@@ -45,15 +47,24 @@ class Profile extends Component {
         const letterHotkey = /^[a-zA-Z0-9]$/g
         if(!letterHotkey.test(hotkey)) return this.setState({ hotkeySelected: -1 })
 
-        if(this.state.hotkeys.indexOf(x => x === hotkey) !== -1) {
+        if(this.state.hotkeys.find(x => x === hotkey) != null) {
             alert(`There's already a key defined to ${hotkey.toUpperCase()}!`)
             return this.setState({ hotkeySelected: -1 })
         }
 
-        const hotkeys = [...this.state.hotkeys]
-        hotkeys[this.state.hotkeySelected] = hotkey
+        const hotkeys = this.state.hotkeys.map((h, i) => i === this.state.hotkeySelected ? hotkey : h)
 
         this.setState({ hotkeySelected: -1, hotkeys })
+    }
+
+    handleLogout() {
+        this.setState({ isLoading: true })
+        firebase.auth().signOut()
+        .then(() => {
+            if(window.socketio) window.socketio.disconnect()
+            this.props.history.replace('/')
+            this.setState({ isLoading: false })
+        })
     }
 
     handleSave() {
@@ -65,9 +76,11 @@ class Profile extends Component {
     }
 
     render() {
+        
         return (
             <div className='bg-container'>
                 <div className='profile-container'>
+                    { this.state.isLoading && <Spinner /> }
                     <Input className='input'
                         label='Name'
                         placeholder='User name...'
@@ -83,12 +96,12 @@ class Profile extends Component {
                             </div>
                         ))}
                     </div>
-                    {
-                        this.state.isLoading ? <Spinner /> :
-                        <Button className='button'
-                            label='Save'
-                            onClick={this.handleSave}/>
-                    }
+                    <Button className='button'
+                        label='Save'
+                        onClick={this.handleSave}/>
+                    <Button className='button logout'
+                        label='Logout'
+                        onClick={this.handleLogout} />
                 </div>
             </div>
         )
