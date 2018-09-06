@@ -82,7 +82,7 @@ export function setRoom({ room }) {
     return {
         type: SET_ROOM,
         payload: {
-            roomJoined: room.name,
+            name: room.name,
             users: room.users.filter(x => !x.isObserver),
             observers: room.users.filter(x => x.isObserver),
             owner: room.owner.id,

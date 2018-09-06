@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
+import Rodal from 'rodal'
 import { Input, Button } from '../../Components'
 import { serverUrl } from '../../constants'
 import { selectSpell, deselectSpell } from '../../Redux/user'
@@ -335,40 +336,6 @@ class Room extends Component {
         )
     }
 
-    renderMapModal() {
-        if(!this.state.modalMapShowing) return null
-
-        const renderMapItem = (mapName, img, name) => {
-            const isActive = mapName === this.state.mapName
-            const onClick = () => this.setState({ mapName })
-            return (
-                <div key={mapName} className={`room-map-container ${ isActive ? 'active ':' '}`}
-                    onClick={onClick}>
-                    <p className="room-map-name">{ mapName || name }</p>
-                    <img className="room-map-img" src={img} />
-                </div>
-            )
-        }
-
-        return (
-            <div className="room-map-modal-container" onClick={() => this.setState({ modalMapShowing: false })}>
-                <div className="room-map-modal-content" onClick={e => e.stopPropagation()}>
-                    <div className="room-maps-list">
-                        { renderMapItem('', '/img/map/grid_destroyed.png', 'Random') }
-                        { renderMapItem('BasicArena', '/img/map/basic_arena.png', 'Basic Arena') }
-                        { renderMapItem('FireArena', '/img/map/basic_arena.png', 'Fire Arena') }
-                        { renderMapItem('Grid', '/img/map/grid_destroyed.png') }
-                    </div>
-                    <div className="room-map-action-container">
-                        <Button className='room-map-action-button'
-                            label='Start'
-                            onClick={this.handleStartGame}/>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
     render() {
         if(_.isEmpty(this.props.room)) return null
         if(_.isEmpty(this.state.selectedSpell)) return null
@@ -403,6 +370,9 @@ class Room extends Component {
         }, [])
         return (
             <div className='bg-container room-grid'>
+                <div className='room-grid-item room-title'>
+                    <h2>{this.props.room.name}</h2>
+                </div>
                 <div className='room-grid-item room-options-container'>
                     {
                         !this.props.isObserver ?
@@ -526,7 +496,42 @@ class Room extends Component {
                         }
                     </div>
                 </div>
-                { this.state.modalMapShowing && this.renderMapModal() }
+                <Rodal visible={this.state.modalMapShowing} onClose={() => this.setState({ modalMapShowing: false })}>
+                    <div className="room-modal">
+                        <div className="room-maps-list">
+
+                            <div className={`room-map-container ${ '' === this.state.mapName ? 'active ':' '}`}
+                                onClick={() => this.setState({ mapName: '' })}>
+                                <p className="room-map-name">Random</p>
+                                <img className="room-map-img" src='/img/map/random.png' />
+                            </div>
+
+                            <div className={`room-map-container ${ 'BasicArena' === this.state.mapName ? 'active ':' '}`}
+                                onClick={() => this.setState({ mapName: 'BasicArena' })}>
+                                <p className="room-map-name">Basic Arena</p>
+                                <img className="room-map-img" src='/img/map/basic-arena-icon.png' />
+                            </div>
+
+                            <div className={`room-map-container ${ 'FireArena' === this.state.mapName ? 'active ':' '}`}
+                                onClick={() => this.setState({ mapName: 'FireArena' })}>
+                                <p className="room-map-name">Fire Arena</p>
+                                <img className="room-map-img" src='/img/map/fire-arena-icon.png' />
+                            </div>
+
+                            <div className={`room-map-container ${ 'Grid' === this.state.mapName ? 'active ':' '}`}
+                                onClick={() => this.setState({ mapName: 'Grid' })}>
+                                <p className="room-map-name">Grid</p>
+                                <img className="room-map-img" src='/img/map/grid-icon.png' />
+                            </div>
+
+                        </div>
+                        <div className="room-map-action-container">
+                            <Button className='room-map-action-button'
+                                label='Start'
+                                onClick={this.handleStartGame}/>
+                        </div>
+                    </div>
+                </Rodal>
             </div>
         )
     }

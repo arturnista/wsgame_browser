@@ -9,8 +9,9 @@
     display: flex;
     flex-direction: column;
 
-    margin: 1em;
+    margin: .5em;
     background-color: #FAFAFA;
+    border-radius: .3em;
 }
 
 .start-rooms-list {
@@ -150,7 +151,6 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background-color: #fafafa;
     padding: 1em;
 }
 

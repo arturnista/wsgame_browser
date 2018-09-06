@@ -1,6 +1,8 @@
 .login-container {
     background-color: #FFF;
     padding: .3em;
+    width: 50vw;
+    min-width: 300px;
 }
 
 .login-text {

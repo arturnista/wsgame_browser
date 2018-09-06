@@ -26,13 +26,16 @@ class Root extends Component {
     constructor(props) {
         super(props)
 
+        this.handlePlayAsGuest = this.handlePlayAsGuest.bind(this)
+
         const { store } = createStore()
         this.store = store
         User.config(store)
 
         this.state = {
             isLoading: true,
-            loginModal: false
+            loginModal: false,
+            guestName: localStorage.getItem('name') || ''
         }
     }
 
@@ -135,6 +138,14 @@ class Root extends Component {
         })
     }
 
+    handlePlayAsGuest() {
+        this.setState({ loginModal: false })
+        
+        const name = this.state.guestName.length > 0 ? this.state.guestName : 'Guest player'
+        this.store.dispatch( defineUser({ name }) )
+        if(this.state.guestName.length > 0) localStorage.setItem('name', this.state.guestName)
+    }
+
     render() {
         if(this.state.isLoading) return <LoadingScreen />
 
@@ -150,10 +161,12 @@ class Root extends Component {
                         <Route exact path="/whatsnew" component={WhatsNew} />
                         <Route exact path="/bugreport" component={BugReport} />
 
-                        <Rodal visible={this.state.loginModal} onClose={() => this.setState({ loginModal: false })}
+                        <Rodal visible={this.state.loginModal} onClose={this.handlePlayAsGuest}
                             closeOnEsc={true}>
                             <LoginComponent 
-                                onPlayAsGuest={() => this.setState({ loginModal: false })}
+                                guestName={this.state.guestName}
+                                onGuestNameChange={x => this.setState({ guestName: x })}
+                                onPlayAsGuest={this.handlePlayAsGuest}
                                 onSignIn={() => this.setState({ loginModal: false })} />
                         </Rodal>
                     </div>

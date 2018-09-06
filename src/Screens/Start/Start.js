@@ -28,6 +28,7 @@ class Start extends Component {
             isLoading: false,
             roomName: nameGenerator(),
             rooms: [],
+            error: ''
         }
 
         this._handleCreateRoom = this._handleCreateRoom.bind(this)
@@ -60,7 +61,7 @@ class Start extends Component {
 
     _handleJoinRoom(room) {
         this.setState({ isLoading: true })
-        this.socketConnect(room)
+        this.socketConnect(room, 'join')
     }
 
     _handleCreateRoom() {
@@ -78,14 +79,21 @@ class Start extends Component {
             throw res
         })
         .then(res => {
-            this.socketConnect(res)
+            this.socketConnect(res, 'create')
         })
     }
 
-    socketConnect(room) {
-        console.log(this.props.user)
+    socketConnect(room, type) {
         const roomUrl = createRoomUrl(room.port)
-        window.socketio = io(roomUrl, { query: `user_id=${this.props.user.id}` })
+        window.socketio = io(roomUrl, { reconnection: false, query: `user_id=${this.props.user.id}&name=${this.props.user.name}` })
+
+        window.socketio.on('connect_error', () => {
+            console.log('SocketIO :: Connect error')
+            let error = ''
+            if(type === 'join') error = 'Error joining the room.'
+            else error = 'Error creating the room.'
+            this.setState({ isLoading: false, error })
+        })
 
         window.socketio.on('connect', (socket) => {
             console.log('SocketIO :: Connected')
@@ -156,6 +164,11 @@ class Start extends Component {
                         </div>
                     </div>
                 </div>
+                <Rodal visible={this.state.error !== ''}
+                    onClose={() => this.setState({ error: '' })}>
+                    <h3>Error</h3>
+                    <p>{this.state.error}</p>
+                </Rodal>
                 <Rodal visible={this.state.isLoading}
                     showCloseButton={false}
                     closeMaskOnClick={false}>
