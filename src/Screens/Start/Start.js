@@ -171,7 +171,8 @@ class Start extends Component {
                 </Rodal>
                 <Rodal visible={this.state.isLoading}
                     showCloseButton={false}
-                    closeMaskOnClick={false}>
+                    closeMaskOnClick={false}
+                    onClose={() => {}}>
                     <Spinner />
                 </Rodal>
             </div>

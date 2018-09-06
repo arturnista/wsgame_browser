@@ -132,6 +132,7 @@ class Root extends Component {
             }
 
             User.start(data => {
+                console.log(data)
                 if(data.login) this.setState({ isLoading: false })
                 else this.setState({ loginModal: true, isLoading: false })
             })

@@ -7,50 +7,51 @@ class User {
 
     constructor() {
         this.store = null
-        this.id = 0
+        this.unsubscribe = null
     }
 
     config(store) {
         this.store = store
-        this.listenerOnline = false
     }
 
     start(callback) {
         firebase.auth()
-        .onAuthStateChanged((user) => {
+        .onAuthStateChanged(user => {
             if(!user) {
+                if(this.unsubscribe) this.unsubscribe()
                 this.defineUser({
                     id: uuid.v4(),
                     type: 'guest',
                     preferences: {
-                    name: 'Guest Player',
+                        name: 'Guest Player',
                         spells: [],
                         hotkeys: ['q', 'w', 'e']
                     }
-                }, callback)
+                })
+                callback({ login: false })
                 return
             }
 
-            if(!this.listenerOnline) {
-                this.listenerOnline = true
-                firebase.firestore().collection('/users').doc(user.uid)
-                .onSnapshot((doc) => {
-                    const userData = doc.data()
-                    
-                    if(!this.store.getState().user) return
-                    
-                    this.store.dispatch(addUserPreferences({
-                        name: userData.preferences.name,
-                        hotkeys: userData.preferences.hotkeys
-                    }))
+            if(this.unsubscribe) this.unsubscribe()
+            this.unsubscribe = firebase.firestore().collection('/users').doc(user.uid)
+            .onSnapshot((doc) => {
+                const userData = doc.data()
+                
+                if(!this.store.getState().user) return
+                
+                this.store.dispatch(addUserPreferences({
+                    name: userData.preferences.name,
+                    hotkeys: userData.preferences.hotkeys
+                }))
+                userData.preferences.spells.forEach((spell) => this.store.dispatch(selectSpell(spell.id, spell.position, userData.preferences.hotkeys)))
 
-                })
-            }
+            })
 
             fetch(`${serverUrl}/users/${user.uid}`)
             .then(res => res.json())
             .then(result => {
-                this.defineUser({ ...result, type: 'normal'}, callback)
+                this.defineUser({ ...result, type: 'normal'})
+                callback({ login: true })
             })
             .catch(e => {
                 callback({ error: 'NOT_FOUND' })
@@ -58,7 +59,7 @@ class User {
         })
     }
 
-    defineUser(userData, callback) {
+    defineUser(userData) {
         
         this.store.dispatch(defineUser(userData))
         this.store.dispatch(addUserPreferences({
@@ -68,7 +69,6 @@ class User {
 
         userData.preferences.spells.forEach((spell) => this.store.dispatch(selectSpell(spell.id, spell.position, userData.preferences.hotkeys)))
         
-        if(callback) callback({ login: userData.type === 'normal' })
     }
 
     updatePreferences(id, data) {
