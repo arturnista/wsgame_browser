@@ -195,10 +195,10 @@ class Room extends Component {
                 let errorMessage = ''
                 switch (result.error) {
                     case 'NO_USERS':
-                        errorMessage = 'There are not users. What should we start game with? GHOSTS????'
+                        errorMessage = 'There are no users. What should we start game with? GHOSTS????'
                         break
                     case 'NOT_READY':
-                        errorMessage = 'Not everybody is ready. Everyone should be right. Yo bro who is not ready??'
+                        errorMessage = 'Not everybody is ready. Everyone should be ready. Yo bro who is not ready??'
                         break
                     default:
                         errorMessage = "Something happen, we don't know what. Sorry mate, try again later I think."

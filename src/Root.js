@@ -7,7 +7,7 @@ import * as PIXI from 'pixi.js'
 
 import { Header, Login as LoginComponent } from './Components'
 import { Router, Route } from 'react-router'
-import { App, Start, Profile, Room, Game, WhatsNew, LoadingScreen, BugReport } from './Screens'
+import { App, Start, Profile, Room, Game, WhatsNew, LoadingScreen, BugReport, NotFound } from './Screens'
 import createBrowserHistory from 'history/createBrowserHistory'
 import createStore from './Redux/createStore'
 import { defineUser } from './Redux/user'
@@ -78,16 +78,27 @@ class Root extends Component {
         .add('spell_v1_explosion_08.png', '/img/game/spell_v1_explosion_08.png')
         .add('spell_v1_explosion_09.png', '/img/game/spell_v1_explosion_09.png')
 
-        .add('blink.png', '/img/game/blink.png')
-        .add('boomerang.png', '/img/game/boomerang.png')
-        .add('bomb.png', '/img/game/bomb.png')
-        .add('explosion.png', '/img/game/explosion.png')
         .add('explosion_00.png', '/img/game/explosion_00.png')
         .add('explosion_01.png', '/img/game/explosion_01.png')
         .add('explosion_02.png', '/img/game/explosion_02.png')
         .add('explosion_03.png', '/img/game/explosion_03.png')
         .add('explosion_04.png', '/img/game/explosion_04.png')
         .add('explosion_05.png', '/img/game/explosion_05.png')
+
+        .add('lightning_bolt_explosion_00.png', '/img/game/lightning_bolt_explosion_00.png')
+        .add('lightning_bolt_explosion_01.png', '/img/game/lightning_bolt_explosion_01.png')
+        .add('lightning_bolt_explosion_02.png', '/img/game/lightning_bolt_explosion_02.png')
+        .add('lightning_bolt_explosion_03.png', '/img/game/lightning_bolt_explosion_03.png')
+
+        .add('slow_00.png', '/img/game/slow_00.png')
+        .add('slow_01.png', '/img/game/slow_01.png')
+        .add('slow_02.png', '/img/game/slow_02.png')
+        .add('slow_03.png', '/img/game/slow_03.png')
+
+        .add('blink.png', '/img/game/blink.png')
+        .add('boomerang.png', '/img/game/boomerang.png')
+        .add('bomb.png', '/img/game/bomb.png')
+        .add('explosion.png', '/img/game/explosion.png')
         .add('explosion_radius.png', '/img/game/explosion_radius.png')
         .add('fireball.png', '/img/game/fireball.png')
         .add('follower.png', '/img/game/follower.png')
@@ -106,20 +117,12 @@ class Root extends Component {
         .add('voodoo_doll.png', '/img/game/voodoo_doll.png')
         .add('prison.png', '/img/game/prison.png')
         .add('lightning_bolt.png', '/img/game/lightning_bolt.png')
-        .add('lightning_bolt_explosion_00.png', '/img/game/lightning_bolt_explosion_00.png')
-        .add('lightning_bolt_explosion_01.png', '/img/game/lightning_bolt_explosion_01.png')
-        .add('lightning_bolt_explosion_02.png', '/img/game/lightning_bolt_explosion_02.png')
-        .add('lightning_bolt_explosion_03.png', '/img/game/lightning_bolt_explosion_03.png')
         .add('bubble.png', '/img/game/bubble.png')
         .add('bubble_00.png', '/img/game/bubble_00.png')
         .add('bubble_01.png', '/img/game/bubble_01.png')
         .add('bubble_02.png', '/img/game/bubble_02.png')
         .add('shotgun.png', '/img/game/shotgun.png')
         .add('shotgun_projectile.png', '/img/game/shotgun_projectile.png')
-        .add('slow_00.png', '/img/game/slow_00.png')
-        .add('slow_01.png', '/img/game/slow_01.png')
-        .add('slow_02.png', '/img/game/slow_02.png')
-        .add('slow_03.png', '/img/game/slow_03.png')
         
         .add('game_05.png', '/img/game/game_05.png')
         .add('game_07.png', '/img/game/game_07.png')

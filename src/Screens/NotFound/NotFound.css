@@ -1,0 +1,9 @@
+.nf-container {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+.nf-content {
+    height: 5em;
+}
