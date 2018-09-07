@@ -131,7 +131,6 @@ class Room extends Component {
     componentWillUnmount() {
         if(window.socketio) {
             window.socketio.emit('user_waiting', {})
-            this.setState({ status: 'waiting' })
 
             window.socketio.off('user_joined_room', this.handleAddUser)
             window.socketio.off('user_ready', this.handleReadyUser)
@@ -340,7 +339,7 @@ class Room extends Component {
                 className={'room-user-container ready'}>
                 <div className='room-user-color' style={{ backgroundColor: '#FFCC00' }}></div>
                 <p className={'room-user-name'}>Bot Ulysses</p>
-                <p className={'room-user-kick'} onClick={() => this.setState({ botCount: this.state.botCount - 1 })}>Remove</p>
+                <p className={'room-user-kick'} onClick={() => this.state.botCount > 0 && this.setState({ botCount: this.state.botCount - 1 })}>Remove</p>
             </div>
         )
     }
@@ -489,7 +488,7 @@ class Room extends Component {
                                 {
                                     this.props.isOwner &&
                                     <Button label='Remove bot' className='room-users-config-button'
-                                        onClick={() => this.setState({ botCount: this.state.botCount - 1})}/>
+                                        onClick={() => this.state.botCount > 0 && this.setState({ botCount: this.state.botCount - 1})}/>
                                 }
                                 <Button label='Leave room' className='room-users-config-button quit'
                                     onClick={this.handleLeaveRoom}/>
