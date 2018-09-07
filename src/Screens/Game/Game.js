@@ -43,10 +43,11 @@ if(!window.PIXI.utils.isWebGLSupported()){
 
 const mapStateToProps = (state) => ({
     game: state.game,
-    user: state.user,
     room: state.room,
+    preferences: state.user.preferences,
     spells: state.spells,
-    isObserver: state.room ? state.room.observers.find(x => x.id === state.user.id) != null : false
+    user: state.room ? state.room.users.find(x => x.id === state.user.id) : null,
+    isObserver: state.room ? state.room.users.find(x => x.id === state.user.id).isObserver : false,
 })
 const mapDispatchToProps = (dispatch) => ({
     stopGame: () => dispatch(stopGame()),
@@ -225,7 +226,10 @@ class Game extends Component {
             for (var i = 0; i < this.props.user.spells.length; i++) {
                 const spellData = this.props.spells.find(x => this.props.user.spells[i].id === x.id)
                 if(!spellData) continue
-                const ic = new SpellIcon(this.props.user.spells[i].position, spellData, this.hud, { xOffset: this.app.renderer.screen.width / 2 - off, yOffset: 23, hotkey: this.props.user.spells[i].hotkey })
+                const spellPos = this.props.user.spells[i].position
+                const hotkey = this.props.preferences.hotkeys[spellPos]
+                
+                const ic = new SpellIcon(spellPos, spellData, this.hud, { xOffset: this.app.renderer.screen.width / 2 - off, yOffset: 23, hotkey })
                 this.spellsIcons.push( ic )
                 this.hudEntities.push( ic )
             }
@@ -795,15 +799,15 @@ class Game extends Component {
 
     handleKeyDown(e) {
         if(this.props.isObserver) return
-        const keyPressed = e.key.toLowerCase()
         
-        this.props.user.spells.forEach(spell => {
-            console.log(spell, keyPressed)
-            if(keyPressed === spell.hotkey) {
+        const keyPressed = e.key.toLowerCase()
+        this.props.preferences.hotkeys.forEach((hotkey, index) => {
+            if(keyPressed === hotkey) {
+                const spell = this.props.user.spells.find(x => x.position === index)
                 this.useSpell(spell.id)
             }
         })
-
+        
         if(keyPressed === 's') {
             this.resetAction()
         } else if(keyPressed === 'escape') {

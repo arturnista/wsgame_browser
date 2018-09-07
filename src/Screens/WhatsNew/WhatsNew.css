@@ -2,12 +2,11 @@
     display: grid;
     grid-template-columns: 1fr 5fr;
     grid-column-gap: 1em;
-    margin: 1em;
+    margin: .5em;
 }
 
 .wn-sidebar {
-    background-color: #FAFAFA;
-
+    margin: 0;
 }
 
 .wn-sidebar-item {
@@ -25,8 +24,7 @@
 
 
 .wn-news-content {
-    background-color: #FAFAFA;
-    padding: 1em;
+    margin: 0;    
 }
 
 .wn-news-title {

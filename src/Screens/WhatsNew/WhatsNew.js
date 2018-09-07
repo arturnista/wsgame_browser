@@ -42,7 +42,7 @@ class WhatsNew extends Component {
                 {
                     this.state.isLoading ? <Spinner /> :
                     <div className='wn-container'>
-                            <div className='wn-sidebar'>
+                            <div className='base-container wn-sidebar'>
                                 <h2>Articles: </h2>
                                 { this.state.articles.map((a, i) => (
                                         <p className={`wn-sidebar-item ${this.state.articleIndex === i ? 'selected' : ''}`} 
@@ -53,8 +53,8 @@ class WhatsNew extends Component {
                                 }
                             </div>
                             {
-                                currentArticle &&
-                                <div className='wn-news-content'>
+                                !currentArticle ? <div className='base-container wn-news-content'></div> :
+                                <div className='base-container wn-news-content'>
                                     <h2 className='wn-news-title'>
                                         <span className='wn-news-title-date'>{moment(currentArticle.date).format('DD/MM/YY')}</span> 
                                         {currentArticle.title}

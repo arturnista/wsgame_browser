@@ -6,8 +6,6 @@
 }
 
 .br-form {
-    padding: .5em;
-    background-color: #fafafa;
     display: flex;
     flex-direction: column;
 }

@@ -8,6 +8,10 @@ const WAITING_USER = 'room/WAITING_USER'
 const UPDATE_CHAT = 'room/UPDATE_CHAT'
 const UPDATE_ROOM = 'room/UPDATE_ROOM'
 
+const SET_SPELLS = 'room/SET_SPELLS'
+const SELECT_SPELL = 'room/SELECT_SPELL'
+const DESELECT_SPELL = 'room/DESELECT_SPELL'
+
 const initialState = null
 
 export default function reducer(state = initialState, action = {}) {
@@ -33,7 +37,6 @@ export default function reducer(state = initialState, action = {}) {
             return {
                 ...state,
                 users: state.users.filter(x => x.id !== action.payload.id),
-                observers: state.observers.filter(x => x.id !== action.payload.id),
             }
         case READY_USER:
             return {
@@ -47,7 +50,6 @@ export default function reducer(state = initialState, action = {}) {
             return {
                 ...state,
                 users: action.users,
-                observers: action.observers,
             }
         case UPDATE_CHAT:
             return {
@@ -67,6 +69,47 @@ export default function reducer(state = initialState, action = {}) {
                 ...state,
                 ...action.payload,
             }
+
+        case SET_SPELLS:
+            return {
+                ...state,
+                users: state.users.map(user => {
+                    if(user.id !== action.payload.userId) return user
+                    return { ...user, spells: [...action.payload.spells] }
+                })
+            }
+        case SELECT_SPELL:
+            return {
+                ...state,
+                users: state.users.map(user => {
+                    if(user.id !== action.payload.userId) return user
+                    const nSelectSpells = user.spells.filter(x => x.position !== action.payload.position)
+                    
+                    return {
+                        ...user,
+                        spells: [
+                            ...nSelectSpells,
+                            {
+                                position: action.payload.position,
+                                id: action.payload.id,
+                            }
+                        ]
+                    }
+                })
+            }
+        case DESELECT_SPELL:
+            return {
+                ...state,
+                users: state.users.map(user => {
+                    if(user.id !== action.payload.userId) return user
+                    const nSelectSpells = user.spells.filter(x => x.position !== action.payload.position)
+                    
+                    return {
+                        ...user,
+                        spells: user.spells.filter(x => x.id !== action.payload.id)
+                    }
+                })
+            }
         default:
             return state
     }
@@ -83,8 +126,7 @@ export function setRoom({ room }) {
         type: SET_ROOM,
         payload: {
             name: room.name,
-            users: room.users.filter(x => !x.isObserver),
-            observers: room.users.filter(x => x.isObserver),
+            users: room.users,
             owner: room.owner.id,
             chat: room.chat,
         }
@@ -134,8 +176,7 @@ export function updateRoom(room) {
         type: UPDATE_ROOM,
         payload: {
             ...room,
-            users: room.users.filter(x => !x.isObserver),
-            observers: room.users.filter(x => x.isObserver),
+            users: room.users,
             owner: room.owner.id,
         }
     }
@@ -144,7 +185,43 @@ export function updateRoom(room) {
 export function resetRoom(users) {
     return {
         type: RESET_ROOM,
-        users: users.filter(x => !x.isObserver),
-        observers: users.filter(x => x.isObserver),
+        users: users,
     }
 }
+
+export function setSpells(userId, spells) {
+    return {
+        type: SET_SPELLS,
+        payload: {
+            userId,
+            spells: spells.map(spell => ({
+                id: spell.id,
+                position: spell.position
+            }))
+        }
+    }
+}
+
+export function selectSpell(userId, id, position) {
+    return {
+        type: SELECT_SPELL,
+        payload: {
+            userId,
+            id,
+            position
+        }
+    }
+}
+
+export function deselectSpell(userId, id, position) {
+    return {
+        type: DESELECT_SPELL,
+        payload: {
+            userId,
+            id,
+            position
+        }
+    }
+}
+
+

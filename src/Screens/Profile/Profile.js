@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
 import _ from 'lodash'
 import { Input, Button, Spinner } from '../../Components'
+import Rodal from 'rodal'
 import User from '../../Entities/User'
 import firebase from '../../Utils/firebase'
 import './Profile.css'
@@ -24,7 +25,7 @@ class Profile extends Component {
         this.handleSelectHotkey = this.handleSelectHotkey.bind(this)
 
         this.state = {
-            isLoading: false,
+            isLoading: true,
             hotkeySelected: -1,
             name: _.get(props.user, 'preferences.name', ''),
             hotkeys: _.get(props.user, 'preferences.hotkeys', []),
@@ -33,6 +34,14 @@ class Profile extends Component {
 
     componentDidMount() {
         window.addEventListener('keydown', this.handleSelectHotkey)
+        User.fetchUserData(this.props.user.id)
+        .then(userData => {
+            this.setState({
+                isLoading: false,
+                name: userData.preferences.name,
+                hotkeys: userData.preferences.hotkeys,
+            })
+        })
     }
 
     componentWillUnmount() {
@@ -79,8 +88,7 @@ class Profile extends Component {
         
         return (
             <div className='bg-container'>
-                <div className='profile-container'>
-                    { this.state.isLoading && <Spinner /> }
+                <div className='base-container profile-container'>
                     <Input className='input'
                         label='Name'
                         placeholder='User name...'
@@ -103,6 +111,12 @@ class Profile extends Component {
                         label='Logout'
                         onClick={this.handleLogout} />
                 </div>
+                <Rodal visible={this.state.isLoading}
+                    showCloseButton={false}
+                    closeMaskOnClick={false}
+                    onClose={() => {}}>
+                    <Spinner />
+                </Rodal>
             </div>
         )
 

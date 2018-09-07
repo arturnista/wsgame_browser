@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { Input, Button, Spinner } from '../../Components'
 import ReactMarkdown from 'react-markdown'
 import moment from 'moment'
+import Rodal from 'rodal'
 import { serverUrl } from '../../constants'
 import './BugReport.css'
 
@@ -58,7 +59,7 @@ class BugReport extends Component {
     render() {
         return (
             <div className="bg-container">
-                <div className="br-grid">
+                <div className="base-container br-grid">
                     <div className="br-form">
                         <h2>Bug report</h2>
                         <p>Please, describe the bug as detailed as possible.</p>
@@ -81,14 +82,17 @@ class BugReport extends Component {
                             value={this.state.content}
                             onChange={e => this.setState({ content: e.target.value })}
                         />
-                        {
-                            this.state.isLoading ? <Spinner /> :
-                            <Button className='br-send-button'
-                                label='Send'
-                                onClick={this.handleCreate}/>
-                        }
+                        <Button className='br-send-button'
+                            label='Send'
+                            onClick={this.handleCreate}/>
                     </div>
                 </div>
+                <Rodal visible={this.state.isLoading}
+                    showCloseButton={false}
+                    closeMaskOnClick={false}
+                    onClose={() => {}}>
+                    <Spinner />
+                </Rodal>
             </div>
         )
 

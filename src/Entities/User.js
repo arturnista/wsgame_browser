@@ -32,30 +32,20 @@ class User {
                 return
             }
 
-            if(this.unsubscribe) this.unsubscribe()
-            this.unsubscribe = firebase.firestore().collection('/users').doc(user.uid)
-            .onSnapshot((doc) => {
-                const userData = doc.data()
-                
-                if(!this.store.getState().user) return
-                
-                this.store.dispatch(addUserPreferences({
-                    name: userData.preferences.name,
-                    hotkeys: userData.preferences.hotkeys
-                }))
-                userData.preferences.spells.forEach((spell) => this.store.dispatch(selectSpell(spell.id, spell.position, userData.preferences.hotkeys)))
+            this.store.dispatch(defineUser({ id: user.uid, type: 'normal' }))
+            callback({ login: true })
 
-            })
+            this.userInitialData(user)
+        })
+    }
 
-            fetch(`${serverUrl}/users/${user.uid}`)
-            .then(res => res.json())
-            .then(result => {
-                this.defineUser({ ...result, type: 'normal'})
-                callback({ login: true })
-            })
-            .catch(e => {
-                callback({ error: 'NOT_FOUND' })
-            })
+    userInitialData(user) {
+        return this.fetchUserData(user.uid)
+        .then(result => {
+            this.defineUser(result)
+        })
+        .catch(e => {
+            setTimeout(() => this.userInitialData(user), 500)
         })
     }
 
@@ -66,9 +56,17 @@ class User {
             name: userData.preferences.name,
             hotkeys: userData.preferences.hotkeys
         }))
+    }
 
-        userData.preferences.spells.forEach((spell) => this.store.dispatch(selectSpell(spell.id, spell.position, userData.preferences.hotkeys)))
-        
+    fetchUserData(id) {
+        return fetch(`${serverUrl}/users/${id}`)
+        .then(res => {
+            if(res.ok) {
+                if(res.status < 300) return res.json()
+                else throw res.json()
+            }
+            throw res
+        })
     }
 
     updatePreferences(id, data) {
@@ -79,6 +77,19 @@ class User {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(data)
+        })
+        .then(res => {
+            if(res.ok) {
+                if(res.status < 300) return res.json()
+                else throw res.json()
+            }
+            throw res
+        })
+        .then(result => {
+            this.store.dispatch(addUserPreferences({
+                name: data.name,
+                hotkeys: data.hotkeys
+            }))
         })
     }
 

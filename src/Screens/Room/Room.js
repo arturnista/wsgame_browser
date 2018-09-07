@@ -3,26 +3,30 @@ import { connect } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import Rodal from 'rodal'
-import { Input, Button } from '../../Components'
+import User from '../../Entities/User'
+import { Input, Button, Spinner } from '../../Components'
 import { serverUrl } from '../../constants'
-import { selectSpell, deselectSpell } from '../../Redux/user'
 import { addSpells } from '../../Redux/spells'
-import { addUser, removeUser, readyUser, waitingUser, updateRoom, updateChat, leaveRoom } from '../../Redux/room'
+import { selectSpell, deselectSpell, setSpells, addUser, removeUser, readyUser, waitingUser, updateRoom, updateChat, leaveRoom } from '../../Redux/room'
 import { startGame } from '../../Redux/game'
 import './Room.css'
 
 const mapStateToProps = (state) => ({
     game: state.game,
     room: state.room,
-    user: state.user,
+    // user: state.user,
     preferences: state.user.preferences,
     spells: state.spells,
+    user: state.room ? state.room.users.find(x => x.id === state.user.id) : null,
     isOwner: state.room ? state.room.owner === state.user.id : false,
-    isObserver: state.room ? state.room.observers.find(x => x.id === state.user.id) != null : false,
+    players: state.room ? state.room.users.filter(x => !x.isObserver) : [],
+    observers: state.room ? state.room.users.filter(x => x.isObserver) : [],
+    isObserver: state.room ? state.room.users.find(x => x.id === state.user.id).isObserver : false,
 })
-const mapDispatchToProps = (dispatch) => ({
-    selectSpell: (spell, index, hotkeyPrefs) => dispatch(selectSpell(spell, index, hotkeyPrefs)),
-    deselectSpell: (spell, index) => dispatch(deselectSpell(spell, index)),
+const mapDispatchToProps = (dispatch, ownProps) => ({
+    setSpells: (userId, spells) => dispatch(setSpells(userId, spells)),
+    selectSpell: (userId, spell, index) => dispatch(selectSpell(userId, spell, index)),
+    deselectSpell: (userId, spell, index) => dispatch(deselectSpell(userId, spell, index)),
     updateChat: spell => dispatch(updateChat(spell)),
     addSpells: spells => dispatch(addSpells(spells)),
     startGame: data => dispatch(startGame(data)),
@@ -73,6 +77,8 @@ class Room extends Component {
 
         this.configSpells = {}
         this.state = {
+            isLoading: false,
+            error: '',
             chatNotRead: this.props.room && this.props.room.chat.length,
             menuSelected: 'config',
             spellTypeSelected: 'offensive',
@@ -94,6 +100,8 @@ class Room extends Component {
             this.props.history.replace('/')
             return
         }
+        
+        this.props.setSpells(this.props.user.id, this.props.user.spells)
 
         fetch(`${serverUrl}/spells`)
         .then(spells => spells.json())
@@ -105,6 +113,7 @@ class Room extends Component {
             this.setState({ offensiveSpells, supportSpells })
             this.props.addSpells(spellsArr)
         })
+
     }
 
     componentWillReceiveProps(nextProps) {
@@ -181,7 +190,23 @@ class Room extends Component {
     }
 
     handleStartGame() {
-        window.socketio.emit('game_start', { map: this.state.mapName, botCount: this.state.botCount })
+        this.setState({ isLoading: true, modalMapShowing: false })
+        window.socketio.emit('game_start', { map: this.state.mapName, botCount: this.state.botCount }, (result) => {
+            if(result.error) {
+                let errorMessage = ''
+                switch (result.error) {
+                    case 'NO_USERS':
+                        errorMessage = 'There are not users. What should we start game with? GHOSTS????'
+                        break
+                    case 'NOT_READY':
+                        errorMessage = 'Not everybody is ready. Everyone should be right. Yo bro who is not ready??'
+                        break
+                    default:
+                        errorMessage = "Something happen, we don't know what. Sorry mate, try again later I think."
+                }
+                this.setState({ isLoading: false, error: errorMessage })
+            }
+        })
     }
 
     handleToggleStatus() {
@@ -198,14 +223,14 @@ class Room extends Component {
         const selectSpell = () => {
             if(currentSpellSelected !== this.state.selectedSpell.id) {
                 window.socketio.emit('user_select_spell', { spellName: this.state.selectedSpell.id, position: index }, (body) => {
-                    if(body.status === 200) this.props.selectSpell(this.state.selectedSpell.id, index, this.props.preferences.hotkeys)
+                    if(body.status === 200) this.props.selectSpell(this.props.user.id, this.state.selectedSpell.id, index)
                 })
             }
         }
         const currentSpellSelected = this.props.user.spells.find(x => x.position === index)
         if(currentSpellSelected) {
             window.socketio.emit('user_deselect_spell', { spellName: currentSpellSelected.id }, (body) => {
-                if(body.status === 200) this.props.deselectSpell(currentSpellSelected.id, index)
+                if(body.status === 200) this.props.deselectSpell(this.props.user.id, currentSpellSelected.id, index)
                 selectSpell()
             })
         } else {
@@ -219,7 +244,7 @@ class Room extends Component {
         const currentSpellSelected = this.props.user.spells.find(x => x.position === index)
         if(currentSpellSelected) {
             window.socketio.emit('user_deselect_spell', { spellName: currentSpellSelected.id }, (body) => {
-                if(body.status === 200) this.props.deselectSpell(currentSpellSelected.id, index)
+                if(body.status === 200) this.props.deselectSpell(this.props.user.id, currentSpellSelected.id, index)
             })
         }
     }
@@ -269,7 +294,7 @@ class Room extends Component {
         if(currentSpell) {
             spell = this.props.spells.find(x => x.id === currentSpell.id)
         }
-        const hotkey = currentSpell ? currentSpell.hotkey : this.props.preferences.hotkeys[index]
+        const hotkey = this.props.preferences.hotkeys[index]
 
         return (
             <div key={index} className={"room-spell-container small " + (currentSpell ? 'selected ' : ' ')}
@@ -323,7 +348,6 @@ class Room extends Component {
     renderChatLine(body) {
         const isMine = body.id === this.props.user.id
         let user = this.props.room.users.find(x => x.id === body.id)
-        if(!user) user = this.props.room.observers.find(x => x.id === body.id)
 
         return (
             <div className={'room-chat-line-container ' + (isMine ? 'mine ' : ' ') }>
@@ -397,7 +421,7 @@ class Room extends Component {
                 </div>
                 <div className='room-grid-item'>
                     {
-                        this.props.room.users.map(this.renderUser)
+                        this.props.players.map(this.renderUser)
                     }
                     {
                         _.times(this.state.botCount, this.renderBot)
@@ -448,7 +472,7 @@ class Room extends Component {
                             </div>
                             :
                             <div className='room-users-config-container content'>
-                                <p className='room-users-config-text'>Observers: {this.props.room.observers.length}</p>
+                                <p className='room-users-config-text'>Observers: {this.props.observers.length}</p>
                                 {
                                     !this.props.isObserver ?
                                     <Button label='Become observer' className='room-users-config-button'
@@ -496,6 +520,17 @@ class Room extends Component {
                         }
                     </div>
                 </div>
+                <Rodal visible={this.state.isLoading}
+                    showCloseButton={false}
+                    closeMaskOnClick={false}
+                    onClose={() => {}}>
+                    <Spinner />
+                </Rodal>
+                <Rodal visible={this.state.error !== ''}
+                    onClose={() => this.setState({ error: '' })}>
+                    <h3>Error</h3>
+                    <p>{this.state.error}</p>
+                </Rodal>
                 <Rodal visible={this.state.modalMapShowing} onClose={() => this.setState({ modalMapShowing: false })}>
                     <div className="room-modal">
                         <div className="room-maps-list">

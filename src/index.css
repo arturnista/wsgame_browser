@@ -32,3 +32,10 @@ p {
     background-color: #061639;
     overflow: auto;
 }
+
+.base-container {
+    background-color: #FAFAFA;
+    margin: .5em;
+    padding: 1em;
+    border-radius: .3em;
+}

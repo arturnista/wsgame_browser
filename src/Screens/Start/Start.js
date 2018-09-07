@@ -138,7 +138,7 @@ class Start extends Component {
         
         return (
             <div className="bg-container start-container">
-                <div className='start-side-container'>
+                <div className='base-container start-side-container'>
                     <h2 className="start-room-conf-title start-rooms-list-title">Rooms</h2>
                     <div className='start-rooms-list-refresh-container'
                         onClick={this.handleRefresh}>
