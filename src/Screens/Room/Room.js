@@ -7,7 +7,7 @@ import User from '../../Entities/User'
 import { Input, Button, Spinner } from '../../Components'
 import { serverUrl } from '../../constants'
 import { addSpells } from '../../Redux/spells'
-import { selectSpell, deselectSpell, setSpells, addUser, removeUser, readyUser, waitingUser, updateRoom, updateChat, leaveRoom } from '../../Redux/room'
+import { selectSpell, deselectSpell, addUser, removeUser, readyUser, waitingUser, updateRoom, updateChat, leaveRoom } from '../../Redux/room'
 import { startGame } from '../../Redux/game'
 import './Room.css'
 
@@ -22,7 +22,6 @@ const mapStateToProps = (state) => ({
     observers: state.room ? state.room.users.filter(x => x.isObserver) : [],
 })
 const mapDispatchToProps = (dispatch, ownProps) => ({
-    setSpells: (userId, spells) => dispatch(setSpells(userId, spells)),
     selectSpell: (userId, spell, index) => dispatch(selectSpell(userId, spell, index)),
     deselectSpell: (userId, spell, index) => dispatch(deselectSpell(userId, spell, index)),
     updateChat: spell => dispatch(updateChat(spell)),
@@ -98,8 +97,6 @@ class Room extends Component {
             this.props.history.replace('/')
             return
         }
-        
-        this.props.setSpells(this.props.user.id, this.props.user.spells)
 
         fetch(`${serverUrl}/spells`)
         .then(spells => spells.json())
@@ -349,7 +346,7 @@ class Room extends Component {
 
         return (
             <div className={'room-chat-line-container ' + (isMine ? 'mine ' : ' ') }
-                style={{ backgroundColor: body.color + '30' }}>
+                style={{ backgroundColor: `${body.color}30`, border: `1px solid ${body.color}` }}>
                 <div className='room-chat-line-header'>
                     <p className='room-chat-line-user'>{body.name}</p>
                     <p className='room-chat-line-date'>{moment(body.createdAt).format('H:mm')}</p>
@@ -360,7 +357,7 @@ class Room extends Component {
     }
 
     render() {
-        if(_.isEmpty(this.props.room)) return null
+        if(_.isEmpty(this.props.room) || _.isEmpty(this.props.user)) return null
         if(_.isEmpty(this.state.selectedSpell)) return null
         
         const toggleText = this.state.status === 'ready' ? 'Wait guys' : "Ok, I'm ready!"

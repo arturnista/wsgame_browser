@@ -8,7 +8,6 @@ const WAITING_USER = 'room/WAITING_USER'
 const UPDATE_CHAT = 'room/UPDATE_CHAT'
 const UPDATE_ROOM = 'room/UPDATE_ROOM'
 
-const SET_SPELLS = 'room/SET_SPELLS'
 const SELECT_SPELL = 'room/SELECT_SPELL'
 const DESELECT_SPELL = 'room/DESELECT_SPELL'
 
@@ -70,14 +69,6 @@ export default function reducer(state = initialState, action = {}) {
                 ...action.payload,
             }
 
-        case SET_SPELLS:
-            return {
-                ...state,
-                users: state.users.map(user => {
-                    if(user.id !== action.payload.userId) return user
-                    return { ...user, spells: [...action.payload.spells] }
-                })
-            }
         case SELECT_SPELL:
             return {
                 ...state,
@@ -186,19 +177,6 @@ export function resetRoom(users) {
     return {
         type: RESET_ROOM,
         users: users,
-    }
-}
-
-export function setSpells(userId, spells) {
-    return {
-        type: SET_SPELLS,
-        payload: {
-            userId,
-            spells: spells.map(spell => ({
-                id: spell.id,
-                position: spell.position
-            }))
-        }
     }
 }
 
