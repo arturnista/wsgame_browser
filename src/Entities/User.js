@@ -2,6 +2,7 @@ import uuid from 'uuid'
 import firebase from '../Utils/firebase'
 import { serverUrl } from '../constants'
 import { defineUser, addUserPreferences, selectSpell } from '../Redux/user'
+import { leaveRoom } from '../Redux/room'
 
 class User {
 
@@ -34,6 +35,11 @@ class User {
 
             this.store.dispatch(defineUser({ id: user.uid, type: 'normal' }))
             callback({ login: true })
+            
+            if(window.socketio) {
+                this.store.dispatch(leaveRoom())
+                window.socketio.disconnect()
+            }
 
             this.userInitialData(user)
         })

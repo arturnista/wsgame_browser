@@ -804,7 +804,7 @@ class Game extends Component {
         this.props.preferences.hotkeys.forEach((hotkey, index) => {
             if(keyPressed === hotkey) {
                 const spell = this.props.user.spells.find(x => x.position === index)
-                this.useSpell(spell.id)
+                if(spell) this.useSpell(spell.id)
             }
         })
         

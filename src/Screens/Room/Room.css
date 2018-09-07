@@ -362,7 +362,6 @@
 }
 
 .room-chat-line-container {
-    border: 2px solid #2f54a3;
     margin: .3em;
     padding: .3em;
 
@@ -370,10 +369,12 @@
     grid-template-rows: 1em 1fr;
     grid-gap: .3em;
 
-    /* background-color: rgba(255, 204, 0, .5); */
+    border-radius: 5px;
+
+    /* background-color: #ffcc0065; */
 }
 .room-chat-line-container.mine {
-    border: 2px solid #2E7D32;
+    /* background-color: #2e7d3265; */
 }
 
 .room-chat-line-header {
@@ -382,7 +383,7 @@
 }
 
 .room-chat-line-user {
-
+    /* text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;     */
 }
 
 .room-chat-line-date {

@@ -14,14 +14,12 @@ import './Room.css'
 const mapStateToProps = (state) => ({
     game: state.game,
     room: state.room,
-    // user: state.user,
     preferences: state.user.preferences,
     spells: state.spells,
-    user: state.room ? state.room.users.find(x => x.id === state.user.id) : null,
+    user: state.room ? state.room.users.find(x => x.id === state.user.id) : {},
     isOwner: state.room ? state.room.owner === state.user.id : false,
     players: state.room ? state.room.users.filter(x => !x.isObserver) : [],
     observers: state.room ? state.room.users.filter(x => x.isObserver) : [],
-    isObserver: state.room ? state.room.users.find(x => x.id === state.user.id).isObserver : false,
 })
 const mapDispatchToProps = (dispatch, ownProps) => ({
     setSpells: (userId, spells) => dispatch(setSpells(userId, spells)),
@@ -117,12 +115,14 @@ class Room extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if(_.isEmpty(nextProps.room)) {
+        if(_.isEmpty(nextProps.room) || _.isEmpty(nextProps.user)) {
             this.props.history.replace('/')
+            return
         }
 
         if(!_.isEmpty(nextProps.game)) {
             this.props.history.replace('/game')
+            return
         }
 
         if(_.isEmpty(this.state.selectedSpell)) this.setState({ selectedSpell: nextProps.spells[1] })
@@ -346,12 +346,12 @@ class Room extends Component {
 
     renderChatLine(body) {
         const isMine = body.id === this.props.user.id
-        let user = this.props.room.users.find(x => x.id === body.id)
 
         return (
-            <div className={'room-chat-line-container ' + (isMine ? 'mine ' : ' ') }>
+            <div className={'room-chat-line-container ' + (isMine ? 'mine ' : ' ') }
+                style={{ backgroundColor: body.color + '30' }}>
                 <div className='room-chat-line-header'>
-                    <p className='room-chat-line-user' style={{ color: user.color }}>{body.name}</p>
+                    <p className='room-chat-line-user'>{body.name}</p>
                     <p className='room-chat-line-date'>{moment(body.createdAt).format('H:mm')}</p>
                 </div>
                 <p className='room-chat-line-message'>{body.message}</p>
@@ -398,7 +398,7 @@ class Room extends Component {
                 </div>
                 <div className='room-grid-item room-options-container'>
                     {
-                        !this.props.isObserver ?
+                        !this.props.user.isObserver ?
                         <Button label={toggleText} className={'room-button ' + this.state.status}
                             onClick={this.handleToggleStatus}/>
                         : <div className='room-button'></div>
@@ -473,7 +473,7 @@ class Room extends Component {
                             <div className='room-users-config-container content'>
                                 <p className='room-users-config-text'>Observers: {this.props.observers.length}</p>
                                 {
-                                    !this.props.isObserver ?
+                                    !this.props.user.isObserver ?
                                     <Button label='Become observer' className='room-users-config-button'
                                         onClick={() => this.setState({ isObserver: true }, () => window.socketio.emit('user_become_observer', {}))}/>
                                     :
