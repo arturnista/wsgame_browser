@@ -15,6 +15,7 @@ export default (props) => {
         signInSuccessUrl: '/',
         signInOptions: [
             firebase.auth.EmailAuthProvider.PROVIDER_ID,
+            firebase.auth.FacebookAuthProvider.PROVIDER_ID,
         ],
         callbacks: {
         // Avoid redirects after sign-in.

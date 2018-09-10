@@ -27,8 +27,7 @@ class Start extends Component {
         this.state = {
             isLoading: false,
             roomName: nameGenerator(),
-            rooms: [],
-            error: ''
+            rooms: []
         }
 
         this._handleCreateRoom = this._handleCreateRoom.bind(this)
@@ -89,10 +88,9 @@ class Start extends Component {
 
         window.socketio.on('connect_error', () => {
             console.log('SocketIO :: Connect error')
-            let error = ''
-            if(type === 'join') error = 'Error joining the room.'
-            else error = 'Error creating the room.'
-            this.setState({ isLoading: false, error })
+            if(type === 'join') window.showMessage('Error joining the room.')
+            else window.showMessage('Error creating the room.')
+            this.setState({ isLoading: false })
         })
 
         window.socketio.on('connect', (socket) => {
@@ -164,11 +162,6 @@ class Start extends Component {
                         </div>
                     </div>
                 </div>
-                <Rodal visible={this.state.error !== ''}
-                    onClose={() => this.setState({ error: '' })}>
-                    <h3>Error</h3>
-                    <p>{this.state.error}</p>
-                </Rodal>
                 <Rodal visible={this.state.isLoading}
                     showCloseButton={false}
                     closeMaskOnClick={false}

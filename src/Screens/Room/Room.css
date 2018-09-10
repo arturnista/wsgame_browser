@@ -124,19 +124,26 @@
     margin: 0;
 }
 .room-spell-container.selected {
-    background-color: #E65100;
+    background-color: #2f54a3;
+}
+.room-spell-container.selected p {
+    color: #FAFAFA;
 }
 .room-spell-container.focus {
     text-decoration: underline;
     border: 2px solid #212121;
     margin: .3em;
 }
+.room-spell-container.selected.focus {
+    text-decoration-color: #FAFAFA;
+}
 
 .room-spell-container:hover {
-    background-color: #ddd;
+    background-color: #2f54a380;
+    color: #212121;
 }
-.room-spell-container.small:hover {
-    background-color: rgba(230, 81, 0, .3);
+.room-spell-container:hover p {
+    color: #212121;
 }
 .room-spell-container.small.selected:hover {
     background-color: rgba(255, 28, 28, .5);

@@ -18,11 +18,9 @@ function FireArena(data, { app, camera, parent }) {
     bg.y = this.data.position.y
     this.parent.addChild(bg)
 
-    this.sprite = new window.PIXI.Sprite(window.textures['basic_arena.png'])
+    this.sprite = new window.PIXI.extras.TilingSprite(window.textures['fire_arena_ground.png'], this.data.size, this.data.size)
     this.sprite.x = this.data.position.x
     this.sprite.y = this.data.position.y
-    this.sprite.width = this.data.size
-    this.sprite.height = this.data.size
     this.sprite.anchor.set(.5, .5)
     this.parent.addChild(this.sprite)
 

@@ -75,7 +75,6 @@ class Room extends Component {
         this.configSpells = {}
         this.state = {
             isLoading: false,
-            error: '',
             chatNotRead: this.props.room && this.props.room.chat.length,
             menuSelected: 'config',
             spellTypeSelected: 'offensive',
@@ -189,18 +188,17 @@ class Room extends Component {
         this.setState({ isLoading: true, modalMapShowing: false })
         window.socketio.emit('game_start', { map: this.state.mapName, botCount: this.state.botCount }, (result) => {
             if(result.error) {
-                let errorMessage = ''
                 switch (result.error) {
                     case 'NO_USERS':
-                        errorMessage = 'There are no users. What should we start game with? GHOSTS????'
+                        window.showMessage('There are no users. What should we start game with? GHOSTS????')
                         break
                     case 'NOT_READY':
-                        errorMessage = 'Not everybody is ready. Everyone should be ready. Yo bro who is not ready??'
+                        window.showMessage('Not everybody is ready. Everyone should be ready. Yo bro who is not ready??')
                         break
                     default:
-                        errorMessage = "Something happen, we don't know what. Sorry mate, try again later I think."
+                        window.showMessage("Something happen, we don't know what. Sorry mate, try again later I think.")
                 }
-                this.setState({ isLoading: false, error: errorMessage })
+                this.setState({ isLoading: false })
             }
         })
     }
@@ -521,11 +519,6 @@ class Room extends Component {
                     closeMaskOnClick={false}
                     onClose={() => {}}>
                     <Spinner />
-                </Rodal>
-                <Rodal visible={this.state.error !== ''}
-                    onClose={() => this.setState({ error: '' })}>
-                    <h3>Error</h3>
-                    <p>{this.state.error}</p>
                 </Rodal>
                 <Rodal visible={this.state.modalMapShowing} onClose={() => this.setState({ modalMapShowing: false })}>
                     <div className="room-modal">

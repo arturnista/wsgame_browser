@@ -72,6 +72,7 @@ class Profile extends Component {
         .then(() => {
             if(window.socketio) window.socketio.disconnect()
             this.props.history.replace('/')
+            window.location.reload()
             
             this.setState({ isLoading: false })
         })

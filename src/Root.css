@@ -31,3 +31,7 @@
     right: inherit;
     left: inherit;
 }
+
+.rodal.error .rodal-dialog {
+    border: 2px solid red;
+}

@@ -34,6 +34,8 @@ class Root extends Component {
 
         this.state = {
             isLoading: true,
+            error: '',
+            errorModal: false,
             loginModal: false,
             guestName: localStorage.getItem('name') || ''
         }
@@ -50,6 +52,8 @@ class Root extends Component {
         .add('grid_toDestroy.png', '/img/map/grid_toDestroy.png')
         .add('grid_destroyed.png', '/img/map/grid_destroyed.png')
         .add('grid_toRevive.png', '/img/map/grid_toRevive.png')
+        .add('fire_arena_ground.png', '/img/map/fire_arena_ground.png')
+        .add('fire_arena_ground_var00.png', '/img/map/fire_arena_ground_var00.png')
         .add('wall.png', '/img/game/wall.png')
 
         .add('player_indicator_00.png', '/img/game/player_indicator_00.png')
@@ -140,6 +144,10 @@ class Root extends Component {
                 else this.setState({ loginModal: true, isLoading: false })
             })
         })
+
+        window.showMessage = (message) => {
+            this.setState({ errorModal: true, error: message })
+        }
     }
 
     handlePlayAsGuest() {
@@ -172,6 +180,11 @@ class Root extends Component {
                                 onGuestNameChange={x => this.setState({ guestName: x })}
                                 onPlayAsGuest={this.handlePlayAsGuest}
                                 onSignIn={() => this.setState({ loginModal: false })} />
+                        </Rodal>
+                        <Rodal visible={this.state.errorModal} className='error'
+                            onClose={() => this.setState({ errorModal: false })}>
+                            <h3>Error</h3>
+                            <p>{this.state.error}</p>
                         </Rodal>
                     </div>
                 </Router>
