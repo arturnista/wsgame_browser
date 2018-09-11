@@ -1,0 +1,38 @@
+.profile-game-container {
+    display: grid;
+    grid-template-columns: 64px auto;
+    grid-gap: 5px;
+
+    position: relative;
+    padding: .3em;
+    margin: .3em;
+    border-radius: 5px;
+}
+.profile-game-container.win {
+    background-color: #2E7D3230;
+    border: 1px solid #2E7D32;
+}
+.profile-game-container.defeat {
+    background-color: #C6282830;
+    border: 1px solid #C62828;
+}
+
+.profile-game-icon {
+    grid-row: 1 / 3;
+    height: 64px;
+    width: 64px;
+}
+
+.profile-game-result {
+    font-size: 2em;
+}
+.profile-game-result.win {
+    color: #2E7D32;
+}
+.profile-game-result.defeat {
+    color: #C62828;
+}
+
+.profile-game-player {
+
+}

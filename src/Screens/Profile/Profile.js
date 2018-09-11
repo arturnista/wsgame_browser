@@ -6,6 +6,7 @@ import { Input, Button, Spinner } from '../../Components'
 import Rodal from 'rodal'
 import User from '../../Entities/User'
 import firebase from '../../Utils/firebase'
+import ProfileGame from './ProfileGame'
 import './Profile.css'
 
 const mapStateToProps = (state) => ({
@@ -26,6 +27,7 @@ class Profile extends Component {
 
         this.state = {
             isLoading: true,
+            games: [],
             hotkeySelected: -1,
             name: _.get(props.user, 'preferences.name', ''),
             hotkeys: _.get(props.user, 'preferences.hotkeys', []),
@@ -38,6 +40,7 @@ class Profile extends Component {
         .then(userData => {
             this.setState({
                 isLoading: false,
+                games: userData.games.sort((a, b) => new Date(b) - new Date(a)),
                 name: userData.preferences.name,
                 hotkeys: userData.preferences.hotkeys,
             })
@@ -89,8 +92,9 @@ class Profile extends Component {
     render() {
         
         return (
-            <div className='bg-container'>
+            <div className='bg-container profile'>
                 <div className='base-container profile-container'>
+                    <h2>Profile</h2>
                     <Input className='input'
                         label='Name'
                         placeholder='User name...'
@@ -112,6 +116,12 @@ class Profile extends Component {
                     <Button className='button logout'
                         label='Logout'
                         onClick={this.handleLogout} />
+                </div>
+                <div className='base-container'>
+                    <h2>Games</h2>
+                    <div className='profile-game-list'>
+                        { this.state.games.map(games => <ProfileGame key={games.id} {...games} userId={this.props.user.id} />) }
+                    </div>
                 </div>
                 <Rodal visible={this.state.isLoading}
                     showCloseButton={false}

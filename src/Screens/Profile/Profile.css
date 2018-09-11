@@ -1,3 +1,15 @@
+.profile {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-game-list {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    overflow: auto;
+}
+
 .profile-container {
     display: grid;
     grid-template-rows: repeat(3, 1fr);
@@ -17,7 +29,7 @@
 }
 
 .profile-container .button.logout {
-    background-color: firebrick;
+    background-color: #b22222;
     color: #fafafa;
 }
 
