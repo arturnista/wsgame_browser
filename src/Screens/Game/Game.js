@@ -8,6 +8,7 @@ import { resetRoom } from '../../Redux/room'
 import { stopGame } from '../../Redux/game'
 import SpellIcon from './HUD/SpellIcon'
 import ObsPlayer from './HUD/ObsPlayer'
+import CameraController from './CameraController'
 import textureMap from './textureMap'
 
 import { winStrings, loseStrings } from '../../constants'
@@ -86,9 +87,12 @@ class Game extends Component {
         this.gameIsRunning = false
         this.zoom = 1
 
+        this.mouseLastPosition = null
+        this.playerLastPosition = null
+        this.mapLastZoom = null
+
         this.player = null
         this.status = { action: 'move' }
-        this.cameraType = this.props.isObserver ? 'observer' : 'player'
 
         this.players = []
         this.obsPlayers = []
@@ -182,8 +186,7 @@ class Game extends Component {
     }
 
     handleLoad() {
-        this.camera = new window.PIXI.Container()
-        this.camera.hitArea = new window.PIXI.Rectangle(0, 0, 1000, 1000)
+        this.camera = new CameraController({ screen: this.app.renderer.screen, map: this.map, type: this.props.isObserver ? 'observer' : 'player' })
         this.hud = new window.PIXI.Container()
 
         this.mapContainer = new window.PIXI.Container()
@@ -223,7 +226,7 @@ class Game extends Component {
 
             this.spellsIcons = []
             const off = (this.props.user.spells.length * 55 - 5) / 2
-            for (var i = 0; i < this.props.user.spells.length; i++) {
+            for (let i = 0; i < this.props.user.spells.length; i++) {
                 const spellData = this.props.spells.find(x => this.props.user.spells[i].id === x.id)
                 if(!spellData) continue
                 const spellPos = this.props.user.spells[i].position
@@ -280,7 +283,7 @@ class Game extends Component {
         if(!this.props.isObserver) {
 
             if(this.player) {
-                if(this.player.metadata.status !== 'alive') this.cameraType = 'observer'
+                if(this.player.metadata.status !== 'alive') this.camera.type = 'observer'
                 
                 const lifePerc = this.player.metadata.life / 100
                 if(this.lastLifePerc !== lifePerc) {
@@ -305,11 +308,11 @@ class Game extends Component {
 
         }
 
-        this.cameraBehaviour()
+        this.camera.update(this.player, this.players)
 
-        if(!_.isEmpty(this.map)) {
-            this.map.update(deltatime)
-        }
+        if(!_.isEmpty(this.map)) this.map.update(deltatime)
+
+        this.updateSpellPrediction()        
 
         for (let i = 0; i < this.hudEntities.length; i++) {
             this.hudEntities[i].update && this.hudEntities[i].update(deltatime)
@@ -339,49 +342,6 @@ class Game extends Component {
                 delete this.entities[entity.id]
             }
         }
-    }
-
-    cameraBehaviour() {
-        if(_.isEmpty(this.map)) return
-
-        if(this.cameraType === 'player') {
-
-            this.playerTarget = this.player
-            if(!this.playerTarget) return
-
-            if(!vector.isEqual(this.lastPosition, this.playerTarget.position)) {
-                const dist = vector.distance(this.map.data.position, this.playerTarget.position)
-                this.changeCameraZoom( this.map.originalSize / dist )
-
-                this.updateSpellPrediction()                        
-                
-                this.lastPosition = _.clone(this.playerTarget.position)
-            }
-
-        } else {
-
-            const dist = this.players.reduce((dist, player) => {
-                if(player.metadata.status !== 'alive') return dist
-                const d = vector.distance(this.map.data.position, player.position)
-                return d > dist ? d : dist
-            }, 0)
-            let nZoom = this.map.originalSize / dist
-            if(nZoom < .7) nZoom = .7
-            this.changeCameraZoom(nZoom)
-
-        }
-    }
-
-    changeCameraZoom(nZoom) {
-        if(nZoom > 1) nZoom = 1
-        if(this.zoom === nZoom) return
-
-        this.zoom = nZoom
-        this.camera.scale.set(this.zoom, this.zoom)
-
-        const xPiv = (this.map.data.position.x / 2) - this.camera.originalPivot.x / this.zoom
-        const yPiv = (this.map.data.position.y / 2) - this.camera.originalPivot.y / this.zoom
-        this.camera.pivot.set(xPiv, yPiv)
     }
 
     /* =================================
@@ -661,6 +621,8 @@ class Game extends Component {
                 this.map = new Grid(body, { app: this.app, camera: this.camera, parent: this.mapContainer })
                 break
         }
+
+        this.camera.defineMap(this.map)
     }
 
     gameStart(body) {
@@ -753,12 +715,7 @@ class Game extends Component {
         this.isDragging = false
         
         event.preventDefault()
-        const xClick = event.clientX
-        const yClick = event.clientY
-        const pos = {
-            x: (xClick / this.zoom) + this.camera.pivot.x,
-            y: (yClick / this.zoom) + this.camera.pivot.y
-        }
+        const pos = this.camera.screnToPosition(event.clientX, event.clientY)
 
         this.initialDragPosition = pos
         if(event.button === 2) {
@@ -775,12 +732,7 @@ class Game extends Component {
         event.preventDefault()
         if(!this.isDragging) return
 
-        const xClick = event.clientX
-        const yClick = event.clientY
-        const pos = {
-            x: (xClick / this.zoom) + this.camera.pivot.x,
-            y: (yClick / this.zoom) + this.camera.pivot.y
-        }
+        const pos = this.camera.screnToPosition(event.clientX, event.clientY)
 
         if(event.button === 0) {
             if(this.status.action === 'spell' && this.status.spellName === 'prison_drag') this.emitAction(this.status, this.initialDragPosition, pos)
@@ -788,13 +740,7 @@ class Game extends Component {
     }
 
     handleMouseMove(event) {
-        const xClick = event.clientX
-        const yClick = event.clientY
-        this.mousePosition =  {
-            x: (xClick / this.zoom) + this.camera.pivot.x,
-            y: (yClick / this.zoom) + this.camera.pivot.y
-        }
-        this.updateSpellPrediction()
+        this.mousePosition = { x: event.clientX, y: event.clientY }
     }
 
     handleKeyDown(e) {
@@ -856,26 +802,21 @@ class Game extends Component {
             case 'lightning_bolt':
             case 'shotgun':
                 this.spellPrediction.visible = true
-                let oneTimePred = new window.PIXI.Graphics()
-                oneTimePred.beginFill(0xFAFAFA, .1)
-                    .lineStyle(2, 0x1976D2)
-                    .moveTo(this.player.position.x - this.mousePosition.x, this.player.position.y - this.mousePosition.y)
-                    .lineTo(0, 0)
-                    .drawCircle(0, 0, this.selectedSpellData.radius || 10)
                 this.spellPrediction.hasLine = true
-                this.spellPrediction.addChild(oneTimePred)
+                this.spellPrediction.addChild(new window.PIXI.Graphics())
+                this.updateSpellPrediction()
                 break
                 
             case 'prison':
             case 'prison_drag':
             case 'explosion':
+                this.spellPrediction.hasLine = false
                 this.spellPrediction.visible = true
                 let circlePred = new window.PIXI.Graphics()
                 circlePred.beginFill(0xFAFAFA, .1)
-                circlePred.lineStyle(2, 0x1976D2)
-                circlePred.drawCircle(0, 0, this.selectedSpellData.radius || 50)
-                circlePred.endFill()
-                this.spellPrediction.hasLine = false
+                    .lineStyle(2, 0x1976D2)
+                    .drawCircle(0, 0, this.selectedSpellData.radius || 50)
+                    .endFill()
                 this.spellPrediction.addChild(circlePred)
                 break
         }
@@ -883,14 +824,19 @@ class Game extends Component {
 
     updateSpellPrediction() {
         if(!this.player || !this.selectedSpellData || !this.spellPrediction) return
-        
-        let finishPos = this.mousePosition
+        if(this.mapLastZoom === this.map.zoom && vector.isEqual(this.playerLastPosition, this.player.position) && vector.isEqual(this.mouseLastPosition, this.mousePosition)) return
+
+        this.mapLastZoom = this.map.zoom
+        this.playerLastPosition = { x: this.player.position.x, y: this.player.position.y }
+        this.mouseLastPosition = { x: this.mousePosition.x, y: this.mousePosition.y }
+
+        let finishPos = this.camera.screnToPosition(this.mousePosition.x, this.mousePosition.y)
 
         if(this.selectedSpellData.distance) {
 
-            const distance = vector.distance(this.player.position, this.mousePosition)
+            const distance = vector.distance(this.player.position, finishPos)
             if(distance > this.selectedSpellData.distance) {
-                const direc = vector.direction(this.player.position, this.mousePosition)
+                const direc = vector.direction(this.player.position, finishPos)
                 const angle = Math.atan2(direc.y, direc.x)
                 const xProj = Math.cos(angle) * this.selectedSpellData.distance
                 const yProj = Math.sin(angle) * this.selectedSpellData.distance
