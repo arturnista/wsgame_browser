@@ -186,7 +186,7 @@ class Room extends Component {
 
     handleStartGame() {
         this.setState({ isLoading: true, modalMapShowing: false })
-        window.socketio.emit('game_start', { map: this.state.mapName, botCount: this.state.botCount }, (result) => {
+        window.socketio.emit('game_start', { map: this.state.mapName, botCount: this.state.botCount, isTutorial: true }, (result) => {
             if(result.error) {
                 switch (result.error) {
                     case 'NO_USERS':

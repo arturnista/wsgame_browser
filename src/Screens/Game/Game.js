@@ -34,6 +34,8 @@ import { createLightningBolt } from './Spells/LightningBolt'
 import { createShotgun } from './Spells/Shotgun'
 import { createDefaultSprite } from './Spells/DefaultSprite'
 
+import { createPositionIndicator } from './Other/PositionIndicator'
+
 import './Game.css'
 
 let type = 'WebGL'
@@ -221,6 +223,12 @@ class Game extends Component {
             this.knockbackText.anchor.set(.5, 0.1)
             this.hud.addChild(this.knockbackText)
 
+            this.serverMessageText = new window.PIXI.Text('', { fontFamily: 'Arial', fontSize: 21, fill: 0xFAFAFA, align: 'center', strokeThickness: 2 })
+            this.serverMessageText.x = this.app.renderer.screen.width / 2
+            this.serverMessageText.y = 50
+            this.serverMessageText.anchor.set(.5, 0.1)
+            this.hud.addChild(this.serverMessageText)
+
             this.spellsIcons = []
             const off = (this.props.user.spells.length * 55 - 5) / 2
             for (var i = 0; i < this.props.user.spells.length; i++) {
@@ -393,6 +401,26 @@ class Game extends Component {
         if(body.entity_deleted) this.deleteEntities(body.entity_deleted)
         if(body.spell_casted) this.spellCasted(body.spell_casted)
         if(body.map_update) this.map.updateData(body.map_update[0])
+        if(body.show_message) {
+            if(this.serverMessageTimeout) clearTimeout(this.serverMessageTimeout)
+            
+            const messageToShow = body.show_message[0]
+            this.serverMessageText.text = messageToShow.message
+            this.serverMessageTimeout = setTimeout(() => this.serverMessageText.text = '', messageToShow.time)
+        }
+        if(body.show_position) {
+
+            if(this.positionShowSprite) {
+                this.entitiesContainer.removeChild(this.positionShowSprite)
+                this.positionShowSprite.destroy()
+            }
+            
+            this.positionShowSprite = createPositionIndicator()
+            this.positionShowSprite.x = body.show_position[0].position.x
+            this.positionShowSprite.y = body.show_position[0].position.y
+            this.entitiesContainer.addChild(this.positionShowSprite)
+
+        }
         this.updateEntities(body.entities)
 
         this.ticks++

@@ -82,6 +82,25 @@ class Start extends Component {
         })
     }
 
+    _handleCreateTutorialRoom() {
+        this.setState({ isLoading: true })
+        fetch(`${serverUrl}/rooms`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name: 'Tutorial', isTutorial: true })
+        })
+        .then(res => {
+            if(res.ok) return res.json()
+            throw res
+        })
+        .then(res => {
+            this.socketConnect(res, 'create')
+        })
+    }
+
     socketConnect(room, type) {
         const roomUrl = createRoomUrl(room.port)
         window.socketio = io(roomUrl, { reconnection: false, query: `user_id=${this.props.user.id}&name=${this.props.user.name}` })
@@ -158,6 +177,9 @@ class Start extends Component {
                             />
                             <Button label='Enter' className='start-button enter right'
                                 onClick={() => this._handleJoinRoom(this.state.roomName)}
+                            />
+                            <Button label='Tutorial' className='start-button right'
+                                onClick={() => this._handleCreateTutorialRoom()}
                             />
                         </div>
                     </div>

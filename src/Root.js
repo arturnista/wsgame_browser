@@ -53,12 +53,14 @@ class Root extends Component {
         .add('grid_destroyed.png', '/img/map/grid_destroyed.png')
         .add('grid_toRevive.png', '/img/map/grid_toRevive.png')
         .add('fire_arena_ground.png', '/img/map/fire_arena_ground.png')
-        .add('fire_arena_ground_var00.png', '/img/map/fire_arena_ground_var00.png')
         .add('wall.png', '/img/game/wall.png')
 
         .add('player_indicator_00.png', '/img/game/player_indicator_00.png')
         .add('player_indicator_01.png', '/img/game/player_indicator_01.png')
         .add('player_indicator_02.png', '/img/game/player_indicator_02.png')
+        .add('position_indicator_00.png', '/img/game/position_indicator_00.png')
+        .add('position_indicator_01.png', '/img/game/position_indicator_01.png')
+        .add('position_indicator_02.png', '/img/game/position_indicator_02.png')
 
         .add('spell_explosion_00.png', '/img/game/spell_explosion_00.png')
         .add('spell_explosion_01.png', '/img/game/spell_explosion_01.png')
@@ -129,7 +131,6 @@ class Root extends Component {
         .add('shotgun_projectile.png', '/img/game/shotgun_projectile.png')
         
         .add('game_05.png', '/img/game/game_05.png')
-        .add('game_07.png', '/img/game/game_07.png')
         .add('game_10.png', '/img/game/game_10.png')
         .load(() => {
             window.textures = {
