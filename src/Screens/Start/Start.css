@@ -171,12 +171,8 @@
 .start-button {
     flex: 1;
     height: 5em;
-}
-.start-button.left {
-    margin-right: 1em;
-}
-.start-button.right {
-    margin-left: 1em;
+    margin-right: .5em;
+    margin-left: .5em;
 }
 .start-button.enter {
     background-color: #2E7D32;

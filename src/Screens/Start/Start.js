@@ -172,13 +172,13 @@ class Start extends Component {
                             onChange={x => this.setState({ roomName: x })}
                         />
                         <div className="start-room-conf-buttons">
-                            <Button label='Create' className='start-button left'
+                            <Button label='Create' className='start-button'
                                 onClick={this._handleCreateRoom}
                             />
-                            <Button label='Enter' className='start-button enter right'
+                            <Button label='Enter' className='start-button enter'
                                 onClick={() => this._handleJoinRoom(this.state.roomName)}
                             />
-                            <Button label='Tutorial' className='start-button right'
+                            <Button label='Tutorial' className='start-button tutorial'
                                 onClick={() => this._handleCreateTutorialRoom()}
                             />
                         </div>

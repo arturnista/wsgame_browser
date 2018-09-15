@@ -9,6 +9,7 @@ import { stopGame } from '../../Redux/game'
 import SpellIcon from './HUD/SpellIcon'
 import ObsPlayer from './HUD/ObsPlayer'
 import textureMap from './textureMap'
+import { selectSpell } from '../../Redux/room'
 
 import { winStrings, loseStrings } from '../../constants'
 
@@ -52,6 +53,7 @@ const mapStateToProps = (state) => ({
     isObserver: state.room ? state.room.users.find(x => x.id === state.user.id).isObserver : false,
 })
 const mapDispatchToProps = (dispatch) => ({
+    selectSpell: (userId, spell, index) => dispatch(selectSpell(userId, spell, index)),
     stopGame: () => dispatch(stopGame()),
     resetRoom: (users) => dispatch(resetRoom(users)),
 })
@@ -223,11 +225,16 @@ class Game extends Component {
             this.knockbackText.anchor.set(.5, 0.1)
             this.hud.addChild(this.knockbackText)
 
-            this.serverMessageText = new window.PIXI.Text('', { fontFamily: 'Arial', fontSize: 21, fill: 0xFAFAFA, align: 'center', strokeThickness: 2 })
+            this.serverMessageText = new window.PIXI.Text('', { fontFamily: 'Arial', fontSize: 21, fill: 0x212121, align: 'center' })
             this.serverMessageText.x = this.app.renderer.screen.width / 2
-            this.serverMessageText.y = 50
-            this.serverMessageText.anchor.set(.5, 0.1)
-            this.hud.addChild(this.serverMessageText)
+            this.serverMessageText.y = 85
+            this.serverMessageText.anchor.set(0.5, 0)
+            this.serverMessageText.bg = new window.PIXI.Sprite(window.PIXI.Texture.WHITE)
+            this.serverMessageText.bg.anchor.set(0.5, 0)
+            this.serverMessageText.bg.x = this.serverMessageText.x
+            this.serverMessageText.bg.y = this.serverMessageText.y
+            this.serverMessageText.bg.visible = false            
+            this.hud.addChild(this.serverMessageText.bg, this.serverMessageText)
 
             this.spellsIcons = []
             const off = (this.props.user.spells.length * 55 - 5) / 2
@@ -401,26 +408,9 @@ class Game extends Component {
         if(body.entity_deleted) this.deleteEntities(body.entity_deleted)
         if(body.spell_casted) this.spellCasted(body.spell_casted)
         if(body.map_update) this.map.updateData(body.map_update[0])
-        if(body.show_message) {
-            if(this.serverMessageTimeout) clearTimeout(this.serverMessageTimeout)
-            
-            const messageToShow = body.show_message[0]
-            this.serverMessageText.text = messageToShow.message
-            this.serverMessageTimeout = setTimeout(() => this.serverMessageText.text = '', messageToShow.time)
-        }
-        if(body.show_position) {
-
-            if(this.positionShowSprite) {
-                this.entitiesContainer.removeChild(this.positionShowSprite)
-                this.positionShowSprite.destroy()
-            }
-            
-            this.positionShowSprite = createPositionIndicator()
-            this.positionShowSprite.x = body.show_position[0].position.x
-            this.positionShowSprite.y = body.show_position[0].position.y
-            this.entitiesContainer.addChild(this.positionShowSprite)
-
-        }
+        if(body.show_message) this.showMessage(body.show_message[0])
+        if(body.show_position) this.showPosition(body.show_position[0])
+        if(body.player_add_spell) this.playerAddSpell(body.player_add_spell[0])
         this.updateEntities(body.entities)
 
         this.ticks++
@@ -604,6 +594,93 @@ class Game extends Component {
 
         }
 
+    }
+
+    showMessage(messageToShow) {
+        if(this.serverMessageTimeout) {
+            clearTimeout(this.serverMessageTimeout)
+            this.serverMessageTimeout = null
+        }
+        
+        let message = ''
+        switch (messageToShow.messageCode) {
+            case 'TUTORIAL_WELCOME':
+                message = 'Welcome to NW Game! This tutorial will help you start playing!'
+                break
+            case 'TUTORIAL_MOVING':
+                message = 'You can move around using the right mouse button. Try moving there!'
+                break
+            case 'TUTORIAL_MOVING_2':
+                message = 'Now there'
+                break
+            case 'TUTORIAL_MOVING_3':
+                message = 'Ok, last time!'
+                break
+            case 'TUTORIAL_SAFETY':
+                message = 'That was a mistake, sorry! You should get back to safety.'
+                break
+            case 'TUTORIAL_DAMAGE_EXPLAIN':
+                message = 'When you leave the arena, you take damage over time.'
+                break
+            case 'TUTORIAL_DAMAGE_EXPLAIN':
+                message = 'When you leave the arena, you take damage over time.'
+                break
+            case 'TUTORIAL_PLAYER':
+                message = 'This is your enemy. Your objetive is to push him out of the arena.'
+                break                    
+            case 'TUTORIAL_SPELL':
+                message = 'To accomplish this, you must use your spells at him.\nPress Q and click at your oponent to use Fireball.'
+                break                    
+            case 'TUTORIAL_SPELL_HIT':
+                message = 'Nice hit! Now try to push him out of the arena.'
+                break          
+            case 'TUTORIAL_KILL':
+                message = 'Ok, now try to kill your enemy! Remember, for that you must keep him out of the arena.'
+                break
+            default:
+                message = messageToShow.messageCode
+        }
+        this.serverMessageText.text = message
+        this.serverMessageText.bg.visible = true
+        this.serverMessageText.bg.width = this.serverMessageText.width + 10
+        this.serverMessageText.bg.height = this.serverMessageText.height + 10
+
+        if(messageToShow.time) {
+            this.serverMessageTimeout = setTimeout(() => {
+                this.serverMessageText.text = ''
+                this.serverMessageText.bg.visible = false
+            }, messageToShow.time)
+        }
+    }
+
+    showPosition(positionToShow) {
+
+        if(!this.positionShowSprite) {
+            this.positionShowSprite = createPositionIndicator()
+            this.entitiesContainer.addChild(this.positionShowSprite)
+        }
+
+        if(positionToShow.destroy) {
+            this.entitiesContainer.removeChild(this.positionShowSprite)
+            this.positionShowSprite.destroy()
+        } else {
+            this.positionShowSprite.x = positionToShow.position.x
+            this.positionShowSprite.y = positionToShow.position.y
+        }
+    }
+
+    playerAddSpell(addSpellData) {
+
+        const spellData = this.props.spells.find(x => addSpellData.spellName === x.id)
+        if(!spellData)  return
+        this.props.selectSpell(this.props.user.id, spellData.id, 0)
+
+        const spellPos = 0
+        const hotkey = this.props.preferences.hotkeys[spellPos]
+        
+        const ic = new SpellIcon(spellPos, spellData, this.hud, { xOffset: this.app.renderer.screen.width / 2 - 25, yOffset: 23, hotkey })
+        this.spellsIcons.push( ic )
+        this.hudEntities.push( ic )
     }
 
     updateEntities(body) {
