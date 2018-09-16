@@ -64,6 +64,12 @@ class Root extends Component {
         .add('position_indicator_00.png', '/img/game/position_indicator_00.png')
         .add('position_indicator_01.png', '/img/game/position_indicator_01.png')
         .add('position_indicator_02.png', '/img/game/position_indicator_02.png')
+        .add('mouse_indicator_00.png', '/img/game/mouse_indicator_00.png')
+        .add('mouse_indicator_01.png', '/img/game/mouse_indicator_01.png')
+        .add('mouse_indicator_02_right.png', '/img/game/mouse_indicator_02_right.png')
+        .add('mouse_indicator_03_right.png', '/img/game/mouse_indicator_03_right.png')
+        .add('mouse_indicator_02_left.png', '/img/game/mouse_indicator_02_left.png')
+        .add('mouse_indicator_03_left.png', '/img/game/mouse_indicator_03_left.png')
 
         .add('spell_explosion_00.png', '/img/game/spell_explosion_00.png')
         .add('spell_explosion_01.png', '/img/game/spell_explosion_01.png')

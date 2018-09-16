@@ -35,7 +35,7 @@ import { createLightningBolt } from './Spells/LightningBolt'
 import { createShotgun } from './Spells/Shotgun'
 import { createDefaultSprite } from './Spells/DefaultSprite'
 
-import { createPositionIndicator } from './Other/PositionIndicator'
+import { createMoveIndicator, createSpellIndicator } from './Other/PositionIndicator'
 
 import './Game.css'
 
@@ -658,7 +658,7 @@ class Game extends Component {
     showPosition(positionToShow) {
 
         if(!this.positionShowSprite) {
-            this.positionShowSprite = createPositionIndicator()
+            this.positionShowSprite = createMoveIndicator()
             this.entitiesContainer.addChild(this.positionShowSprite)
         }
 
