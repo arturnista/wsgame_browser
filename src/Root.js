@@ -45,6 +45,9 @@ class Root extends Component {
         window.PIXI.loader
         .add('/img/tileset.json')
         .add('/img/WSSprites.json')
+        .add('black.png', '/img/black.png')
+        .add('black_transparent.png', '/img/black_transparent.png')
+        
         .add('basic_arena.png', '/img/map/basic_arena.png')
         .add('basic_arena_bg.png', '/img/map/basic_arena_bg.png')
         .add('fire_arena_bg.png', '/img/map/fire_arena_bg.png')

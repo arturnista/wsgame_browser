@@ -74,9 +74,17 @@ export function createPlayer(playerData, isYou, game) {
 
         const hasSlow = player.metadata.modifiers.find(x => x === 'slow')
         if(hasSlow) {
-            if(modifiersContainer.children.length === 0) modifiersContainer.addChild(createSlowEffect())
+            if(!modifiersContainer.slow) {
+                const slowEffect = createSlowEffect()
+                modifiersContainer.addChild(slowEffect)
+                modifiersContainer.slow = slowEffect
+            }
         } else {
-            modifiersContainer.removeChild(modifiersContainer.children[0])
+            if(modifiersContainer.slow) {
+                modifiersContainer.removeChild(modifiersContainer.slow)
+                modifiersContainer.slow.destroy()
+                modifiersContainer.slow = null
+            }
         }
         
     }

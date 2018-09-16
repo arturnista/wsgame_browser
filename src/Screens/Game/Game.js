@@ -225,11 +225,11 @@ class Game extends Component {
             this.knockbackText.anchor.set(.5, 0.1)
             this.hud.addChild(this.knockbackText)
 
-            this.serverMessageText = new window.PIXI.Text('', { fontFamily: 'Arial', fontSize: 21, fill: 0x212121, align: 'center' })
+            this.serverMessageText = new window.PIXI.Text('', { fontFamily: 'Arial', fontSize: 21, fill: 0xFAFAFA, align: 'center' })
             this.serverMessageText.x = this.app.renderer.screen.width / 2
             this.serverMessageText.y = 85
             this.serverMessageText.anchor.set(0.5, 0)
-            this.serverMessageText.bg = new window.PIXI.Sprite(window.PIXI.Texture.WHITE)
+            this.serverMessageText.bg = new window.PIXI.Sprite(window.textures['black_transparent.png'])
             this.serverMessageText.bg.anchor.set(0.5, 0)
             this.serverMessageText.bg.x = this.serverMessageText.x
             this.serverMessageText.bg.y = this.serverMessageText.y
@@ -340,6 +340,7 @@ class Game extends Component {
         while (this.entitiesToRemove.length > 0) {
             const entity = this.entitiesToRemove.pop()
             this.entitiesContainer.removeChild(entity)
+            entity.destroy()
             if(entity.id && this.entities[entity.id]) {
                 this.entities[entity.id].destroy()
                 delete this.entities[entity.id]
@@ -349,6 +350,7 @@ class Game extends Component {
         while (this.spellsToRemove.length > 0) {
             const entity = this.spellsToRemove.pop()
             this.spellsContainer.removeChild(entity)
+            entity.destroy()
             if(entity.id && this.entities[entity.id]) {
                 this.entities[entity.id].destroy()
                 delete this.entities[entity.id]
@@ -778,6 +780,7 @@ class Game extends Component {
             }
         }
         this.hud.removeChild(this.startGameHud)
+        this.destroySprites(this.startGameHud)
         this.gameIsRunning = true
     }
 
