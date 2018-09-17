@@ -412,6 +412,7 @@ class Game extends Component {
         if(body.map_update) this.map.updateData(body.map_update[0])
         if(body.show_message) this.showMessage(body.show_message[0])
         if(body.show_position) this.showPosition(body.show_position[0])
+        if(body.show_spell_position) this.showSpellPosition(body.show_spell_position[0])
         if(body.player_add_spell) this.playerAddSpell(body.player_add_spell[0])
         this.updateEntities(body.entities)
 
@@ -668,6 +669,22 @@ class Game extends Component {
         } else {
             this.positionShowSprite.x = positionToShow.position.x
             this.positionShowSprite.y = positionToShow.position.y
+        }
+    }
+
+    showSpellPosition(positionToShow) {
+        
+        if(!this.spellShowSprite) {
+            this.spellShowSprite = createSpellIndicator()
+            this.entitiesContainer.addChild(this.spellShowSprite)
+        }
+
+        if(positionToShow.destroy) {
+            this.entitiesContainer.removeChild(this.spellShowSprite)
+            this.spellShowSprite.destroy()
+        } else {
+            this.spellShowSprite.x = positionToShow.position.x
+            this.spellShowSprite.y = positionToShow.position.y
         }
     }
 

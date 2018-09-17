@@ -20,7 +20,7 @@ export function createPositionIndicator() {
 
 export function createMoveIndicator() {
     
-    let images = [ 'mouse_indicator_00.png', 'mouse_indicator_01.png', 'mouse_indicator_02_right.png', 'mouse_indicator_03_right.png', 'mouse_indicator_02_right.png', 'mouse_indicator_01.png' ]
+    let images = [ 'move_indicator_00.png', 'move_indicator_01.png', 'move_indicator_02.png', 'move_indicator_03.png', 'move_indicator_02.png', 'move_indicator_01.png' ]
     let textureArray = []
     
     for (let i=0; i < images.length; i++) {
@@ -40,7 +40,7 @@ export function createMoveIndicator() {
 
 export function createSpellIndicator() {
     
-    let images = [ 'mouse_indicator_00.png', 'mouse_indicator_01.png', 'mouse_indicator_02_left.png', 'mouse_indicator_03_left.png', 'mouse_indicator_02_left.png', 'mouse_indicator_01.png' ]
+    let images = [ 'spell_indicator_00.png', 'spell_indicator_01.png', 'spell_indicator_02.png', 'spell_indicator_03.png', 'spell_indicator_02.png', 'spell_indicator_01.png' ]
     let textureArray = []
     
     for (let i=0; i < images.length; i++) {
