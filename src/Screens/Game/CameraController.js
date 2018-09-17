@@ -15,6 +15,16 @@ class CameraController extends window.PIXI.Container {
         this.screen = screen
         this.playerTarget = null
         this.lastPosition = null
+
+        this.isShaking = false
+        this.shakeTime = 0
+        this.shakeTimeAmount = 0
+        this.shakePower = 0
+        this.shakeAmount = 10
+        this.shakeHalfAmount = this.shakeAmount / 2
+
+        this.position.x = 0
+        this.position.y = 0
     }
 
     defineMap(map) {
@@ -32,12 +42,28 @@ class CameraController extends window.PIXI.Container {
         this.setPivot()
     }
 
-    update(player, players) {
+    setTargetPlayer(player) {
+        this.playerTarget = player
+    }
+
+    update(deltatime, players) {
         if(_.isEmpty(this.map)) return
+
+        if(this.shakePower > 0) this.shakePower -= deltatime
+
+        if(this.isShaking) {
+            this.shakeTime += deltatime
+
+            this.position.x += this.shakeHalfAmount - (Math.random() * this.shakeAmount)
+            this.position.y += this.shakeHalfAmount - (Math.random() * this.shakeAmount)
+            if(this.shakeTime >= this.shakeTimeAmount) {
+                this.position.set(0, 0)
+                this.isShaking = false
+            }
+        }
 
         if(this.type === 'player') {
 
-            this.playerTarget = player
             if(!this.playerTarget) return
 
             if(!vector.isEqual(this.lastPosition, this.playerTarget.position)) {
@@ -72,6 +98,22 @@ class CameraController extends window.PIXI.Container {
             x: (posX / this.zoom) + this.pivot.x,
             y: (posY / this.zoom) + this.pivot.y
         }
+    }
+
+    shake(force) {
+        if(isNaN(force)) return
+        this.isShaking = true
+
+        const nForce = force / 100
+
+        if(this.shakePower === 0) this.shakePower = 1
+        this.shakePower += nForce
+
+        this.shakeAmount = this.shakePower
+        this.shakeHalfAmount = this.shakeAmount / 2
+
+        this.shakeTime = 0
+        this.shakeTimeAmount = .15
     }
 
 }

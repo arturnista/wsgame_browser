@@ -94,6 +94,8 @@ class Game extends Component {
         this.player = null
         this.status = { action: 'move' }
 
+        this.lastKnockbackValue = 0
+
         this.players = []
         this.obsPlayers = []
 
@@ -291,7 +293,12 @@ class Game extends Component {
                     this.lastLifePerc = lifePerc
                 }
                 const knockbackValue = this.player.metadata.knockbackValue.toFixed(0)
-                if(this.knockbackText.text !== knockbackValue) this.knockbackText.text = knockbackValue
+                if(this.knockbackText.text !== knockbackValue) {
+                    if(this.lastKnockbackValue > 0) this.camera.shake(this.player.metadata.knockbackValue - this.lastKnockbackValue)
+
+                    this.lastKnockbackValue = this.player.metadata.knockbackValue
+                    this.knockbackText.text = knockbackValue
+                }
                 
                 this.player.metadata.spells.forEach(spell => {
                     const icon = this.spellsIcons.find(x => x.id === spell.name)
@@ -308,7 +315,8 @@ class Game extends Component {
 
         }
 
-        this.camera.update(this.player, this.players)
+        this.camera.setTargetPlayer(this.player)
+        this.camera.update(deltatime, this.players)
 
         if(!_.isEmpty(this.map)) this.map.update(deltatime)
 
@@ -753,11 +761,13 @@ class Game extends Component {
                 if(spell) this.useSpell(spell.id)
             }
         })
-        
+
         if(keyPressed === 's') {
             this.resetAction()
         } else if(keyPressed === 'escape') {
             this.resetAction()
+        } else if(keyPressed === ' ') {
+            this.camera.shake()
         }
     }
 
