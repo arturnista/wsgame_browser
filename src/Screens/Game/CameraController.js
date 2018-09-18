@@ -106,7 +106,7 @@ class CameraController extends window.PIXI.Container {
 
         const nForce = force / 100
 
-        if(this.shakePower === 0) this.shakePower = 1
+        if(this.shakePower < 1) this.shakePower = 1
         this.shakePower += nForce
 
         this.shakeAmount = this.shakePower
