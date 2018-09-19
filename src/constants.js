@@ -1,5 +1,5 @@
-export const serverUrl = 'http://localhost:5000'
-export const createRoomUrl = port => `http://localhost:${port}`
+export const serverUrl = 'https://localhost:5000'
+export const createRoomUrl = port => `https://localhost:${port}`
 // export const createRoomUrl = port => `http://localhost:${port}`
 
 export const firebaseConfig = {
