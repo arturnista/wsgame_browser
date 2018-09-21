@@ -50,7 +50,7 @@ export function createSpellIndicator() {
 
     let sprite = new window.PIXI.extras.AnimatedSprite(textureArray)
     sprite.anchor.set(.5, 1)
-    sprite.animationSpeed = .03
+    sprite.animationSpeed = .1
     sprite.width = 64
     sprite.height = 64
     sprite.play()
