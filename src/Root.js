@@ -56,6 +56,7 @@ class Root extends Component {
         .add('grid_destroyed.png', '/img/map/grid_destroyed.png')
         .add('grid_toRevive.png', '/img/map/grid_toRevive.png')
         .add('fire_arena_ground.png', '/img/map/fire_arena_ground.png')
+        .add('tutorial_arena_bg.png', '/img/map/tutorial_arena_bg.png')
         .add('wall.png', '/img/game/wall.png')
 
         .add('player_indicator_00.png', '/img/game/player_indicator_00.png')

@@ -155,6 +155,12 @@ class Start extends Component {
         
         return (
             <div className="bg-container start-container">
+                <div className='base-container tutorial-container'>
+                    <h2 className='start-tutorial-title'>Starting now?</h2>
+                    <Button label='Try our tutorial!' className='start-tutorial-button'
+                        onClick={() => this._handleCreateTutorialRoom()}
+                    />
+                </div>
                 <div className='base-container start-side-container'>
                     <h2 className="start-room-conf-title start-rooms-list-title">Rooms</h2>
                     <div className='start-rooms-list-refresh-container'
@@ -177,9 +183,6 @@ class Start extends Component {
                             />
                             <Button label='Enter' className='start-button enter'
                                 onClick={() => this._handleJoinRoom(this.state.roomName)}
-                            />
-                            <Button label='Tutorial' className='start-button tutorial'
-                                onClick={() => this._handleCreateTutorialRoom()}
                             />
                         </div>
                     </div>

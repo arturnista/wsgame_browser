@@ -16,6 +16,7 @@ import { winStrings, loseStrings } from '../../constants'
 import BasicArena from './Maps/BasicArena'
 import FireArena from './Maps/FireArena'
 import Grid from './Maps/Grid'
+import TutorialArena from './Maps/TutorialArena'
 
 import { createPlayer } from './Player'
 
@@ -632,7 +633,7 @@ class Game extends Component {
                 message = 'This is your enemy. Your objetive is to push him out of the arena.'
                 break                    
             case 'TUTORIAL_SPELL':
-                message = 'To accomplish this, you must use your spells at him.\nPress Q and click at your oponent to use Fireball.'
+                message = 'Use your new spell at him!'
                 break                    
             case 'TUTORIAL_SPELL_HIT':
                 message = 'Nice hit! Now try to push him out of the arena.'
@@ -780,6 +781,9 @@ class Game extends Component {
                 break
             case 'Fire Arena':
                 this.map = new FireArena(body, { app: this.app, camera: this.camera, parent: this.mapContainer })
+                break
+            case 'Tutorial Arena':
+                this.map = new TutorialArena(body, { app: this.app, camera: this.camera, parent: this.mapContainer })
                 break
             case 'Grid':
                 this.map = new Grid(body, { app: this.app, camera: this.camera, parent: this.mapContainer })
