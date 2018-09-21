@@ -21,6 +21,7 @@
 
 
 .start-side-container {
+    position: relative;
     flex: 1;
 
     display: flex;
@@ -34,6 +35,18 @@
 
 .start-rooms-list-title {
     margin: 0;
+}
+
+.start-blockmode-test {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background-color: #FFCC00;
+    padding: 2px;
+    border-radius: 3px;
+    color: #212121;
+    font-size: .8em;
+    border: 1px dashed #212121;
 }
 
 .start-rooms-list-refresh-container {

@@ -9,11 +9,6 @@ function BasicArena(data, { app, camera, parent }) {
     this.currentSize = this.data.size
     this.lastSize = this.currentSize + 10
 
-    const xPiv = ((this.app.renderer.screen.width - this.data.position.x) / 2)
-    const yPiv = ((this.app.renderer.screen.height - this.data.position.y) / 2)
-    camera.originalPivot = { x: xPiv, y: yPiv }
-    camera.pivot.set((this.data.position.x / 2) - xPiv, (this.data.position.y / 2) - yPiv)
-
     const bg = new window.PIXI.extras.TilingSprite(window.textures['basic_arena_bg.png'], this.app.renderer.screen.width * 10, this.app.renderer.screen.height * 10)
     bg.anchor.set(.5, .5)
     bg.x = this.data.position.x

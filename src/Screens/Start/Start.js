@@ -27,6 +27,7 @@ class Start extends Component {
         this.state = {
             isLoading: false,
             roomName: nameGenerator(),
+            isBlockMode: false,
             rooms: []
         }
 
@@ -38,6 +39,12 @@ class Start extends Component {
 
     componentDidMount() {
         this.handleRefresh()
+
+        const testUrl = createRoomUrl(5000)
+        fetch(`${testUrl}`)
+        .catch(err => {
+            this.setState({ isBlockMode: true })
+        })
 
         if(!_.isEmpty(this.props.room)) {
             this.props.history.replace('/room')
@@ -65,7 +72,7 @@ class Start extends Component {
 
     _handleCreateRoom() {
         this.setState({ isLoading: true })
-        fetch(`${serverUrl}/rooms`, {
+        fetch(`${serverUrl}/rooms?blockMode=${this.state.isBlockMode}`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -162,6 +169,7 @@ class Start extends Component {
                     />
                 </div>
                 <div className='base-container start-side-container'>
+                    { this.state.isBlockMode && <p className='start-blockmode-test'>Block mode</p> }
                     <h2 className="start-room-conf-title start-rooms-list-title">Rooms</h2>
                     <div className='start-rooms-list-refresh-container'
                         onClick={this.handleRefresh}>
