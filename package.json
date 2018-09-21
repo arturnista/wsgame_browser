@@ -1,6 +1,6 @@
 {
   "name": "NWGame-Browser",
-  "version": "0.6.1",
+  "version": "0.6.3",
   "private": true,
   "dependencies": {
     "firebase": "^5.4.2",

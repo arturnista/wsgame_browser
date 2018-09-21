@@ -42,7 +42,10 @@ class Start extends Component {
 
         const testUrl = createRoomUrl(5000)
         fetch(`${testUrl}`)
-        .catch(err => {
+        .then(() => {
+            console.log('Available!')
+        }, err => {
+            console.log('Blocked!', err)
             this.setState({ isBlockMode: true })
         })
 

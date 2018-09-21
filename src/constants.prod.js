@@ -1,5 +1,6 @@
 export const serverUrl = window.location.origin
-export const createRoomUrl = port => `${serverUrl}:${port}`
+const roomBaseUrl = window.location.origin.replace(/:(\d)*$/g, '')
+export const createRoomUrl = port => `${roomBaseUrl}:${port}`
 
 export const firebaseConfig = {
     apiKey: "AIzaSyAGtltdTXQHwpBSq_LbWfSKk08CAN-GKv4",
