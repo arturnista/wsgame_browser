@@ -35,9 +35,12 @@ class Start extends Component {
         this._handleJoinRoom = this._handleJoinRoom.bind(this)
         this.handleRefresh = this.handleRefresh.bind(this)
         this.renderRoomLine = this.renderRoomLine.bind(this)
+        this.handleKeyDown = this.handleKeyDown.bind(this)
     }
 
     componentDidMount() {
+        document.addEventListener('keydown', this.handleKeyDown)
+
         this.handleRefresh()
 
         const testUrl = createRoomUrl(5000)
@@ -57,6 +60,19 @@ class Start extends Component {
     componentDidUpdate(prevProps) {
         if(!_.isEmpty(this.props.room)) {
             this.props.history.replace('/room')
+        }
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.handleKeyDown)
+    }
+
+    handleKeyDown(event) {
+        if(this.props.isObserver) return
+        
+        const keyPressed = event.key.toLowerCase()
+        if(keyPressed === 'b') {
+            this.setState({ isBlockMode: !this.state.isBlockMode })
         }
     }
 

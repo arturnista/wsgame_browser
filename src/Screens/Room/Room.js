@@ -11,6 +11,21 @@ import { selectSpell, deselectSpell, addUser, removeUser, readyUser, waitingUser
 import { startGame } from '../../Redux/game'
 import './Room.css'
 
+const spellMoreInfo = {
+    amount: 'Amount',
+    baseAmount: 'Base Amount',
+    cooldown: 'Cooldown',
+    distance: 'Distance',
+    duration: 'Duration',
+    incrementalCooldown: 'Incremental Cooldown',
+    knockbackIncrement: 'Increment',
+    knockbackMultiplier: 'Multiplier',
+    maxRadius: 'Max radius',
+    minRadius: 'Min radius',
+    moveSpeed: 'Move Speed',
+    radius: 'Radius',
+}
+
 const mapStateToProps = (state) => ({
     game: state.game,
     room: state.room,
@@ -21,6 +36,7 @@ const mapStateToProps = (state) => ({
     players: state.room ? state.room.users.filter(x => !x.isObserver) : [],
     observers: state.room ? state.room.users.filter(x => x.isObserver) : [],
 })
+
 const mapDispatchToProps = (dispatch, ownProps) => ({
     selectSpell: (userId, spell, index) => dispatch(selectSpell(userId, spell, index)),
     deselectSpell: (userId, spell, index) => dispatch(deselectSpell(userId, spell, index)),
@@ -384,7 +400,7 @@ class Room extends Component {
                 case 'hitEffects':
                     return prev
             }
-            return [ ...prev, { key: curr, value } ]
+            return [ ...prev, { key: curr, label: spellMoreInfo[curr], value } ]
         }, [])
         return (
             <div className='bg-container room-grid'>
@@ -505,8 +521,9 @@ class Room extends Component {
                     </div>
                     <div className='room-details-data-container'>
                         {
-                            moreSpellData.map(({ key, value }) => (
+                            moreSpellData.map(({ key, value, label }) => (
                                 <div className='room-details-data' key={key}>
+                                    <p className='room-details-data-label'>{label}</p>
                                     <img className='room-details-data-icon' src={`/img/icons/${key}.png`} alt={key} />
                                     <p className='room-details-data-value'>{value}</p>
                                 </div>
