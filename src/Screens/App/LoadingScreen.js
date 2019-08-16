@@ -5,7 +5,7 @@ import './LoadingScreen.css'
 const LoadingScreen = () => (
     <div className='loading-screen'>
         <div className='loading-screen-container'>
-            <h1 className='loading-screen-game-name'>NW Game</h1>
+            <h1 className='loading-screen-game-name'>Mage Arena</h1>
             <Spinner />
             <p className='loading-screen-text'>Loading sprites...</p>
         </div>

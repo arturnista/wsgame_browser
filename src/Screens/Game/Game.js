@@ -577,7 +577,7 @@ class Game extends Component {
         let message = ''
         switch (messageToShow.messageCode) {
             case 'TUTORIAL_WELCOME':
-                message = 'Welcome to NW Game! This tutorial will help you start playing!'
+                message = 'Welcome to the Mage Arena! This tutorial will help you start playing!'
                 break
             case 'TUTORIAL_MOVING':
                 message = 'You can move around using the right mouse button. Try moving there!'
