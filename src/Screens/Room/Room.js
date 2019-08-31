@@ -17,7 +17,7 @@ const spellMoreInfo = {
     cooldown: 'Cooldown',
     distance: 'Distance',
     duration: 'Duration',
-    incrementalCooldown: 'Incremental Cooldown',
+    incrementalCooldown: 'Incremental CD',
     knockbackIncrement: 'Increment',
     knockbackMultiplier: 'Multiplier',
     maxRadius: 'Max radius',
