@@ -153,7 +153,6 @@ export function waitingUser(user) {
 }
 
 export function updateChat(chat) {
-    chat.reverse()
     return {
         type: UPDATE_CHAT,
         payload: {

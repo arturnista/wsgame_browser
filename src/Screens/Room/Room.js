@@ -66,6 +66,7 @@ class Room extends Component {
         this.handleStartGame = this.handleStartGame.bind(this)
         this.handleToggleStatus = this.handleToggleStatus.bind(this)
         this.handleNewChatMessage = this.handleNewChatMessage.bind(this)
+        this.handleChatScroll = this.handleChatScroll.bind(this)
         this.handleUpdateRoom = this.handleUpdateRoom.bind(this)
         this.handleAddUser = this.handleAddUser.bind(this)
         this.handleReadyUser = this.handleReadyUser.bind(this)
@@ -92,6 +93,7 @@ class Room extends Component {
         this.state = {
             isLoading: false,
             chatNotRead: this.props.room && this.props.room.chat.length,
+            chatAtBottom: true,
             menuSelected: 'config',
             spellTypeSelected: 'offensive',
             modalMapShowing: false,
@@ -178,15 +180,22 @@ class Room extends Component {
         }
     }
 
+    handleChatScroll(e) {
+        if (this.chatContainer.offsetHeight + this.chatContainer.scrollTop >= this.chatContainer.scrollHeight) {
+            this.setState({ chatAtBottom: true, chatNotRead: 0 })
+        } else {
+            this.setState({ chatAtBottom: false })
+        }
+    }
+
     handleNewChatMessage(body) {
         console.log('handleNewChatMessage', body)
         this.props.updateChat(body.chat)
 
-        if(this.state.menuSelected !== 'chat') {
+        if(this.state.menuSelected !== 'chat' || !this.state.chatAtBottom) {
             this.setState({ chatNotRead: this.state.chatNotRead + 1 })
         } else {
-            const chatElement = document.getElementById("room-chat")
-            chatElement.scrollTop = chatElement.scrollHeight
+            this.chatContainer.scrollTop = this.chatContainer.scrollHeight
         }
     }
 
@@ -373,6 +382,8 @@ class Room extends Component {
     render() {
         if(_.isEmpty(this.props.room) || _.isEmpty(this.props.user)) return null
         if(_.isEmpty(this.state.selectedSpell)) return null
+
+        this.chatContainer = document.getElementById("chat-container")
         
         const toggleText = this.state.status === 'ready' ? 'Wait guys' : "Ok, I'm ready!"
 
@@ -465,8 +476,8 @@ class Room extends Component {
                     </div>
                     {
                         this.state.menuSelected === 'chat' ? 
-                            <div id="room-chat" className='room-chat-container content'>
-                                <div className='room-chat-list-container'>
+                            <div className='room-chat-container content'>
+                                <div id="chat-container" className='room-chat-list-container' onScroll={this.handleChatScroll}>
                                     {
                                         this.props.room.chat.map(this.renderChatLine)
                                     }
