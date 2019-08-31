@@ -2,7 +2,7 @@ function Grid(data, { app, camera, parent }) {
     this.app = app
     this.parent = parent
     this.data = data
-    this.originalSize = (this.data.size / 2) - 100
+    this.originalSize = (this.data.size / 2) + 150
 
     const bg = new window.PIXI.extras.TilingSprite(window.textures['basic_arena_bg.png'], this.app.renderer.screen.width * 10, this.app.renderer.screen.height * 10)
     bg.anchor.set(.5, .5)
@@ -22,6 +22,17 @@ function Grid(data, { app, camera, parent }) {
 
         this.parent.addChild(sprite)
         this.blocks.push({ sprite, data: blockData })
+    }
+
+    for (let i = 0; i < data.obstacles.length; i++) {
+        const obstacleData = data.obstacles[i]
+        const obstacle = new window.PIXI.Sprite( window.textures['wall.png'] )
+        obstacle.anchor.set(.5, .5)
+        obstacle.x = obstacleData.position.x
+        obstacle.y = obstacleData.position.y
+        obstacle.width = obstacleData.collider.size
+        obstacle.height = obstacleData.collider.size
+        this.parent.addChild(obstacle)
     }
 }
 
