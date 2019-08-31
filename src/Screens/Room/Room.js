@@ -119,7 +119,11 @@ class Room extends Component {
         .then(spells => spells.json())
         .then(spells => {
             this.configSpells = spells._config
-            const spellsArr = Object.keys(spells).map(key => ({ id: key, ...spells[key] }))
+            let spellsArr = Object.keys(spells)
+            .map(key => ({ id: key, ...spells[key] }))
+            
+            spellsArr = _.sortBy(spellsArr, e => e.name)
+
             const offensiveSpells = spellsArr.filter(x => x.type === 'offensive')
             const supportSpells = spellsArr.filter(x => x.type === 'support')
             this.setState({ offensiveSpells, supportSpells })
@@ -385,7 +389,8 @@ class Room extends Component {
 
         this.chatContainer = document.getElementById("chat-container")
         
-        const toggleText = this.state.status === 'ready' ? 'Wait guys' : "Ok, I'm ready!"
+        let toggleText = this.state.status === 'ready' ? 'Wait guys' : "Ok, I'm ready!"
+        if(this.state.status === 'ready' && Math.random() < .1) toggleText = 'FUCK YOU IM A DRAGON'
 
         const moreSpellData = Object.keys(this.state.selectedSpell).reduce((prev, curr) => {
             let value = this.state.selectedSpell[curr]
