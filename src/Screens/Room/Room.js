@@ -345,6 +345,7 @@ class Room extends Component {
         return (
             <div key={user.id}
                 className={'room-user-container ' + user.status}>
+                { isOwner && <div className='room-user-owner'></div> }
                 <div className='room-user-color' style={{ backgroundColor: user.color }}>
                     <p className='room-user-win'>{user.winCount}</p>
                 </div>
@@ -448,18 +449,21 @@ class Room extends Component {
                     <div className='room-grid-item room-selected-container'>
                         <p className='room-selected-help'><strong>Drag and Drop</strong> the spell on the hotkey</p>
                         <p className='room-selected-help'>Right click to deselect</p>
-                        <p className='room-selected-help'>Press on a spell to view details</p>
+                        <p className='room-selected-help'>Press on a spell to view its details</p>
                         {
                             [0, 1, 2].map(this.renderSelectedSpell)
                         }
                     </div>
-                    <div className='room-grid-item'>
+                    <div className='room-grid-item room-user-list'>
                         {
                             this.props.players.map(this.renderUser)
                         }
                         {
                             _.times(this.state.botCount, this.renderBot)
                         }
+                        <div className="room-user-observers">
+                            <p><small>Observers: </small>{this.props.observers.length}</p>
+                        </div>
                     </div>
                     <div className='room-spell-type-container'>
                         <div className='room-grid-item'>
@@ -526,13 +530,12 @@ class Room extends Component {
                                 </div>
                                 :
                                 <div className='room-users-config-container content'>
-                                    <p className='room-users-config-text'>Observers: {this.props.observers.length}</p>
                                     {
                                         !this.props.user.isObserver ?
-                                        <Button label='Become observer' className='room-users-config-button'
+                                        <Button label='Become observer' className={`room-users-config-button ${this.props.isOwner ? 'obs' : ''}`}
                                             onClick={() => this.setState({ isObserver: true }, () => window.socketio.emit('user_become_observer', {}))}/>
                                         :
-                                        <Button label='Become player' className='room-users-config-button'
+                                        <Button label='Become player' className={`room-users-config-button ${this.props.isOwner ? 'obs' : ''}`}
                                             onClick={() => this.setState({ isObserver: false }, () => window.socketio.emit('user_become_player', {}))}/>
                                     }
                                     {
