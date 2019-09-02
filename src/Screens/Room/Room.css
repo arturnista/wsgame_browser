@@ -25,6 +25,11 @@
     grid-template-rows: auto 1fr;
 }
 
+.room-grid-item.horizontal {
+    display: grid;
+    grid-template-columns: auto auto;
+}
+
 .room-grid-item .header {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -101,6 +106,29 @@
     font-size: .6em;
 }
 
+.room-spell-type-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: .5em;
+}
+
+.room-spell-type-container.sep {
+    border-right: 1px solid #212121;
+}
+
+.room-spell-type-container .header {
+    grid-template-columns: auto;
+    grid-gap: 0;
+}
+.room-spell-type-container .header .title.active {
+    border-bottom: none;
+}
+.room-spell-type-container .room-spells-remaning.out {
+    color: red;
+    font-weight: bold;
+}
+
+
 .room-spells-list {
     display: flex;
     flex-wrap: wrap;
@@ -136,10 +164,13 @@
     color: #FAFAFA;
 }
 .room-spell-container.can-drop {
-    background-color: rgba(47, 84, 163, .8);
+    background-color: rgba(47, 83, 162, .7);
 }
 .room-spell-container.is-over {
-    background-color: #2f54a3;
+    background-color: rgba(47, 83, 162, .3);
+}
+.room-spell-container.selected.is-over {
+    background-color: rgba(255, 28, 28, .5);
 }
 .room-spell-container:hover {
     background-color: #2f54a380;
@@ -148,7 +179,7 @@
 .room-spell-container:hover p {
     color: #212121;
 }
-.room-spell-container.small.selected:hover {
+.room-spell-container.selected:hover {
     background-color: rgba(255, 28, 28, .5);
 }
 
