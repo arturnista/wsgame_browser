@@ -167,16 +167,16 @@
     color: #FAFAFA;
 }
 .room-spell-container.can-drop {
-    background-color: rgba(47, 83, 162, .7);
+    /* background-color: rgba(47, 83, 162, .7); */
 }
 .room-spell-container.selected.can-drop {
-    background-color: rgba(47, 83, 162, .5);
+    /* background-color: rgba(47, 83, 162, .5); */
 }
 .room-spell-container.is-over {
-    background-color: rgba(46, 125, 50, .6);
+    background-color: rgba(46, 125, 50, 1);
 }
 .room-spell-container.selected.is-over {
-    background-color: rgba(46, 125, 50, .6);
+    background-color: rgba(46, 125, 50, 1);
 }
 .room-spell-container:hover {
     background-color: #2f54a380;
