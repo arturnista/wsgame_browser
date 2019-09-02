@@ -1,6 +1,6 @@
 .room-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 3fr 4fr;
     grid-template-rows: 2.5em 100px 1fr 1fr;
     grid-gap: .5em;
     padding: .5em;
