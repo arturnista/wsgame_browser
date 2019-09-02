@@ -104,7 +104,7 @@ class Room extends Component {
             isLoading: false,
             chatNotRead: this.props.room && this.props.room.chat.length,
             chatAtBottom: true,
-            menuSelected: 'config',
+            menuSelected: 'chat',
             spellTypeSelected: 'offensive',
             modalMapShowing: false,
             status: 'waiting',
@@ -446,9 +446,9 @@ class Room extends Component {
                         }
                     </div>
                     <div className='room-grid-item room-selected-container'>
-                        <p className='room-selected-help'>Press on a spell to focus it</p>
-                        <p className='room-selected-help'>Left click to select the focus spell</p>
+                        <p className='room-selected-help'><strong>Drag and Drop</strong> the spell on the hotkey</p>
                         <p className='room-selected-help'>Right click to deselect</p>
+                        <p className='room-selected-help'>Press on a spell to view details</p>
                         {
                             [0, 1, 2].map(this.renderSelectedSpell)
                         }
@@ -469,7 +469,7 @@ class Room extends Component {
                                 </h2>
                                 {
                                     offensiveSpellsRemaining > 0 ?
-                                    <p className="room-spells-remaning">You can pick <strong>{offensiveSpellsRemaining}</strong> offensive spells.</p>
+                                    <p className="room-spells-remaning">You can pick <strong>{offensiveSpellsRemaining}</strong> offensive spell{offensiveSpellsRemaining != 1 && 's'}.</p>
                                     :
                                     <p className="room-spells-remaning out">You picked all your offensive spells.</p>                                    
                                 }
@@ -486,7 +486,7 @@ class Room extends Component {
                                 </h2>
                                 {
                                     supportSpellsRemaining > 0 ?
-                                    <p className="room-spells-remaning">You can pick <strong>{supportSpellsRemaining}</strong> support spells.</p>
+                                    <p className="room-spells-remaning">You can pick <strong>{supportSpellsRemaining}</strong> support spell{supportSpellsRemaining != 1 && 's'}.</p>
                                     :
                                     <p className="room-spells-remaning out">You picked all your support spells.</p>                                    
                                 }
