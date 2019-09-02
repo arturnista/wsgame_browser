@@ -331,7 +331,7 @@
     background-color: #fafafa;
     border-bottom: 1px solid #212121;
     border-left: 1px solid #212121;
-    /* padding: .1em; */
+    padding: 0 0.1em;
 }
 
 .room-user-container {
