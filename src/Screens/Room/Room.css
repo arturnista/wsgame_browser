@@ -121,17 +121,13 @@
     grid-template-rows: 2em 1fr;
     
     border: 1px solid #212121;
-    height: 7em;
-    width: 6em;
-    margin: calc(.3em + 1px);
+    margin: 0;
 
-    transition: 300ms all;
-}
-.room-spell-container.small {
     grid-template-rows: .8em 1fr;
     height: 100%;
     width: 100%;
-    margin: 0;
+
+    transition: 300ms all;
 }
 .room-spell-container.selected {
     background-color: #2f54a3;
@@ -139,15 +135,12 @@
 .room-spell-container.selected p {
     color: #FAFAFA;
 }
-.room-spell-container.focus {
-    text-decoration: underline;
-    border: 2px solid #212121;
-    margin: .3em;
+.room-spell-container.can-drop {
+    background-color: rgba(47, 84, 163, .8);
 }
-.room-spell-container.selected.focus {
-    text-decoration-color: #FAFAFA;
+.room-spell-container.is-over {
+    background-color: #2f54a3;
 }
-
 .room-spell-container:hover {
     background-color: #2f54a380;
     color: #212121;
@@ -157,6 +150,46 @@
 }
 .room-spell-container.small.selected:hover {
     background-color: rgba(255, 28, 28, .5);
+}
+
+
+.room-spell {
+    cursor: pointer;
+    position: relative;
+
+    display: grid;
+    grid-template-rows: 2em 1fr;
+    
+    border: 1px solid #212121;
+    height: 7em;
+    width: 6em;
+    margin: calc(.3em + 1px);
+
+    transition: 300ms all;
+}
+.room-spell.selected {
+    background-color: #2f54a3;
+}
+.room-spell.selected p {
+    color: #FAFAFA;
+}
+.room-spell.focus {
+    text-decoration: underline;
+    border: 2px solid #212121;
+    margin: .3em;
+}
+.room-spell.selected.focus {
+    text-decoration-color: #FAFAFA;
+}
+.room-spell.dragging {
+    opacity: .5;
+}
+.room-spell:hover {
+    background-color: #2f54a380;
+    color: #212121;
+}
+.room-spell:hover p {
+    color: #212121;
 }
 
 .room-spell-name {

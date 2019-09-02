@@ -9,6 +9,11 @@ import { serverUrl } from '../../constants'
 import { addSpells } from '../../Redux/spells'
 import { selectSpell, deselectSpell, addUser, removeUser, readyUser, waitingUser, updateRoom, updateChat, leaveRoom } from '../../Redux/room'
 import { startGame } from '../../Redux/game'
+import { DndProvider } from 'react-dnd'
+import HTML5Backend from 'react-dnd-html5-backend'
+import SpellItem from './SpellItem'
+import SpellContainer from './SpellContainer'
+
 import './Room.css'
 
 const spellMoreInfo = {
@@ -75,6 +80,11 @@ class Room extends Component {
         this.handleDestroyRoom = this.handleDestroyRoom.bind(this)
         this.handleLeaveRoom = this.handleLeaveRoom.bind(this)
         this.handleKickPlayer = this.handleKickPlayer.bind(this)
+
+        this.handleFocusSpell = this.handleFocusSpell.bind(this)
+        this.handleSelectSpell = this.handleSelectSpell.bind(this)
+        this.handleToggleSpell = this.handleToggleSpell.bind(this)
+        this.handleDeselectSpell = this.handleDeselectSpell.bind(this)
         if(!window.socketio) {
             this.props.history.replace('/')
             return
@@ -243,13 +253,20 @@ class Room extends Component {
     }
 
     handleToggleSpell(index) {
+        this.handleSelectSpell(index, this.state.selectedSpell)
+    }   
+
+    handleSelectSpell(index, spell) {
         const selectSpell = () => {
-            if(currentSpellSelected !== this.state.selectedSpell.id) {
-                window.socketio.emit('user_select_spell', { spellName: this.state.selectedSpell.id, position: index }, (body) => {
-                    if(body.status === 200) this.props.selectSpell(this.props.user.id, this.state.selectedSpell.id, index)
+            window.socketio.emit('user_deselect_spell', { spellName: spell.id }, (body) => {
+                if(body.status === 200) this.props.deselectSpell(this.props.user.id, spell.id, index)
+                
+                window.socketio.emit('user_select_spell', { spellName: spell.id, position: index }, (body) => {
+                    if(body.status === 200) this.props.selectSpell(this.props.user.id, spell.id, index)
                 })
-            }
+            })
         }
+
         const currentSpellSelected = this.props.user.spells.find(x => x.position === index)
         if(currentSpellSelected) {
             window.socketio.emit('user_deselect_spell', { spellName: currentSpellSelected.id }, (body) => {
@@ -259,7 +276,7 @@ class Room extends Component {
         } else {
             selectSpell()
         }
-    }   
+    }
 
     handleDeselectSpell(index, e) {
         e.preventDefault()
@@ -299,15 +316,8 @@ class Room extends Component {
     renderSpell(spell) {
         const isSelected = this.props.user.spells.find(x => x.id === spell.id)
         const focus = this.state.selectedSpell.id === spell.id
-        return (
-            <div key={spell.id} className={"room-spell-container " + (isSelected ? 'selected ' : ' ') + (focus? 'focus ' : ' ')}
-                onClick={() => this.handleFocusSpell(spell)}>
-                <p className="room-spell-name">{spell.name}</p>
-                <div className='room-spell-icon-container'>
-                    <img className="room-spell-icon" src={`/img/game/${spell.id}.png`}/>
-                </div>
-            </div>
-        )
+
+        return <SpellItem key={spell.id} spell={spell} isSelected={isSelected} focus={focus} onFocus={this.handleFocusSpell} />
     }
 
     renderSelectedSpell(index) {
@@ -319,21 +329,14 @@ class Room extends Component {
         }
         const hotkey = this.props.preferences.hotkeys[index]
 
-        return (
-            <div key={index} className={"room-spell-container small " + (currentSpell ? 'selected ' : ' ')}
-                onClick={(e) => this.handleToggleSpell(index, e)}
-                onContextMenu={(e) => this.handleDeselectSpell(index, e)} >
-                { currentSpell && <p className="room-spell-name">{spell.name}</p> }
-                { currentSpell && 
-                    <div className='room-spell-icon-container'>
-                        <img className="room-spell-icon" src={`/img/game/${spell.id}.png`}/>
-                    </div>
-                }
-                <div className="room-spell-hotkey-container">
-                    <p className="room-spell-hotkey">{hotkey.toUpperCase()}</p>
-                </div>
-            </div>
-        )
+        return <SpellContainer key={index} 
+            index={index} 
+            currentSpell={currentSpell} 
+            spell={spell} 
+            hotkey={hotkey}
+            onSelect={this.handleSelectSpell}
+            onToggle={this.handleToggleSpell}
+            onDeselect={this.handleDeselectSpell} />
     }
 
     renderUser(user) {
@@ -419,6 +422,7 @@ class Room extends Component {
             return [ ...prev, { key: curr, label: spellMoreInfo[curr], value } ]
         }, [])
         return (
+				<DndProvider backend={HTML5Backend}>
             <div className='bg-container room-grid'>
                 <div className='room-grid-item room-title'>
                     <h2>{this.props.room.name}</h2>
@@ -590,6 +594,7 @@ class Room extends Component {
                     </div>
                 </Rodal>
             </div>
+            </DndProvider>
         )
     }
 
