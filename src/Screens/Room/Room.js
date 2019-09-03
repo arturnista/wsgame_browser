@@ -418,6 +418,8 @@ class Room extends Component {
                 case 'effects':
                 case 'afterEffects':
                 case 'hitEffects':
+                case 'startRadius':
+                case 'increaseRadius':
                     return prev
             }
             return [ ...prev, { key: curr, label: spellMoreInfo[curr], value } ]
