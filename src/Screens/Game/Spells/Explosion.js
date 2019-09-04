@@ -2,6 +2,7 @@ import _ from 'lodash'
 import uuid from 'uuid'
 import vector from '../../../Utils/vector'
 import { explosion } from './utils'
+import { playSpellSound } from '../Sounds'
 
 export function createExplosion(spellData, game) {
     const spell = new window.PIXI.Sprite( window.textures['bomb.png'] )
@@ -56,6 +57,7 @@ export function createExplosion(spellData, game) {
                 }
                 spell.texture = window.textures['explosion.png']
                 exploded = true
+                playSpellSound('explosion_explode')
             }
             if(t > 2) {
                 game.removeSpell(spell)

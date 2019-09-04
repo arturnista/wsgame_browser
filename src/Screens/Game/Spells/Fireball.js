@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import vector from '../../../Utils/vector'
 import { explosion } from './utils'
+import { playSpellSound } from '../Sounds'
 
 export function createFireball(spellData) {
     const spell = new window.PIXI.Sprite( window.textures['fireball.png'] )
@@ -15,6 +16,8 @@ export function createFireball(spellData) {
         spell.vx = spell.metadata.velocity.x
         spell.vy = spell.metadata.velocity.y
     }
+
+    playSpellSound('fireball_cast')
 
     return spell
 }

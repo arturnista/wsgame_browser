@@ -4,6 +4,7 @@ import moment from 'moment'
 import _ from 'lodash'
 import Rodal from 'rodal'
 import * as PIXI from 'pixi.js'
+import PixiSound from 'pixi-sound'
 
 import { Header, Login as LoginComponent } from './Components'
 import { Router, Route } from 'react-router'
@@ -18,6 +19,7 @@ import './Root.css'
 import 'rodal/lib/rodal.css'
 
 window.PIXI = PIXI
+window.PIXI.sound = PixiSound
 
 const history = createBrowserHistory()
 
@@ -42,6 +44,13 @@ class Root extends Component {
     }
 
     componentDidMount() {
+
+        window.PIXI.sound.add({
+            fireball_cast: '/sounds/fireball_cast_00.wav',
+            shotgun_cast: '/sounds/shotgun_cast_00.wav',
+            explosion_explode: '/sounds/explosion_explode.wav',
+        })
+
         window.PIXI.loader
         .add('/img/tileset.json')
         .add('/img/WSSprites.json')
