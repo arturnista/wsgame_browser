@@ -128,7 +128,7 @@ class Start extends Component {
     }
 
     socketConnect(room, type) {
-        const roomUrl = this.state.isBlockMode ? serverUrl : createRoomUrl(room.port)
+        const roomUrl = room.isBlockMode ? serverUrl : createRoomUrl(room.port)
         window.socketio = io(roomUrl, { reconnection: false, query: `user_id=${this.props.user.id}&name=${this.props.user.name}` })
 
         window.socketio.on('connect_error', () => {
