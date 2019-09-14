@@ -45,11 +45,11 @@ class Root extends Component {
 
     componentDidMount() {
 
-        window.PIXI.sound.add({
-            fireball_cast: '/sounds/fireball_cast_00.wav',
-            shotgun_cast: '/sounds/shotgun_cast_00.wav',
-            explosion_explode: '/sounds/explosion_explode.wav',
-        })
+        // window.PIXI.sound.add({
+        //     fireball_cast: '/sounds/fireball_cast_00.wav',
+        //     shotgun_cast: '/sounds/shotgun_cast_00.wav',
+        //     explosion_explode: '/sounds/explosion_explode.wav',
+        // })
 
         window.PIXI.loader
         .add('/img/tileset.json')
