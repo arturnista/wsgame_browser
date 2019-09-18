@@ -7,7 +7,7 @@ import User from '../../Entities/User'
 import { Input, Button, Spinner } from '../../Components'
 import { serverUrl } from '../../constants'
 import { addSpells } from '../../Redux/spells'
-import { selectSpell, deselectSpell, addUser, removeUser, readyUser, waitingUser, updateRoom, updateChat, leaveRoom } from '../../Redux/room'
+import { selectTeam, selectSpell, deselectSpell, addUser, removeUser, readyUser, waitingUser, updateRoom, updateChat, leaveRoom } from '../../Redux/room'
 import { startGame } from '../../Redux/game'
 import { DndProvider } from 'react-dnd'
 import HTML5Backend from 'react-dnd-html5-backend'
@@ -16,7 +16,7 @@ import SpellContainer from './SpellContainer'
 
 import './Room.css'
 
-const spellMoreInfo = {
+const SPELL_INFO_NAME = {
     amount: 'Amount',
     baseAmount: 'Base Amount',
     cooldown: 'Cooldown',
@@ -43,6 +43,7 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
+    selectTeam: (userId, team) => dispatch(selectTeam(userId, team)),
     selectSpell: (userId, spell, index) => dispatch(selectSpell(userId, spell, index)),
     deselectSpell: (userId, spell, index) => dispatch(deselectSpell(userId, spell, index)),
     updateChat: spell => dispatch(updateChat(spell)),
@@ -81,6 +82,9 @@ class Room extends Component {
         this.handleLeaveRoom = this.handleLeaveRoom.bind(this)
         this.handleKickPlayer = this.handleKickPlayer.bind(this)
 
+        this.handleUserSelectedTeam = this.handleUserSelectedTeam.bind(this)
+        this.handleSelectTeam = this.handleSelectTeam.bind(this)
+        
         this.handleFocusSpell = this.handleFocusSpell.bind(this)
         this.handleSelectSpell = this.handleSelectSpell.bind(this)
         this.handleToggleSpell = this.handleToggleSpell.bind(this)
@@ -94,6 +98,7 @@ class Room extends Component {
         window.socketio.on('user_ready', this.handleReadyUser)
         window.socketio.on('user_waiting', this.handleWaitingUser)
         window.socketio.on('user_left_room', this.handleRemoveUser)
+        window.socketio.on('user_selected_team', this.handleUserSelectedTeam)
         window.socketio.on('room_update', this.handleUpdateRoom)
         window.socketio.on('room_chat_new_message', this.handleNewChatMessage)
 
@@ -252,6 +257,16 @@ class Room extends Component {
         }
     }
 
+    handleUserSelectedTeam(body) {
+        console.log('handleUserSelectedTeam', body);
+        
+        this.props.selectTeam(body.user, body.team)
+    }
+
+    handleSelectTeam(event) {
+        window.socketio.emit('user_select_team', { teamId: parseInt(event.target.value) })
+    }
+
     handleToggleSpell(index) {
         this.handleSelectSpell(index, this.state.selectedSpell)
     }   
@@ -346,7 +361,7 @@ class Room extends Component {
             <div key={user.id}
                 className={'room-user-container ' + user.status}>
                 { isOwner && <div className='room-user-owner'></div> }
-                <div className='room-user-color' style={{ backgroundColor: user.color }}>
+                <div className='room-user-color' style={{ backgroundColor: user.team.color }}>
                     <p className='room-user-win'>{user.winCount}</p>
                 </div>
                 <p className={'room-user-name ' + (isOwner ? 'owner ' : ' ') + (isYou ? 'you' : '')}>{user.name}</p>
@@ -356,6 +371,16 @@ class Room extends Component {
                     <p className='room-user-kick' onClick={() => this.handleKickPlayer(user.id)}>
                         Kick player
                     </p>
+                }
+                {
+                    isYou ? 
+                        <select name="select" onChange={this.handleSelectTeam} value={user.team.id}>
+                            {
+                                this.props.room.teams.map(t => <option value={t.id}>{t.color}</option> )
+                            }
+                        </select>
+                    :
+                        user.team && <p>{user.team.name}</p>
                 }
             </div>
         )
@@ -422,7 +447,7 @@ class Room extends Component {
                 case 'increaseRadius':
                     return prev
             }
-            return [ ...prev, { key: curr, label: spellMoreInfo[curr], value } ]
+            return [ ...prev, { key: curr, label: SPELL_INFO_NAME[curr], value } ]
         }, [])
 
         const offensiveSpellsRemaining = this.configSpells.MAX_OFFENSIVE - this.props.user.spells.reduce((prev, current) => this.props.spells.find(x => x.id == current.id).type == 'offensive' ? prev + 1 : prev, 0)

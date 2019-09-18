@@ -19,7 +19,7 @@ function ObsPlayer(index, playerData, hud, { spells }) {
     nameBGRectangle.endFill()
     this.hud.addChild(nameBGRectangle)
 
-    const invColor = invertColor(playerData.color, { bw: true })
+    const invColor = invertColor(playerData.team.color, { bw: true })
 
     this.nameText = new window.PIXI.Text(playerData.name, { fontFamily: 'Arial', fontSize: 15, fill: parseInt(invColor.replace('#', ''), 16), align: 'center' })
     this.nameText.x = 0

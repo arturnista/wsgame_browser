@@ -794,7 +794,7 @@ class Game extends Component {
             winnerTextBackground.endFill()
             this.hud.addChild(winnerTextBackground)
 
-            const winnerText = new window.PIXI.Text(`Winner ${body.winner.name}`, { fontFamily: 'Arial', fontSize: 30, fill: parseInt(body.winner.color.replace('#', ''), 16), align: 'center' })
+            const winnerText = new window.PIXI.Text(`Winner ${body.winner.name}`, { fontFamily: 'Arial', fontSize: 30, fill: parseInt(body.winner.team.color.replace('#', ''), 16), align: 'center' })
             winnerText.anchor.set(.5, .5)
             winnerText.x = this.app.renderer.screen.width / 2
             winnerText.y = 250

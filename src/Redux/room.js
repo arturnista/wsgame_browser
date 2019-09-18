@@ -8,6 +8,7 @@ const WAITING_USER = 'room/WAITING_USER'
 const UPDATE_CHAT = 'room/UPDATE_CHAT'
 const UPDATE_ROOM = 'room/UPDATE_ROOM'
 
+const SELECT_TEAM = 'room/SELECT_TEAM'
 const SELECT_SPELL = 'room/SELECT_SPELL'
 const DESELECT_SPELL = 'room/DESELECT_SPELL'
 
@@ -68,6 +69,18 @@ export default function reducer(state = initialState, action = {}) {
                 ...state,
                 ...action.payload,
             }
+        
+        case SELECT_TEAM:
+            return {
+                ...state,
+                users: state.users.map(user => {
+                    if(user.id !== action.payload.userId) return user
+                    return {
+                        ...user,
+                        team: action.payload.team
+                    }
+                })
+            }
 
         case SELECT_SPELL:
             return {
@@ -120,6 +133,7 @@ export function setRoom({ room }) {
             users: room.users,
             owner: room.owner.id,
             chat: room.chat,
+            teams: room.teams
         }
     }
 }
@@ -176,6 +190,16 @@ export function resetRoom(users) {
     return {
         type: RESET_ROOM,
         users: users,
+    }
+}
+
+export function selectTeam(userId, team) {
+    return {
+        type: SELECT_TEAM,
+        payload: {
+            userId,
+            team
+        }
     }
 }
 

@@ -53,7 +53,7 @@ export function createPlayer(playerData, isYou, game) {
     playerSprite.anchor.set(.5, .5)
     playerSprite.width = playerData.collider.size
     playerSprite.height = playerData.collider.size
-    playerSprite.tint = parseInt(playerData.color.replace('#', ''), 16)
+    playerSprite.tint = parseInt(playerData.team.color.replace('#', ''), 16)
     player.addChild(playerSprite)
 
     let modifiersContainer = new window.PIXI.Container()
