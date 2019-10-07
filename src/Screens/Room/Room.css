@@ -345,7 +345,8 @@
     border-bottom: 1px solid #212121;
 }
 .room-user-container.ready {
-    background-color: #2E7D32;
+    /* background-color: #2E7D32; */
+    background-image: linear-gradient(to left, #2E7D32 , transparent);
 }
 
 .room-user-color {    
@@ -556,6 +557,12 @@
 
 .room-users-config-button {
     height: 3em;
+}
+.room-users-config-button.on {
+    background-image: linear-gradient(to left, #2E7D32, transparent 20%);
+}
+.room-users-config-button.off {
+    background-image: linear-gradient(to left, #C62828, transparent 20%);
 }
 
 .room-users-config-button.quit {

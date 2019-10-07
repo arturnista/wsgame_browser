@@ -79,6 +79,7 @@ class Room extends Component {
         this.handleWaitingUser = this.handleWaitingUser.bind(this)
         this.handleRemoveUser = this.handleRemoveUser.bind(this)
         this.handleDestroyRoom = this.handleDestroyRoom.bind(this)
+        this.handleToggleFriendlyFire = this.handleToggleFriendlyFire.bind(this)
         this.handleLeaveRoom = this.handleLeaveRoom.bind(this)
         this.handleKickPlayer = this.handleKickPlayer.bind(this)
 
@@ -316,6 +317,10 @@ class Room extends Component {
         this.setState({ chatMessage: '' })
     }
 
+    handleToggleFriendlyFire() {
+        window.socketio.emit('room_toggle_friendly_fire', {})                
+    }
+
     handleLeaveRoom() {
         window.socketio.disconnect()        
     }
@@ -415,6 +420,8 @@ class Room extends Component {
     render() {
         if(_.isEmpty(this.props.room) || _.isEmpty(this.props.user)) return null
         if(_.isEmpty(this.state.selectedSpell)) return null
+
+        const { room } = this.props
 
         this.chatContainer = document.getElementById("chat-container")
         
@@ -564,6 +571,11 @@ class Room extends Component {
                                         :
                                         <Button label='Become player' className={`room-users-config-button ${this.props.isOwner ? 'obs' : ''}`}
                                             onClick={() => this.setState({ isObserver: false }, () => window.socketio.emit('user_become_player', {}))}/>
+                                    }
+                                    {
+                                        this.props.isOwner &&
+                                        <Button label={`Friendly Fire ${room.friendlyFire ? 'ON' : 'OFF'}`} className={`room-users-config-button ${room.friendlyFire ? 'on' : 'off'}`}
+                                            onClick={this.handleToggleFriendlyFire} />
                                     }
                                     {
                                         this.props.isOwner &&
