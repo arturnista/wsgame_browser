@@ -5,7 +5,7 @@
   "dependencies": {
     "firebase": "^5.4.2",
     "history": "^4.7.2",
-    "moment": "^2.22.1",
+    "moment": "^2.29.4",
     "pixi-sound": "^3.0.3",
     "pixi.js": "^4.8.0",
     "react": "^16.3.2",
